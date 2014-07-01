@@ -82,7 +82,17 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
     type: 'checkbox',
     name: 'activateDeactivate',
     message: 'Which resources your plugin needs?',
-    choices: [{name: 'Activate Method', checked: true}, {name: 'Deactivate Method', checked: true}, {name: 'Uninstall File', checked: true}]
+    choices: [{name: 'Activate Method', checked: true},
+     {name: 'Deactivate Method', checked: true},
+     {name: 'Uninstall File', checked: true},
+     {name: 'CPT_Core', checked: true},
+     {name: 'Taxonomy_Core', checked: true},
+     {name: 'Widget-Boilerplate', checked: true},
+     {name: 'CMB', checked: true},
+     {name: 'CMBF', checked: true},
+     {name: 'Fake Page Class', checked: true},
+     {name: 'Template system (like WooCommerce)', checked: true},
+     {name: 'Language function support (WPML/Ceceppa Multilingua/Polylang)', checked: true},]
   }, {
     type: 'confirm',
     name: 'adminPage',
@@ -129,7 +139,7 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
     var zip = new admzip('./plugin.zip');
     console.log('File downloaded');
     zip.extractAllTo('plugin_temp', true);
-    fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-master/plugin-name/', './' + self.pluginSlug, function () {
+    fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-master/plugin-name/', './' + self.pluginSlug, function () {
       rmdir('plugin_temp', function (error) {
         if (error) {
           console.log(error);
@@ -140,13 +150,6 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
     fs.unlink('plugin.zip');
   });
 };
-
-// WpPluginBoilerplateGenerator.prototype.copyPlugin = function copyPlugin() {
-//   var cb = this.async();
-//   ncp('./base', './' + this.pluginSlug, function () {
-//     cb();
-//   });
-// };
 
 WpPluginBoilerplateGenerator.prototype.setFiles = function setName() {
   // Rename files
