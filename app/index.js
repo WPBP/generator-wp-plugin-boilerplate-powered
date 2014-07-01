@@ -1,23 +1,23 @@
 'use strict';
 
-var util     = require('util');
-var path     = require('path');
-var yeoman   = require('yeoman-generator');
-var fs       = require('fs');
-var request  = require('request');
-var admzip   = require('adm-zip');
-var rmdir    = require('rimraf');
-var _s       = require('underscore.string');
-var ncp      = require('ncp');
+var util = require('util');
+var path = require('path');
+var yeoman = require('yeoman-generator');
+var fs = require('fs');
+var request = require('request');
+var admzip = require('adm-zip');
+var rmdir = require('rimraf');
+var _s = require('underscore.string');
+var ncp = require('ncp');
 var Replacer = require('./replacer');
 
 var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplateGenerator(args, options, config) {
   var self = this,
-    default_file;
+          default_file;
 
   yeoman.generators.Base.apply(this, arguments);
 
-  this.on('end', function () {
+  this.on('end', function() {
     var key = null;
     for (key in self.files) {
       if (self.files.hasOwnProperty(key)) {
@@ -28,10 +28,10 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
     console.log('All done!');
   });
 
-  // have Yeoman greet the user.
+// have Yeoman greet the user.
   console.log(this.yeoman);
 
-  if ( fs.existsSync(__dirname + '/../default-values.json') ) {
+  if (fs.existsSync(__dirname + '/../default-values.json')) {
     default_file = '../default-values.json';
   } else {
     console.log('--------------------------');
@@ -47,70 +47,76 @@ util.inherits(WpPluginBoilerplateGenerator, yeoman.generators.Base);
 
 WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
   var cb = this.async(),
-    prompts = [];
+          prompts = [];
 
   prompts = [{
-    name: 'name',
-    message: 'What do you want to call your plugin?',
-    default: 'My New Plugin'
-  }, {
-    name: 'pluginVersion',
-    message: 'What is your new plugin\'s version?',
-    default: '1.0.0'
-  }, {
-    name: 'author',
-    message: 'What is your name?',
-    default: this.defaultValues.author.name
-  }, {
-    name: 'authorEmail',
-    message: 'What is your e-mail?',
-    default: this.defaultValues.author.email
-  }, {
-    name: 'authorURI',
-    message: 'What is your URL?',
-    default: this.defaultValues.author.url
-  }, {
-    name: 'copyright',
-    message: 'What goes in copyright tags?',
-    default: this.defaultValues.author.copyright
-  }, {
-    type: 'checkbox',
-    name: 'publicResources',
-    message: 'Which resources your public site needs?',
-    choices: [{name: 'JS', checked: true}, {name: 'CSS', checked: true}]
-  }, {
-    type: 'checkbox',
-    name: 'activateDeactivate',
-    message: 'Which resources your plugin needs?',
-    choices: [{name: 'Activate Method', checked: true},
-     {name: 'Deactivate Method', checked: true},
-     {name: 'Uninstall File', checked: true},
-     {name: 'CPT_Core', checked: true},
-     {name: 'Taxonomy_Core', checked: true},
-     {name: 'Widget-Boilerplate', checked: true},
-     {name: 'CMB', checked: true},
-     {name: 'CMBF', checked: true},
-     {name: 'Fake Page Class', checked: true},
-     {name: 'Template system (like WooCommerce)', checked: true},
-     {name: 'Language function support (WPML/Ceceppa Multilingua/Polylang)', checked: true},]
-  }, {
-    type: 'confirm',
-    name: 'adminPage',
-    message: 'Does your plugin need an admin page?'
-  }];
+      name: 'name',
+      message: 'What do you want to call your plugin?',
+      default: 'My New Plugin'
+    }, {
+      name: 'pluginVersion',
+      message: 'What is your new plugin\'s version?',
+      default: '1.0.0'
+    }, {
+      name: 'author',
+      message: 'What is your name?',
+      default: this.defaultValues.author.name
+    }, {
+      name: 'authorEmail',
+      message: 'What is your e-mail?',
+      default: this.defaultValues.author.email
+    }, {
+      name: 'authorURI',
+      message: 'What is your URL?',
+      default: this.defaultValues.author.url
+    }, {
+      name: 'copyright',
+      message: 'What goes in copyright tags?',
+      default: this.defaultValues.author.copyright
+    }, {
+      type: 'checkbox',
+      name: 'publicResources',
+      message: 'Which resources your public site needs?',
+      choices: [{name: 'JS', checked: true}, {name: 'CSS', checked: true}]
+    }, {
+      type: 'checkbox',
+      name: 'activateDeactivate',
+      message: 'Which resources your plugin needs?',
+      choices: [{name: 'Activate Method', checked: true},
+        {name: 'Deactivate Method', checked: true},
+        {name: 'Uninstall File', checked: true}]
+    }, {
+      type: 'checkbox',
+      name: 'modules',
+      message: 'Which library your plugin needs?',
+      choices: [
+        {name: 'CPT_Core', checked: true},
+        {name: 'Taxonomy_Core', checked: true},
+        {name: 'Widget-Boilerplate', checked: true},
+        {name: 'CMB', checked: true},
+        {name: 'CMBF', checked: true},
+        {name: 'Fake Page Class', checked: true},
+        {name: 'Template system (like WooCommerce)', checked: true},
+        {name: 'Language function support (WPML/Ceceppa Multilingua/Polylang)', checked: true}]
+    }, {
+      type: 'confirm',
+      name: 'adminPage',
+      message: 'Does your plugin need an admin page?'
+    }];
 
-  this.prompt(prompts, function (props) {
-    this.pluginName         = props.name;
-    this.pluginSlug         = _s.slugify(props.name);
-    this.pluginClassName    = _s.titleize(props.name).replace(/ /g, "_");
-    this.author             = props.author;
-    this.authorEmail        = props.authorEmail;
-    this.authorURI          = props.authorURI;
-    this.pluginVersion      = props.pluginVersion;
-    this.pluginCopyright    = props.copyright;
-    this.publicResources    = props.publicResources;
+  this.prompt(prompts, function(props) {
+    this.pluginName = props.name;
+    this.pluginSlug = _s.slugify(props.name);
+    this.pluginClassName = _s.titleize(props.name).replace(/ /g, "_");
+    this.author = props.author;
+    this.authorEmail = props.authorEmail;
+    this.authorURI = props.authorURI;
+    this.pluginVersion = props.pluginVersion;
+    this.pluginCopyright = props.copyright;
+    this.publicResources = props.publicResources;
     this.activateDeactivate = props.activateDeactivate;
-    this.adminPage          = props.adminPage;
+    this.modules = props.modules;
+    this.adminPage = props.adminPage;
 
     // Set the path of the files
     this.files = {
@@ -129,26 +135,26 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
 
 WpPluginBoilerplateGenerator.prototype.download = function download() {
   var cb = this.async(),
-    self = this;
+          self = this;
 
   console.log('Downloading the WP Plugin Boilerplate Powered...');
 
   request('http://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/master.zip')
-  .pipe(fs.createWriteStream('plugin.zip'))
-  .on('close', function () {
-    var zip = new admzip('./plugin.zip');
-    console.log('File downloaded');
-    zip.extractAllTo('plugin_temp', true);
-    fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-master/plugin-name/', './' + self.pluginSlug, function () {
-      rmdir('plugin_temp', function (error) {
-        if (error) {
-          console.log(error);
-        }
-        cb();
-      });
-    });
-    fs.unlink('plugin.zip');
-  });
+          .pipe(fs.createWriteStream('plugin.zip'))
+          .on('close', function() {
+            var zip = new admzip('./plugin.zip');
+            console.log('File downloaded');
+            zip.extractAllTo('plugin_temp', true);
+            fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-master/plugin-name/', './' + self.pluginSlug, function() {
+              rmdir('plugin_temp', function(error) {
+                if (error) {
+                  console.log(error);
+                }
+                cb();
+              });
+            });
+            fs.unlink('plugin.zip');
+          });
 };
 
 WpPluginBoilerplateGenerator.prototype.setFiles = function setName() {
@@ -177,6 +183,29 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
   }
   if (this.activateDeactivate.indexOf('Deactivate Method') === -1) {
     this.files.primary.rm("\nregister_deactivation_hook( __FILE__, array( '" + this.pluginClassName + "', 'deactivate' ) );");
+  }
+
+  // Options
+  if (this.modules.indexOf('CPT_Core') === -1 && this.modules.indexOf('Taxonomy_Core') === -1) {
+    this.files.primary.rm("\n/*\n * Load library for simple and fast creation of Taxonomy and Custom Post Type\n *\n */");
+  }
+  if (this.modules.indexOf('CPT_Core') === -1) {
+    rmdir(this.pluginSlug + '/includes/CPT_Core', function(error) {
+      if (error) {
+        console.log(error);
+      }
+    });
+    this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/CPT_Core/CPT_Core.php' );");
+    this.files.primary.rm("and Custom Post Type");
+  }
+  if (this.modules.indexOf('Taxonomy_Core') === -1) {
+    rmdir(this.pluginSlug + '/includes/Taxonomy_Core', function(error) {
+      if (error) {
+        console.log(error);
+      }
+    });
+    this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/Taxonomy_Core/Taxonomy_Core.php' );");
+    this.files.primary.rm("Taxonomy and");
   }
 };
 
