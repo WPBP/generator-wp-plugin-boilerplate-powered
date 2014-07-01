@@ -1,21 +1,21 @@
 {
-  "name": "generator-wp-plugin-boilerplate",
+  "name": "generator-wp-plugin-boilerplate-powered",
   "version": "0.1.0",
-  "description": "A generator for Yeoman to customize the WP Plugin Boilerplate (https://github.com/tommcfarlin/WordPress-Plugin-Boilerplate).",
+  "description": "A generator for Yeoman to customize the WP Plugin Boilerplate Powered (https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered).",
   "keywords": [
     "yeoman", "yeoman-generator", "wordpress", "wordpress-plugin", "PHP"
   ],
-  "homepage": "https://github.com/thiagolcks/generator-wp-plugin-boilerplate",
-  "bugs": "https://github.com/thiagolcks/generator-wp-plugin-boilerplate/issues",
+  "homepage": "https://github.com/Mte90/generator-wp-plugin-boilerplate-powered",
+  "bugs": "https://github.com/Mte90/generator-wp-plugin-boilerplate-powered/issues",
   "author": {
-    "name": "Thiago Locks",
-    "email": "thiago@zira.com.br",
-    "url": "https://github.com/thiagolcks"
+    "name": "Daniele Scasciafratte",
+    "email": "mte90net@gmail.com",
+    "url": "https://github.com/Mte90"
   },
   "main": "app/index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/thiagolcks/generator-wp-plugin-boilerplate.git"
+    "url": "git://github.com/Mte90/generator-wp-plugin-boilerplate-powered.git"
   },
   "scripts": {
     "test": "mocha"

@@ -1,6 +1,6 @@
-# generator-wp-plugin-boilerplate
+# generator-wp-plugin-boilerplate-powered
 
-A generator for [Yeoman](http://yeoman.io) to customize the WP Plugin Boilerplate
+A generator for [Yeoman](http://yeoman.io) to customize the WP Plugin Boilerplate Powered
 
 
 ## Getting Started
@@ -22,7 +22,7 @@ $ npm install -g yo
 ### Install the generator
 
 ```
-$ npm install -g generator-wp-plugin-boilerplate
+$ npm install -g generator-wp-plugin-boilerplate-powered
 ```
 
 ### How to use it
@@ -31,7 +31,7 @@ $ npm install -g generator-wp-plugin-boilerplate
 # Go to the plugin directory of your WP
 cd wp-content/plugins
 # Run the generator
-$ yo wp-plugin-boilerplate
+$ yo wp-plugin-boilerplate-powered
 ```
 
 ### Getting To Know Yeoman
