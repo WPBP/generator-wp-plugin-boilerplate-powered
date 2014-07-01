@@ -195,7 +195,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
         console.log(error);
       }
     });
-    this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/CPT_Core/CPT_Core.php' );");
+    this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/CPT_Core/CPT_Core.php' );\n");
     this.files.primary.rm("and Custom Post Type");
   }
   if (this.modules.indexOf('Taxonomy_Core') === -1) {
@@ -204,8 +204,29 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
         console.log(error);
       }
     });
-    this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/Taxonomy_Core/Taxonomy_Core.php' );");
+    this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/Taxonomy_Core/Taxonomy_Core.php' );\n");
     this.files.primary.rm("Taxonomy and");
+  }
+  if (this.modules.indexOf('Widget-Boilerplate') === -1) {
+    rmdir(this.pluginSlug + '/includes/Widget-Boilerplate', function(error) {
+      if (error) {
+        console.log(error);
+      }
+    });
+    this.files.primary.rm("\n/*\n * Load Widget boilerplate\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/Widget-Boilerplate/widget-boilerplate/plugin.php' );\n");
+  }
+  if (this.modules.indexOf('Fake Page Class') === -1) {
+    fs.unlink(this.pluginSlug + '/includes/fake-page.php');
+    this.files.primary.rm("\n/*\n * Load Fake Page class\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/fake-page.php' );\n");
+    this.files.primary.rm("\nnew Fake_Page(\n\t\tarray(\n\t'slug' => 'fake_slug',\n\t'post_title' => 'Fake Page Title',\n\t'post content' => 'This is the fake page content'\n\t\t)\n);\n");
+  }
+  if (this.modules.indexOf('Template system (like WooCommerce)') === -1) {
+    fs.unlink(this.pluginSlug + '/includes/template.php');
+    this.files.primary.rm("\n/*\n * Load template system\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/template.php' );\n");
+  }
+  if (this.modules.indexOf('Language function support (WPML/Ceceppa Multilingua/Polylang)') === -1) {
+    fs.unlink(this.pluginSlug + '/includes/language.php');
+    this.files.primary.rm("\n/*\n * Load Language wrapper function for WPML/Ceceppa Multilingua/Polylang\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/language.php' );\n");
   }
 };
 
