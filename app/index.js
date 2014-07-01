@@ -93,8 +93,8 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'CPT_Core', checked: true},
         {name: 'Taxonomy_Core', checked: true},
         {name: 'Widget-Boilerplate', checked: true},
-        {name: 'CMB', checked: true},
-        {name: 'CMBF', checked: true},
+        {name: 'HM Custom Meta Boxes for WordPress', checked: false},
+        {name: 'Custom Metaboxes and Fields for WordPress', checked: false},
         {name: 'Fake Page Class', checked: true},
         {name: 'Template system (like WooCommerce)', checked: true},
         {name: 'Language function support (WPML/Ceceppa Multilingua/Polylang)', checked: true}]
@@ -253,7 +253,37 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   } else {
     if (this.snippet.indexOf('Support Dashboard At Glance Widget') === -1) {
       this.files.adminClass.rm("\n\t\t// At Glance Dashboard widget for your cpts\n\t\tadd_filter( 'dashboard_glance_items', array( $this, 'cpt_dashboard_support' ), 10, 1 );\n");
-      this.files.adminClass.rmsearch('* Add the counter of your CPTs in At Glance widget in the dashboard<br>','* NOTE:     Your metabox on Demo CPT',1,1);
+      this.files.adminClass.rmsearch('* Add the counter of your CPTs in At Glance widget in the dashboard<br>', '* NOTE:     Your metabox on Demo CPT', 1, 1);
+    }
+    if (this.modules.indexOf('Custom Metaboxes and Fields for WordPress') === -1) {
+      rmdir(this.pluginSlug + '/includes/CMBF', function(error) {
+        if (error) {
+          console.log(error);
+        }
+      });
+      rmdir(this.pluginSlug + '/includes/CMBF-Select2', function(error) {
+        if (error) {
+          console.log(error);
+        }
+      });
+      this.files.adminClass.rmsearch("* Choose the Custom Meta Box Library and remove the other", "* Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", 0, 0);
+      this.files.adminClass.rmsearch("*  Custom Metabox and Fields for Wordpress", "add_filter( 'cmb_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", 0, 4);
+      this.files.adminClass.add('https://github.com/humanmade/Custom-Meta-Boxes/','https://github.com/humanmade/Custom-Meta-Boxes/	*/' + "\n");
+      
+      this.files.adminView.rmsearch("// NOTE:Code for CMBF!", "cmb_metabox_form( $option_fields, $this->plugin_slug . '-settings' );", 3, -2);
+    }
+    if (this.modules.indexOf('HM Custom Meta Boxes for WordPress') === -1) {
+      rmdir(this.pluginSlug + '/includes/CMB', function(error) {
+        if (error) {
+          console.log(error);
+        }
+      });
+      this.files.adminClass.rmsearch("* Choose the Custom Meta Box Library and remove the other", "*  Custom Metabox and Fields for Wordpress", 0, 0);
+    }
+    if (this.modules.indexOf('Custom Metaboxes and Fields for WordPress') === -1 && this.modules.indexOf('HM Custom Meta Boxes for WordPress') === -1) {
+      this.files.adminClass.rmsearch("* Filter is the same", "add_filter( 'cmb_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", 1, 0);
+      
+      this.files.adminClass.rmsearch("* NOTE:     Your metabox on Demo CPT", "return $meta_boxes;", 1, -3);
     }
   }
 };
