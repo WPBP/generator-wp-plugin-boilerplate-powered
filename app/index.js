@@ -99,6 +99,13 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'Template system (like WooCommerce)', checked: true},
         {name: 'Language function support (WPML/Ceceppa Multilingua/Polylang)', checked: true}]
     }, {
+      type: 'checkbox',
+      name: 'snippet',
+      message: 'Which snippet your plugin needs?',
+      choices: [
+        {name: 'Support Dashboard At Glance Widget', checked: false}
+      ]
+    }, {
       type: 'confirm',
       name: 'adminPage',
       message: 'Does your plugin need an admin page?'
@@ -116,6 +123,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
     this.publicResources = props.publicResources;
     this.activateDeactivate = props.activateDeactivate;
     this.modules = props.modules;
+    this.snippet = props.snippet;
     this.adminPage = props.adminPage;
 
     // Set the path of the files
@@ -242,6 +250,11 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     this.files.adminClass.rm("\n\t\t// Add an action link pointing to the options page.\n\t\t$plugin_basename = plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_slug . '.php' );\n\t\tadd_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );");
     this.files.adminClass.rm("\n\n\t\t// Load admin style sheet and JavaScript.\n\t\tadd_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );\n\t\tadd_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );\n\n\t\t// Add the options page and menu item.\n\t\tadd_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );");
     this.files.adminClass.rm("\n\t/**\n\t * Register and enqueue admin-specific style sheet.\n\t *\n\t * @since     1.0.0\n\t *\n\t * @return    null    Return early if no settings page is registered.\n\t */\n\tpublic function enqueue_admin_styles() {\n\n\t\tif ( ! isset( $this->plugin_screen_hook_suffix ) ) {\n\t\t\treturn;\n\t\t}\n\n\t\t$screen = get_current_screen();\n\t\tif ( $this->plugin_screen_hook_suffix == $screen->id ) {\n\t\t\twp_enqueue_style( $this->plugin_slug .'-admin-styles', plugins_url( 'assets/css/admin.css', __FILE__ ), array(), MyNewPlugin::VERSION );\n\t\t}\n\n\t}\n\n\t/**\n\t * Register and enqueue admin-specific JavaScript.\n\t *\n\t * @since     1.0.0\n\t *\n\t * @return    null    Return early if no settings page is registered.\n\t */\n\tpublic function enqueue_admin_scripts() {\n\n\t\tif ( ! isset( $this->plugin_screen_hook_suffix ) ) {\n\t\t\treturn;\n\t\t}\n\n\t\t$screen = get_current_screen();\n\t\tif ( $this->plugin_screen_hook_suffix == $screen->id ) {\n\t\t\twp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'assets/js/admin.js', __FILE__ ), array( 'jquery' ), MyNewPlugin::VERSION );\n\t\t}\n\n\t}\n\n\t/**\n\t * Register the administration menu for this plugin into the WordPress Dashboard menu.\n\t *\n\t * @since    1.0.0\n\t */\n\tpublic function add_plugin_admin_menu() {\n\n\t\t/*\n\t\t * Add a settings page for this plugin to the Settings menu.\n\t\t *\n\t\t * NOTE:  Alternative menu locations are available via WordPress administration menu functions.\n\t\t *\n\t\t *        Administration Menus: http://codex.wordpress.org/Administration_Menus\n\t\t *\n\t\t * @TODO:\n\t\t *\n\t\t * - Change 'Page Title' to the title of your plugin admin page\n\t\t * - Change 'Menu Text' to the text for menu item for the plugin settings page\n\t\t * - Change 'manage_options' to the capability you see fit\n\t\t *   For reference: http://codex.wordpress.org/Roles_and_Capabilities\n\t\t */\n\t\t$this->plugin_screen_hook_suffix = add_options_page(\n\t\t\t__( 'Page Title', $this->plugin_slug ),\n\t\t\t__( 'Menu Text', $this->plugin_slug ),\n\t\t\t'manage_options',\n\t\t\t$this->plugin_slug,\n\t\t\tarray( $this, 'display_plugin_admin_page' )\n\t\t);\n\n\t}\n\n\t/**\n\t * Render the settings page for this plugin.\n\t *\n\t * @since    1.0.0\n\t */\n\tpublic function display_plugin_admin_page() {\n\t\tinclude_once( 'views/admin.php' );\n\t}\n\n\t/**\n\t * Add settings action link to the plugins page.\n\t *\n\t * @since    1.0.0\n\t */\n\tpublic function add_action_links( $links ) {\n\n\t\treturn array_merge(\n\t\t\tarray(\n\t\t\t\t'settings' => '<a href=\"' . admin_url( 'options-general.php?page=' . $this->plugin_slug ) . '\">' . __( 'Settings', $this->plugin_slug ) . '</a>'\n\t\t\t),\n\t\t\t$links\n\t\t);\n\n\t}");
+  } else {
+    if (this.snippet.indexOf('Support Dashboard At Glance Widget') === -1) {
+      this.files.adminClass.rm("\n\t\t// At Glance Dashboard widget for your cpts\n\t\tadd_filter( 'dashboard_glance_items', array( $this, 'cpt_dashboard_support' ), 10, 1 );\n");
+      this.files.adminClass.rmsearch('* Add the counter of your CPTs in At Glance widget in the dashboard<br>','* NOTE:     Your metabox on Demo CPT',1,1);
+    }
   }
 };
 
