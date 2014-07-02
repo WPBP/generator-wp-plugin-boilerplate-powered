@@ -34,16 +34,21 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
     }
 
     fs.writeFile(self.pluginSlug + '/submodules.sh',
-            "#!/bin/sh\nset -e\ngit init\ngit config -f .gitmodules --get-regexp '^submodule\..*\.path$' |\n    while read path_key path\n    do\n        url_key=$(echo $path_key | sed 's/\.path/.url/')\n        url=$(git config -f .gitmodules --get $url_key)\n        rm -r $path\n        git submodule add -f $url $path\n    done\nrm -r ./.git\nrm ./.gitmodules",
+            "#!/bin/sh\nset -e\ngit init\ngit config -f .gitmodules --get-regexp '^submodule\..*\.path$' |\n    while read path_key path\n    do\n        url_key=$(echo $path_key | sed 's/\.path/.url/')\n        url=$(git config -f .gitmodules --get $url_key)\n        if [ -d $path ]; then\n        rm -r $path\n        git submodule add -f $url $path\n    fi\n    done\nrm -r ./.git\nrm ./.gitmodules",
             'utf8',
             function(err) {
               if (err) {
                 return console.log(err);
               } else {
                 fs.chmodSync(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', '0777');
+                console.log('Generate git config on the fly');
                 console.log('Download submodules');
-                exec('./submodules.sh | rm ./submodules.sh', {cwd: process.cwd() + '/' + self.pluginSlug + '/'}, puts);
-                console.log('All done!');
+                var submodule = exec('./submodules.sh', {cwd: process.cwd() + '/' + self.pluginSlug + '/'}, puts);
+                submodule.on('close', function(code) {
+                  exec('rm ./submodules.sh', {cwd: process.cwd() + '/' + self.pluginSlug + '/'}, puts);
+                  console.log('Remove git config generated');
+                  console.log('All done!');
+                });
               }
             }
     );
@@ -190,6 +195,7 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
 };
 
 WpPluginBoilerplateGenerator.prototype.setFiles = function setName() {
+  // Change path of gitmodules
   this.files.gitmodules.add(new RegExp(this.pluginSlug + '/', "g"), '');
 
   // Rename files
@@ -231,7 +237,6 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
     });
     this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/CPT_Core/CPT_Core.php' );\n");
     this.files.primary.rm("and Custom Post Type");
-    this.files.gitmodules.rmsearch('[submodule "' + this.pluginSlug + '/CPT_Core"]', 'url = https://github.com/jtsternberg/CPT_Core', 0, 0);
   }
   if (this.modules.indexOf('Taxonomy_Core') === -1) {
     rmdir(this.pluginSlug + '/includes/Taxonomy_Core', function(error) {

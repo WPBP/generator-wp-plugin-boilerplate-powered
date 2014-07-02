@@ -1,46 +1,45 @@
 {
-  "name": "generator-wp-plugin-boilerplate-powered",
-  "version": "0.1.0",
-  "description": "A generator for Yeoman to customize the WP Plugin Boilerplate Powered (https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered).",
-  "keywords": [
-    "yeoman", "yeoman-generator", "wordpress", "wordpress-plugin", "PHP"
-  ],
-  "homepage": "https://github.com/Mte90/generator-wp-plugin-boilerplate-powered",
-  "bugs": "https://github.com/Mte90/generator-wp-plugin-boilerplate-powered/issues",
-  "author": {
-    "name": "Daniele Scasciafratte",
-    "email": "mte90net@gmail.com",
-    "url": "https://github.com/Mte90"
+  "name" : "generator-wp-plugin-boilerplate-powered",
+  "version" : "0.1.0",
+  "description" : "A generator for Yeoman to customize the WP Plugin Boilerplate Powered (https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered).",
+  "keywords" : [ "yeoman", "yeoman-generator", "wordpress", "wordpress-plugin", "PHP" ],
+  "homepage" : "https://github.com/Mte90/generator-wp-plugin-boilerplate-powered",
+  "bugs" : {
+    "url" : "https://github.com/Mte90/generator-wp-plugin-boilerplate-powered/issues"
   },
-  "main": "app/index.js",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/Mte90/generator-wp-plugin-boilerplate-powered.git"
+  "author" : {
+    "name" : "Daniele Scasciafratte",
+    "email" : "mte90net@gmail.com",
+    "url" : "https://github.com/Mte90"
   },
-  "scripts": {
-    "test": "mocha"
+  "main" : "./app/index.js",
+  "repository" : {
+    "type" : "git",
+    "url" : "git://github.com/Mte90/generator-wp-plugin-boilerplate-powered.git"
   },
-  "dependencies": {
-    "yeoman-generator": "~0.14.0",
-    "request": "~2.29.0",
-    "adm-zip": "~0.4.3",
-    "rimraf": "~2.1",
-    "underscore.string": "~2.3",
-    "ncp": "~0.4.2"
+  "scripts" : {
+    "test" : "mocha"
   },
-  "devDependencies": {
-    "mocha": "~1.14.0"
+  "dependencies" : {
+    "yeoman-generator" : "~0.14.0",
+    "request" : "~2.29.0",
+    "adm-zip" : "~0.4.3",
+    "rimraf" : "~2.1",
+    "underscore.string" : "~2.3",
+    "ncp" : "~0.4.2",
+	"line-input-stream" : "~1.0.1"
   },
-  "peerDependencies": {
-    "yo": ">=1.0.0"
+  "devDependencies" : {
+    "mocha" : "~1.14.0"
   },
-  "engines": {
-    "node": ">=0.8.0",
-    "npm": ">=1.2.10"
+  "peerDependencies" : {
+    "yo" : ">=1.0.0"
   },
-  "licenses": [
-    {
-      "type": "MIT"
-    }
-  ]
+  "engines" : {
+    "node" : ">=0.8.0",
+    "npm" : ">=1.2.10"
+  },
+  "licenses" : [ {
+    "type" : "MIT"
+  } ]
 }
