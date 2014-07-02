@@ -9,7 +9,15 @@ var admzip = require('adm-zip');
 var rmdir = require('rimraf');
 var _s = require('underscore.string');
 var ncp = require('ncp');
+var sys = require('sys');
+var exec = require('child_process').exec;
 var Replacer = require('./replacer');
+
+function puts(error, stdout, stderr) {
+  sys.puts(error);
+  sys.puts(stderr);
+  sys.puts(stdout);
+}
 
 var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplateGenerator(args, options, config) {
   var self = this,
@@ -25,7 +33,21 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
       }
     }
 
-    console.log('All done!');
+    fs.writeFile(self.pluginSlug + '/submodules.sh',
+            "#!/bin/sh\nset -e\ngit init\ngit config -f .gitmodules --get-regexp '^submodule\..*\.path$' |\n    while read path_key path\n    do\n        url_key=$(echo $path_key | sed 's/\.path/.url/')\n        url=$(git config -f .gitmodules --get $url_key)\n        rm -r $path\n        git submodule add -f $url $path\n    done\nrm -r ./.git\nrm ./.gitmodules",
+            'utf8',
+            function(err) {
+              if (err) {
+                return console.log(err);
+              } else {
+                fs.chmodSync(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', '0777');
+                console.log('Download submodules');
+                exec('./submodules.sh | rm ./submodules.sh', {cwd: process.cwd() + '/' + self.pluginSlug + '/'}, puts);
+                console.log('All done!');
+              }
+            }
+    );
+
   });
 
 // have Yeoman greet the user.
@@ -93,8 +115,8 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'CPT_Core', checked: true},
         {name: 'Taxonomy_Core', checked: true},
         {name: 'Widget-Boilerplate', checked: true},
-        {name: 'HM Custom Meta Boxes for WordPress', checked: false},
-        {name: 'Custom Metaboxes and Fields for WordPress', checked: false},
+        {name: 'HM Custom Meta Boxes for WordPress', checked: true},
+        {name: 'Custom Metaboxes and Fields for WordPress', checked: true},
         {name: 'Fake Page Class', checked: true},
         {name: 'Template system (like WooCommerce)', checked: true},
         {name: 'Language function support (WPML/Ceceppa Multilingua/Polylang)', checked: true}]
@@ -134,7 +156,8 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       publicView: new Replacer(this.pluginSlug + '/public/views/public.php', this),
       adminView: new Replacer(this.pluginSlug + '/admin/views/admin.php', this),
       uninstall: new Replacer(this.pluginSlug + '/uninstall.php', this),
-      readme: new Replacer(this.pluginSlug + '/README.txt', this)
+      readme: new Replacer(this.pluginSlug + '/README.txt', this),
+      gitmodules: new Replacer(this.pluginSlug + '/.gitmodules', this)
     };
 
     cb();
@@ -153,6 +176,7 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
             var zip = new admzip('./plugin.zip');
             console.log('File downloaded');
             zip.extractAllTo('plugin_temp', true);
+            fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-master/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-master/plugin-name/.gitmodules');
             fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-master/plugin-name/', './' + self.pluginSlug, function() {
               rmdir('plugin_temp', function(error) {
                 if (error) {
@@ -166,6 +190,8 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
 };
 
 WpPluginBoilerplateGenerator.prototype.setFiles = function setName() {
+  this.files.gitmodules.add(new RegExp(this.pluginSlug + '/', "g"), '');
+
   // Rename files
   fs.rename(this.pluginSlug + '/plugin-name.php', this.files.primary.file);
   fs.rename(this.pluginSlug + '/admin/class-plugin-name-admin.php', this.files.adminClass.file);
@@ -205,6 +231,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
     });
     this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/CPT_Core/CPT_Core.php' );\n");
     this.files.primary.rm("and Custom Post Type");
+    this.files.gitmodules.rmsearch('[submodule "' + this.pluginSlug + '/CPT_Core"]', 'url = https://github.com/jtsternberg/CPT_Core', 0, 0);
   }
   if (this.modules.indexOf('Taxonomy_Core') === -1) {
     rmdir(this.pluginSlug + '/includes/Taxonomy_Core', function(error) {
@@ -268,8 +295,8 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
       });
       this.files.adminClass.rmsearch("* Choose the Custom Meta Box Library and remove the other", "* Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", 0, 0);
       this.files.adminClass.rmsearch("*  Custom Metabox and Fields for Wordpress", "add_filter( 'cmb_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", 0, 4);
-      this.files.adminClass.add('https://github.com/humanmade/Custom-Meta-Boxes/','https://github.com/humanmade/Custom-Meta-Boxes/	*/' + "\n");
-      
+      this.files.adminClass.add('https://github.com/humanmade/Custom-Meta-Boxes/', 'https://github.com/humanmade/Custom-Meta-Boxes/	*/' + "\n");
+
       this.files.adminView.rmsearch("// NOTE:Code for CMBF!", "cmb_metabox_form( $option_fields, $this->plugin_slug . '-settings' );", 3, -2);
     }
     if (this.modules.indexOf('HM Custom Meta Boxes for WordPress') === -1) {
@@ -282,7 +309,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     }
     if (this.modules.indexOf('Custom Metaboxes and Fields for WordPress') === -1 && this.modules.indexOf('HM Custom Meta Boxes for WordPress') === -1) {
       this.files.adminClass.rmsearch("* Filter is the same", "add_filter( 'cmb_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", 1, 0);
-      
+
       this.files.adminClass.rmsearch("* NOTE:     Your metabox on Demo CPT", "return $meta_boxes;", 1, -3);
     }
   }
