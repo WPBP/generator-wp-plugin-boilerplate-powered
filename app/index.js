@@ -19,6 +19,43 @@ function puts(error, stdout, stderr) {
   sys.puts(stdout);
 }
 
+function cleanFolder(path) {
+  var default_file = [
+    'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json',
+    'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json',
+    '.travis.yml', '.bowerrc', '.gitignore', 'README.txt'
+  ];
+  var default_folder = ['tests'];
+
+  default_file.forEach(function(element, index, array) {
+    fs.exists('./' + path + '/' + element, function(exists) {
+      if (exists) {
+        fs.unlink(path + '/' + element);
+      }
+    });
+  });
+
+  default_folder.forEach(function(element, index, array) {
+    fs.stat('./' + path + '/' + element, function(error, stats) {
+      if (!error) {
+        rmdir('./' + path + '/' + element, function(err) {
+          if (error) {
+            console.log(error);
+          }
+        });
+      }
+    });
+  });
+
+  fs.exists('./' + path + '/index.php', function(exists) {
+    if (!exists) {
+      fs.writeFile('./' + path + '/index.php',
+              "<?php // Silence is golden",
+              'utf8', function() {
+              });
+    }
+  });
+}
 var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplateGenerator(args, options, config) {
   var self = this,
           default_file;
@@ -47,6 +84,29 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 submodule.on('close', function(code) {
                   exec('rm ./submodules.sh', {cwd: process.cwd() + '/' + self.pluginSlug + '/'}, puts);
                   console.log('Remove git config generated');
+
+                  if (self.modules.indexOf('CPT_Core') !== -1) {
+                    cleanFolder(self.pluginSlug + '/includes/CPT_Core');
+                  }
+
+                  if (self.modules.indexOf('Taxonomy_Core') !== -1) {
+                    cleanFolder(self.pluginSlug + '/includes/Taxonomy_Core');
+                  }
+
+                  if (self.modules.indexOf('Widget-Boilerplate') !== -1) {
+                    cleanFolder(self.pluginSlug + '/includes/Widget-Boilerplate');
+                    cleanFolder(self.pluginSlug + '/includes/Widget-Boilerplate/widget-boilerplate');
+                  }
+
+                  if (self.modules.indexOf('Custom Metaboxes and Fields for WordPress') !== -1) {
+                    cleanFolder(self.pluginSlug + '/admin/includes/CMBF');
+                    cleanFolder(self.pluginSlug + '/admin/includes/CMBF-Select2');
+                  }
+
+                  if (self.modules.indexOf('HM Custom Meta Boxes for WordPress') !== -1) {
+                    cleanFolder(self.pluginSlug + '/admin/includes/CMB');
+                  }
+
                   console.log('All done!');
                 });
               }
@@ -117,7 +177,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       name: 'modules',
       message: 'Which library your plugin needs?',
       choices: [
-        {name: 'CPT_Core', checked: false},
+        {name: 'CPT_Core', checked: true},
         {name: 'Taxonomy_Core', checked: true},
         {name: 'Widget-Boilerplate', checked: true},
         {name: 'HM Custom Meta Boxes for WordPress', checked: true},
@@ -237,7 +297,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
     });
     this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/CPT_Core/CPT_Core.php' );\n");
     this.files.primary.rm("and Custom Post Type");
-    this.files.publicClass.rmsearch('// Create Custom Post Type https://github.com/jtsternberg/CPT_Core/blob/master/README.md',"array( 'Demo', 'Demos', 'demo' ), array( 'taxonomies' => array( 'demo-section' ) )",0,-3);
+    this.files.publicClass.rmsearch('// Create Custom Post Type https://github.com/jtsternberg/CPT_Core/blob/master/README.md', "array( 'Demo', 'Demos', 'demo' ), array( 'taxonomies' => array( 'demo-section' ) )", 0, -3);
   }
   if (this.modules.indexOf('Taxonomy_Core') === -1) {
     rmdir(this.pluginSlug + '/includes/Taxonomy_Core', function(error) {
@@ -247,7 +307,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
     });
     this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/Taxonomy_Core/Taxonomy_Core.php' );\n");
     this.files.primary.rm("Taxonomy and");
-    this.files.publicClass.rmsearch('// Create Custom Taxonomy https://github.com/jtsternberg/Taxonomy_Core/blob/master/README.md',"	array( 'Demo Section', 'Demo Sections', 'demo-section' ), array( 'public' => true ), array( 'demo' )",0,-3);
+    this.files.publicClass.rmsearch('// Create Custom Taxonomy https://github.com/jtsternberg/Taxonomy_Core/blob/master/README.md', "	array( 'Demo Section', 'Demo Sections', 'demo-section' ), array( 'public' => true ), array( 'demo' )", 0, -3);
   }
   if (this.modules.indexOf('Widget-Boilerplate') === -1) {
     rmdir(this.pluginSlug + '/includes/Widget-Boilerplate', function(error) {
