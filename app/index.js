@@ -264,6 +264,11 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
   }
   if (this.modules.indexOf('Template system (like WooCommerce)') === -1) {
     fs.unlink(this.pluginSlug + '/includes/template.php');
+    rmdir(this.pluginSlug + '/templates', function(error) {
+      if (error) {
+        console.log(error);
+      }
+    });
     this.files.primary.rm("\n/*\n * Load template system\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/template.php' );\n");
   }
   if (this.modules.indexOf('Language function support (WPML/Ceceppa Multilingua/Polylang)') === -1) {
