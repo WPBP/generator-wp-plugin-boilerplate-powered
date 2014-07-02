@@ -117,7 +117,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       name: 'modules',
       message: 'Which library your plugin needs?',
       choices: [
-        {name: 'CPT_Core', checked: true},
+        {name: 'CPT_Core', checked: false},
         {name: 'Taxonomy_Core', checked: true},
         {name: 'Widget-Boilerplate', checked: true},
         {name: 'HM Custom Meta Boxes for WordPress', checked: true},
@@ -130,7 +130,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       name: 'snippet',
       message: 'Which snippet your plugin needs?',
       choices: [
-        {name: 'Support Dashboard At Glance Widget', checked: false}
+        {name: 'Support Dashboard At Glance Widget', checked: true}
       ]
     }, {
       type: 'confirm',
@@ -237,6 +237,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
     });
     this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/CPT_Core/CPT_Core.php' );\n");
     this.files.primary.rm("and Custom Post Type");
+    this.files.publicClass.rmsearch('// Create Custom Post Type https://github.com/jtsternberg/CPT_Core/blob/master/README.md',"array( 'Demo', 'Demos', 'demo' ), array( 'taxonomies' => array( 'demo-section' ) )",0,-3);
   }
   if (this.modules.indexOf('Taxonomy_Core') === -1) {
     rmdir(this.pluginSlug + '/includes/Taxonomy_Core', function(error) {
@@ -246,6 +247,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
     });
     this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/Taxonomy_Core/Taxonomy_Core.php' );\n");
     this.files.primary.rm("Taxonomy and");
+    this.files.publicClass.rmsearch('// Create Custom Taxonomy https://github.com/jtsternberg/Taxonomy_Core/blob/master/README.md',"	array( 'Demo Section', 'Demo Sections', 'demo-section' ), array( 'public' => true ), array( 'demo' )",0,-3);
   }
   if (this.modules.indexOf('Widget-Boilerplate') === -1) {
     rmdir(this.pluginSlug + '/includes/Widget-Boilerplate', function(error) {

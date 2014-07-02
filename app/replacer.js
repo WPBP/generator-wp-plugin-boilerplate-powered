@@ -25,6 +25,7 @@ var Replacer = module.exports = function Replacer(file, options) {
   module.add(/Your Name <email@example\.com>/g, options.author + ' <' + options.authorEmail + '>');
   module.add(/1\.0\.0/g, options.pluginVersion);
   module.add(/Your Name or Company Name/g, options.pluginCopyright);
+  module.add(new RegExp('http://example.com','g'), options.authorURI);
 
   module.replace = function() {
     fs.readFile(file, 'utf8', function(err, data) {
