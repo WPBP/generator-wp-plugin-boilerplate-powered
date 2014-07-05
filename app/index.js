@@ -235,7 +235,7 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
 
   console.log('Downloading the WP Plugin Boilerplate Powered...');
 
-  request('http://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/master.zip')
+  request('https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/1.0.0.zip')
           .pipe(fs.createWriteStream('plugin.zip'))
           .on('close', function() {
             var zip = new admzip('./plugin.zip');
