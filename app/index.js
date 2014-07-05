@@ -12,6 +12,7 @@ var ncp = require('ncp');
 var sys = require('sys');
 var exec = require('child_process').exec;
 var Replacer = require('./replacer');
+var version = '1.0.0';
 
 function puts(error, stdout, stderr) {
   sys.puts(error);
@@ -235,14 +236,14 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
 
   console.log('Downloading the WP Plugin Boilerplate Powered...');
 
-  request('https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/1.0.0.zip')
+  request('http://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/1.0.0.zip')
           .pipe(fs.createWriteStream('plugin.zip'))
           .on('close', function() {
             var zip = new admzip('./plugin.zip');
             console.log('File downloaded');
             zip.extractAllTo('plugin_temp', true);
-            fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-master/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-master/plugin-name/.gitmodules');
-            fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-master/plugin-name/', './' + self.pluginSlug, function() {
+            fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules');
+            fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/', './' + self.pluginSlug, function() {
               rmdir('plugin_temp', function(error) {
                 if (error) {
                   console.log(error);
