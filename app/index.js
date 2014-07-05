@@ -223,7 +223,8 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       adminView: new Replacer(this.pluginSlug + '/admin/views/admin.php', this),
       uninstall: new Replacer(this.pluginSlug + '/uninstall.php', this),
       readme: new Replacer(this.pluginSlug + '/README.txt', this),
-      gitmodules: new Replacer(this.pluginSlug + '/.gitmodules', this)
+      gitmodules: new Replacer(this.pluginSlug + '/.gitmodules', this),
+      template: new Replacer(this.pluginSlug + '/includes/template.php', this)
     };
 
     cb();
