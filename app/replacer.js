@@ -26,8 +26,7 @@ var Replacer = module.exports = function Replacer(file, options) {
   module.add(/1\.0\.0/g, options.pluginVersion);
   module.add(/Your Name or Company Name/g, options.pluginCopyright);
   module.add(new RegExp('http://example.com','g'), options.authorURI);
-  var prefix = options.pluginName;
-  module.add(/pn_get_template_part/g, prefix.match(/\b(\w)/g).join('') + '_get_template_part');
+  module.add(/pn_/g, options.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '_');
 
   module.replace = function() {
     fs.readFile(file, 'utf8', function(err, data) {
