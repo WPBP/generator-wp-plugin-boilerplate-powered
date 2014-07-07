@@ -29,22 +29,26 @@ var Replacer = module.exports = function Replacer(file, options) {
   module.add(/pn_/g, options.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '_');
 
   module.replace = function() {
-    fs.readFile(file, 'utf8', function(err, data) {
-      var i, total;
-      if (err) {
-        return console.log(err);
-      }
+    fs.exists(file, function(exists) {
+      if (exists) {
+        fs.readFile(file, 'utf8', function(err, data) {
+          var i, total;
+          if (err) {
+            return console.log(err);
+          }
 
-      total = searches.length;
-      for (i = 0; i < total; i += 1) {
-        data = data.replace(searches[i].search, searches[i].replace);
-      }
+          total = searches.length;
+          for (i = 0; i < total; i += 1) {
+            data = data.replace(searches[i].search, searches[i].replace);
+          }
 
-      fs.writeFile(file, data, 'utf8', function(err) {
-        if (err) {
-          return console.log(err);
-        }
-      });
+          fs.writeFile(file, data, 'utf8', function(err) {
+            if (err) {
+              return console.log(err);
+            }
+          });
+        });
+      }
     });
   };
 
