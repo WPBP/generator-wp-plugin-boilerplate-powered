@@ -83,7 +83,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 console.log('Download submodules');
                 var submodule = exec('./submodules.sh', {cwd: process.cwd() + '/' + self.pluginSlug + '/'}, puts);
                 submodule.on('close', function(code) {
-                  //exec('rm ./submodules.sh', {cwd: process.cwd() + '/' + self.pluginSlug + '/'}, puts);
+                  exec('rm ./submodules.sh', {cwd: process.cwd() + '/' + self.pluginSlug + '/'}, puts);
                   console.log('Remove git config generated');
 
                   if (self.modules.indexOf('CPT_Core') !== -1) {
@@ -358,8 +358,11 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
       this.files.adminCss.rmsearch('#dashboard_right_now a.demo-count:before {', '', 0, 3);
     }
   }
+  if (this.modules.indexOf('Custom Metaboxes and Fields for WordPress') === -1 && this.modules.indexOf('HM Custom Meta Boxes for WordPress') === -1) {
+    this.files.adminClass.rmsearch("add_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );", "add_filter( 'cmb_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", -1, 0);
+    this.files.adminClass.rmsearch("* NOTE:     Your metabox on Demo CPT", "return $meta_boxes;", 1, -3);
+  }
   if (this.modules.indexOf('Custom Metaboxes and Fields for WordPress') === -1) {
-    
     rmdir(this.pluginSlug + '/admin/includes/CMBF', function(error) {
       if (error) {
         console.log(error);
@@ -370,10 +373,11 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
         console.log(error);
       }
     });
-    this.files.adminClass.rmsearch("* Choose the Custom Meta Box Library and remove the other", "* Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", 0, 0);
-    this.files.adminClass.rmsearch("*  Custom Metabox and Fields for Wordpress", "add_filter( 'cmb_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", 0, 4);
-    this.files.adminClass.add('https://github.com/humanmade/Custom-Meta-Boxes/', 'https://github.com/humanmade/Custom-Meta-Boxes/	*/' + "\n");
-
+    if (this.modules.indexOf('HM Custom Meta Boxes for WordPress') !== -1) {
+      this.files.adminClass.rmsearch("* Choose the Custom Meta Box Library and remove the other", "* Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", 0, 0);
+      this.files.adminClass.rmsearch("*  Custom Metabox and Fields for Wordpress", "add_filter( 'cmb_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", 0, 4);
+      this.files.adminClass.add('https://github.com/humanmade/Custom-Meta-Boxes/', 'https://github.com/humanmade/Custom-Meta-Boxes/	*/' + "\n");
+    }
     this.files.adminView.rmsearch("// NOTE:Code for CMBF!", "cmb_metabox_form( $option_fields, $this->plugin_slug . '-settings' );", 3, -2);
   }
   if (this.modules.indexOf('HM Custom Meta Boxes for WordPress') === -1) {
@@ -383,12 +387,8 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
       }
     });
     this.files.adminClass.rmsearch("* Choose the Custom Meta Box Library and remove the other", "*  Custom Metabox and Fields for Wordpress", 0, 0);
+    this.files.adminClass.rmsearch("*  Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", "require_once( plugin_dir_path( __FILE__ ) . 'includes/CMB/custom-meta-boxes.php' );", -1, 1);
   }
-  if (this.modules.indexOf('Custom Metaboxes and Fields for WordPress') === -1 && this.modules.indexOf('HM Custom Meta Boxes for WordPress') === -1) {
-    this.files.adminClass.rmsearch("* Filter is the same", "add_filter( 'cmb_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", 1, 0);
-    this.files.adminClass.rmsearch("* NOTE:     Your metabox on Demo CPT", "return $meta_boxes;", 1, -3);
-  }
-
 };
 
 WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass() {
