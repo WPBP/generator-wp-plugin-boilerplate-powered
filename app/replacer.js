@@ -25,7 +25,7 @@ var Replacer = module.exports = function Replacer(file, options) {
   module.add(/Your Name <email@example\.com>/g, options.author + ' <' + options.authorEmail + '>');
   module.add(/1\.0\.0/g, options.pluginVersion);
   module.add(/Your Name or Company Name/g, options.pluginCopyright);
-  module.add(new RegExp('http://example.com','g'), options.authorURI);
+  module.add(new RegExp('http://example.com', 'g'), options.authorURI);
   module.add(/pn_/g, options.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '_');
 
   module.replace = function() {
@@ -63,13 +63,15 @@ var Replacer = module.exports = function Replacer(file, options) {
       // pause stream if a newline char is found
       stream.pause();
       _file.push(line);
-      line = line.replace(/(\r\n|\n|\r|\t)/gm, "");
-      line = line.replace(/ /g, '');
+      line = line.replace(/(\r\n|\n|\r|\t)/gm, '').replace(/ /g, '');
 
       if (line === start) {
         _start = i - count_initial;
+        if (!end.length) {
+          _end = i + count_end;
+        }
         stream.resume();
-      } else if (line === end) {
+      } else if (line === end && end) {
         _end = i - count_end;
         stream.resume();
       }
@@ -79,7 +81,7 @@ var Replacer = module.exports = function Replacer(file, options) {
       var z = 0;
       var complete = '';
       for (z = _start; z < _end; z++) {
-          complete += '\n' + _file[z];
+        complete += '\n' + _file[z];
       }
 
       module.rm(complete);

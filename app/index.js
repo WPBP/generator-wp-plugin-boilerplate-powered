@@ -219,6 +219,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       primary: new Replacer(this.pluginSlug + '/' + this.pluginSlug + '.php', this),
       publicClass: new Replacer(this.pluginSlug + '/public/class-' + this.pluginSlug + '.php', this),
       adminClass: new Replacer(this.pluginSlug + '/admin/class-' + this.pluginSlug + '-admin.php', this),
+      adminCss: new Replacer(this.pluginSlug + '/admin/assets/css/admin.css', this),
       publicView: new Replacer(this.pluginSlug + '/public/views/public.php', this),
       adminView: new Replacer(this.pluginSlug + '/admin/views/admin.php', this),
       uninstall: new Replacer(this.pluginSlug + '/uninstall.php', this),
@@ -355,6 +356,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     if (this.snippet.indexOf('Support Dashboard At Glance Widget') === -1) {
       this.files.adminClass.rm("\n\t\t// At Glance Dashboard widget for your cpts\n\t\tadd_filter( 'dashboard_glance_items', array( $this, 'cpt_dashboard_support' ), 10, 1 );\n");
       this.files.adminClass.rmsearch('* Add the counter of your CPTs in At Glance widget in the dashboard<br>', '* NOTE:     Your metabox on Demo CPT', 1, 1);
+      this.files.adminCss.rmsearch('#dashboard_right_now a.demo-count:before {', '', 0, 3);
     }
     if (this.modules.indexOf('Custom Metaboxes and Fields for WordPress') === -1) {
       rmdir(this.pluginSlug + '/includes/CMBF', function(error) {
