@@ -58,37 +58,41 @@ var Replacer = module.exports = function Replacer(file, options) {
     var _file = [];
     start = start.replace(/ /g, '');
     end = end.replace(/ /g, '');
-    stream = readline(fs.createReadStream(file, {flags: 'r'}));
-    stream.setDelimiter("\n");
+    fs.exists(file, function(exists) {
+      if (exists) {
+        stream = readline(fs.createReadStream(file, {flags: 'r'}));
+        stream.setDelimiter("\n");
 
-    //start reading the file
-    stream.addListener('line', function(line) {
-      i++;
-      // pause stream if a newline char is found
-      stream.pause();
-      _file.push(line);
-      line = line.replace(/(\r\n|\n|\r|\t)/gm, '').replace(/ /g, '');
+        //start reading the file
+        stream.addListener('line', function(line) {
+          i++;
+          // pause stream if a newline char is found
+          stream.pause();
+          _file.push(line);
+          line = line.replace(/(\r\n|\n|\r|\t)/gm, '').replace(/ /g, '');
 
-      if (line === start) {
-        _start = i - count_initial;
-        if (!end.length) {
-          _end = i + count_end;
-        }
-        stream.resume();
-      } else if (line === end && end) {
-        _end = i - count_end;
-        stream.resume();
+          if (line === start) {
+            _start = i - count_initial;
+            if (!end.length) {
+              _end = i + count_end;
+            }
+            stream.resume();
+          } else if (line === end && end) {
+            _end = i - count_end;
+            stream.resume();
+          }
+        });
+
+        stream.addListener("close", function() {
+          var z = 0;
+          var complete = '';
+          for (z = _start; z < _end; z++) {
+            complete += '\n' + _file[z];
+          }
+
+          module.rm(complete);
+        });
       }
-    });
-
-    stream.addListener("close", function() {
-      var z = 0;
-      var complete = '';
-      for (z = _start; z < _end; z++) {
-        complete += '\n' + _file[z];
-      }
-
-      module.rm(complete);
     });
   };
 
