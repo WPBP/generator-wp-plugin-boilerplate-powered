@@ -72,7 +72,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
     }
 
     fs.writeFile(self.pluginSlug + '/submodules.sh',
-            "#!/bin/sh\nset -e\ngit init\ngit config -f .gitmodules --get-regexp '^submodule\..*\.path$' |\n    while read path_key path\n    do\n        url_key=$(echo $path_key | sed 's/\.path/.url/')\n        url=$(git config -f .gitmodules --get $url_key)\n        if [ -d $path ]; then\n        rm -r $path\n        git submodule add -f $url $path\n      echo '\nAdding $url'\n    fi\n    done",
+            "#!/bin/sh\nset -e\ngit init\ngit config -f .gitmodules --get-regexp '^submodule\..*\.path$' |\n    while read path_key path\n    do\n        url_key=$(echo $path_key | sed 's/\.path/.url/')\n        url=$(git config -f .gitmodules --get $url_key)\n        if [ -d $path ]; then\n        rm -r $path\n        git submodule add -f $url $path\n    fi\n    done",
             'utf8',
             function(err) {
               if (err) {
@@ -81,6 +81,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 fs.chmodSync(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', '0777');
                 console.log('Generate git config on the fly');
                 console.log('Download submodules');
+                //require('child_process').spawn('cosa').stdout.on('data', ...)
                 var submodule = exec('./submodules.sh', {cwd: process.cwd() + '/' + self.pluginSlug + '/'}, puts);
                 submodule.on('close', function(code) {
                   exec('rm ./submodules.sh', {cwd: process.cwd() + '/' + self.pluginSlug + '/'}, puts);
@@ -391,12 +392,17 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
         console.log(error);
       }
     });
+    this.files.adminClass.rm("$settings[ 1 ] = get_option( $this->plugin_slug . '-settings-second' );");
+    this.files.adminClass.rm("update_option( $this->plugin_slug . '-settings-second', get_object_vars( $settings[ 1 ] ) );");
+    this.files.adminView.rmsearch("//Required for multi CMB form", "jQuery('.cmb-form #wp_meta_box_nonce').appendTo('.cmb-form');", 1, -4);
+    this.files.adminView.rmsearch('<div id="tabs-1">', "cmb_metabox_form( $option_fields, $this->plugin_slug . '-settings' );", -1, -2);
+    this.files.adminView.rmsearch('<div id="tabs-2">', "cmb_metabox_form( $option_fields_second, $this->plugin_slug . '-settings-second' );", -1, -2);
+    
     if (this.modules.indexOf('HM Custom Meta Boxes for WordPress') !== -1) {
       this.files.adminClass.rmsearch("* Choose the Custom Meta Box Library and remove the other", "* Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", 0, 0);
       this.files.adminClass.rmsearch("*  Custom Metabox and Fields for Wordpress", "add_filter( 'cmb_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", 0, 4);
       this.files.adminClass.add('https://github.com/humanmade/Custom-Meta-Boxes/', 'https://github.com/humanmade/Custom-Meta-Boxes/	*/' + "\n");
     }
-    this.files.adminView.rmsearch("// NOTE:Code for CMBF!", "cmb_metabox_form( $option_fields, $this->plugin_slug . '-settings' );", 3, -2);
   }
   if (this.modules.indexOf('HM Custom Meta Boxes for WordPress') === -1) {
     rmdir(this.pluginSlug + '/admin/includes/CMB', function(error) {
