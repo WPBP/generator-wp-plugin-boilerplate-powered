@@ -12,7 +12,7 @@ var ncp = require('ncp');
 var sys = require('sys');
 var exec = require('child_process').exec;
 var Replacer = require('./replacer');
-var version = '1.0.0';
+var version = 'master';
 
 function puts(error, stdout, stderr) {
   sys.puts(error);
@@ -235,11 +235,16 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
 
 WpPluginBoilerplateGenerator.prototype.download = function download() {
   var cb = this.async(),
-          self = this;
+          self = this,
+          path = 'http://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/' + version + '.zip';
 
   console.log('Downloading the WP Plugin Boilerplate Powered...');
 
-  request('http://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/1.0.0.zip')
+  if (version === 'master') {
+    path = 'https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/master.zip';
+  }
+
+  request(path)
           .pipe(fs.createWriteStream('plugin.zip'))
           .on('close', function() {
             var zip = new admzip('./plugin.zip');
@@ -266,6 +271,7 @@ WpPluginBoilerplateGenerator.prototype.setFiles = function setName() {
   fs.rename(this.pluginSlug + '/plugin-name.php', this.files.primary.file);
   fs.rename(this.pluginSlug + '/admin/class-plugin-name-admin.php', this.files.adminClass.file);
   fs.rename(this.pluginSlug + '/public/class-plugin-name.php', this.files.publicClass.file);
+  fs.rename(this.pluginSlug + '/languages/plugin-name.pot', this.pluginSlug + '/languages/' + this.pluginSlug + '.pot');
 };
 
 WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
