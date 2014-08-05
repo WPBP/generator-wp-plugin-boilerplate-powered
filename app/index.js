@@ -72,7 +72,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
     }
 
     fs.writeFile(self.pluginSlug + '/submodules.sh',
-            "#!/bin/sh\nset -e\ngit init\ngit config -f .gitmodules --get-regexp '^submodule\..*\.path$' |\n    while read path_key path\n    do\n        url_key=$(echo $path_key | sed 's/\.path/.url/')\n        url=$(git config -f .gitmodules --get $url_key)\n        if [ -d $path ]; then\n        rm -r $path\n        git submodule add -f $url $path\n    fi\n    done\nrm -r ./.git\nrm ./.gitmodules",
+            "#!/bin/sh\nset -e\ngit init\ngit config -f .gitmodules --get-regexp '^submodule\..*\.path$' |\n    while read path_key path\n    do\n        url_key=$(echo $path_key | sed 's/\.path/.url/')\n        url=$(git config -f .gitmodules --get $url_key)\n        if [ -d $path ]; then\n        rm -r $path\n        git submodule add -f $url $path\n      echo '\nAdding $url'\n    fi\n    done",
             'utf8',
             function(err) {
               if (err) {
@@ -198,6 +198,10 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       type: 'confirm',
       name: 'adminPage',
       message: 'Does your plugin need an admin page?'
+    }, {
+      type: 'confirm',
+      name: 'git',
+      message: 'Do you need an initialized git repo?'
     }];
 
   this.prompt(prompts, function(props) {
@@ -344,6 +348,14 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
   if (this.modules.indexOf('Language function support (WPML/Ceceppa Multilingua/Polylang)') === -1) {
     fs.unlink(this.pluginSlug + '/includes/language.php');
     this.files.primary.rm("\n/*\n * Load Language wrapper function for WPML/Ceceppa Multilingua/Polylang\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/language.php' );\n");
+  }
+  if (this.git === false) {
+    fs.unlink(this.pluginSlug + '.gitmodules');
+    rmdir(this.pluginSlug + '/.git', function(error) {
+      if (error) {
+        console.log(error);
+      }
+    });
   }
 };
 
