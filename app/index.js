@@ -14,12 +14,6 @@ var spawn = require('child_process').spawn;
 var Replacer = require('./replacer');
 var version = 'master';
 
-function puts(error, stdout, stderr) {
-  sys.puts(error);
-  sys.puts(stderr);
-  sys.puts(stdout);
-}
-
 function cleanFolder(path) {
   var default_file = [
     'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json',
@@ -70,10 +64,24 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
         self.files[key].replace();
       }
     }
+    var submodulessh =
+            ['#!/bin/sh',
+              'set -e',
+              'git init',
+              "git config -f .gitmodules --get-regexp '^submodule..*.path$' |",
+              'while read path_key path',
+              '   do',
+              "     url_key=$(echo $path_key | sed 's/.path/.url/')",
+              '     url=$(git config -f .gitmodules --get $url_key)',
+              '       if [ -d $path ]; then',
+              '         rm -r $path',
+              '         echo "Add $url in $path"',
+              '         git submodule add -f $url $path',
+              '       fi',
+              '   done'
+            ].join('\n');
 
-    fs.writeFile(self.pluginSlug + '/submodules.sh',
-            "#!/bin/sh\nset -e\ngit init\ngit config -f .gitmodules --get-regexp '^submodule\..*\.path$' |\n    while read path_key path\n    do\n        url_key=$(echo $path_key | sed 's/\.path/.url/')\n        url=$(git config -f .gitmodules --get $url_key)\n        if [ -d $path ]; then\n        rm -r $path\n        git submodule add -f $url $path\n    fi\n    done",
-            'utf8',
+    fs.writeFile(self.pluginSlug + '/submodules.sh', submodulessh, 'utf8',
             function(err) {
               if (err) {
                 return console.log(err);
@@ -81,14 +89,14 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 fs.chmodSync(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', '0777');
                 console.log('Generate git config on the fly');
                 console.log('Download submodules');
-                var submodule = spawn('./submodules.sh', '', {cwd: process.cwd() + '/' + self.pluginSlug + '/'});
+                var submodule = spawn('./submodules.sh', [], {cwd: process.cwd() + '/' + self.pluginSlug + '/'});
                 submodule.stdout.on('data',
                         function(data) {
-                          console.log(data);
+                          console.log(data.toString());
                         });
                 submodule.on('close',
                         function(code) {
-                          exec('rm ./submodules.sh', {cwd: process.cwd() + '/' + self.pluginSlug + '/'}, puts);
+                          spawn('rm', [' ./submodules.sh'], {cwd: process.cwd() + '/' + self.pluginSlug + '/'});
                           console.log('Remove git config generated');
 
                           if (self.modules.indexOf('CPT_Core') !== -1) {
