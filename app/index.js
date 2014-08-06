@@ -10,7 +10,7 @@ var rmdir = require('rimraf');
 var _s = require('underscore.string');
 var ncp = require('ncp');
 var sys = require('sys');
-var exec = require('child_process').exec;
+var spawn = require('child_process').spawn;
 var Replacer = require('./replacer');
 var version = 'master';
 
@@ -81,36 +81,41 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 fs.chmodSync(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', '0777');
                 console.log('Generate git config on the fly');
                 console.log('Download submodules');
-                //require('child_process').spawn('cosa').stdout.on('data', ...)
-                var submodule = exec('./submodules.sh', {cwd: process.cwd() + '/' + self.pluginSlug + '/'}, puts);
-                submodule.on('close', function(code) {
-                  exec('rm ./submodules.sh', {cwd: process.cwd() + '/' + self.pluginSlug + '/'}, puts);
-                  console.log('Remove git config generated');
+                var submodule = spawn('./submodules.sh', '', {cwd: process.cwd() + '/' + self.pluginSlug + '/'});
+                submodule.stdout.on('data',
+                        function(data) {
+                          console.log(data);
+                        });
+                submodule.on('close',
+                        function(code) {
+                          exec('rm ./submodules.sh', {cwd: process.cwd() + '/' + self.pluginSlug + '/'}, puts);
+                          console.log('Remove git config generated');
 
-                  if (self.modules.indexOf('CPT_Core') !== -1) {
-                    cleanFolder(self.pluginSlug + '/includes/CPT_Core');
-                  }
+                          if (self.modules.indexOf('CPT_Core') !== -1) {
+                            cleanFolder(self.pluginSlug + '/includes/CPT_Core');
+                          }
 
-                  if (self.modules.indexOf('Taxonomy_Core') !== -1) {
-                    cleanFolder(self.pluginSlug + '/includes/Taxonomy_Core');
-                  }
+                          if (self.modules.indexOf('Taxonomy_Core') !== -1) {
+                            cleanFolder(self.pluginSlug + '/includes/Taxonomy_Core');
+                          }
 
-                  if (self.modules.indexOf('Widget-Boilerplate') !== -1) {
-                    cleanFolder(self.pluginSlug + '/includes/Widget-Boilerplate');
-                    cleanFolder(self.pluginSlug + '/includes/Widget-Boilerplate/widget-boilerplate');
-                  }
+                          if (self.modules.indexOf('Widget-Boilerplate') !== -1) {
+                            cleanFolder(self.pluginSlug + '/includes/Widget-Boilerplate');
+                            cleanFolder(self.pluginSlug + '/includes/Widget-Boilerplate/widget-boilerplate');
+                          }
 
-                  if (self.modules.indexOf('Custom Metaboxes and Fields for WordPress') !== -1) {
-                    cleanFolder(self.pluginSlug + '/admin/includes/CMBF');
-                    cleanFolder(self.pluginSlug + '/admin/includes/CMBF-Select2');
-                  }
+                          if (self.modules.indexOf('Custom Metaboxes and Fields for WordPress') !== -1) {
+                            cleanFolder(self.pluginSlug + '/admin/includes/CMBF');
+                            cleanFolder(self.pluginSlug + '/admin/includes/CMBF-Select2');
+                          }
 
-                  if (self.modules.indexOf('HM Custom Meta Boxes for WordPress') !== -1) {
-                    cleanFolder(self.pluginSlug + '/admin/includes/CMB');
-                  }
+                          if (self.modules.indexOf('HM Custom Meta Boxes for WordPress') !== -1) {
+                            cleanFolder(self.pluginSlug + '/admin/includes/CMB');
+                          }
 
-                  console.log('All done!');
-                });
+                          console.log('Inserted index.php files in all the folders');
+                          console.log('All done!');
+                        });
               }
             }
     );
@@ -121,7 +126,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
   console.log(this.yeoman);
 
   if (fs.existsSync(__dirname + '/../default-values.json')) {
-    default_file = path.join(__dirname,'../default-values.json');
+    default_file = path.join(__dirname, '../default-values.json');
   } else if (fs.existsSync(process.cwd() + '/default-values.json')) {
     default_file = process.cwd() + '/default-values.json';
   } else {
@@ -129,7 +134,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
     console.log('May I give you an advice?');
     console.log('You should create the file ' + process.cwd() + '/default-values.json with default values! Use the default-values-example.json as a template.');
     console.log('--------------------------');
-    default_file = path.join(__dirname,'../default-values-example.json');
+    default_file = path.join(__dirname, '../default-values-example.json');
   }
   this.defaultValues = JSON.parse(this.readFileAsString(default_file));
 };
@@ -249,31 +254,47 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
 WpPluginBoilerplateGenerator.prototype.download = function download() {
   var cb = this.async(),
           self = this,
-          path = 'http://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/' + version + '.zip';
+          path = 'http://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/' + version + '.zip',
+          zip = "";
 
-  console.log('Downloading the WP Plugin Boilerplate Powered...');
+  if (fs.existsSync(process.cwd() + '/plugin.zip')) {
+    console.log('Extract Plugin boilerplate');
+    zip = new admzip('./plugin.zip');
+    zip.extractAllTo('plugin_temp', true);
+    fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules');
+    fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/', './' + self.pluginSlug, function() {
+      rmdir('plugin_temp', function(error) {
+        if (error) {
+          console.log(error);
+        }
+        cb();
+      });
+    });
+  } else {
+    console.log('Downloading the WP Plugin Boilerplate Powered...');
 
-  if (version === 'master') {
-    path = 'https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/master.zip';
-  }
+    if (version === 'master') {
+      path = 'https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/master.zip';
+    }
 
-  request(path)
-          .pipe(fs.createWriteStream('plugin.zip'))
-          .on('close', function() {
-            var zip = new admzip('./plugin.zip');
-            console.log('File downloaded');
-            zip.extractAllTo('plugin_temp', true);
-            fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules');
-            fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/', './' + self.pluginSlug, function() {
-              rmdir('plugin_temp', function(error) {
-                if (error) {
-                  console.log(error);
-                }
-                cb();
+    request(path)
+            .pipe(fs.createWriteStream('plugin.zip'))
+            .on('close', function() {
+              zip = new admzip('./plugin.zip');
+              console.log('File downloaded');
+              zip.extractAllTo('plugin_temp', true);
+              fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules');
+              fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/', './' + self.pluginSlug, function() {
+                rmdir('plugin_temp', function(error) {
+                  if (error) {
+                    console.log(error);
+                  }
+                  cb();
+                });
               });
+              //fs.unlink('plugin.zip');
             });
-            fs.unlink('plugin.zip');
-          });
+  }
 };
 
 WpPluginBoilerplateGenerator.prototype.setFiles = function setName() {
@@ -352,7 +373,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
         console.log(error);
       }
     });
-    this.files.publicClass.rmsearch('* Example for override the template system on the frontend','return $original_template;',1,-2);
+    this.files.publicClass.rmsearch('* Example for override the template system on the frontend', 'return $original_template;', 1, -2);
     this.files.publicClass.rm('//Ovveride the template hierachy for load /templates/content-demo.php');
     this.files.publicClass.rm("add_filter( 'template_include', array( $this, 'load_content_demo' ) );");
     this.files.primary.rm("\n/*\n * Load template system\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/template.php' );\n");
@@ -362,8 +383,8 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
     this.files.primary.rm("\n/*\n * Load Language wrapper function for WPML/Ceceppa Multilingua/Polylang\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/language.php' );\n");
   }
   if (this.snippet.indexOf('Javascript DOM-based Routing') === -1) {
-      this.files.publicjs.rmsearch('* DOM-based Routing', '$(document).ready(UTIL.loadEvents);', 1, 1);
-    }
+    this.files.publicjs.rmsearch('* DOM-based Routing', '$(document).ready(UTIL.loadEvents);', 1, 1);
+  }
   if (this.git === false) {
     fs.unlink(this.pluginSlug + '.gitmodules');
     rmdir(this.pluginSlug + '/.git', function(error) {
@@ -411,7 +432,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     this.files.adminView.rmsearch("//Required for multi CMB form", "jQuery('.cmb-form #wp_meta_box_nonce').appendTo('.cmb-form');", 1, -4);
     this.files.adminView.rmsearch('<div id="tabs-1">', "cmb_metabox_form( $option_fields, $this->plugin_slug . '-settings' );", -1, -2);
     this.files.adminView.rmsearch('<div id="tabs-2">', "cmb_metabox_form( $option_fields_second, $this->plugin_slug . '-settings-second' );", -1, -2);
-    
+
     if (this.modules.indexOf('HM Custom Meta Boxes for WordPress') !== -1) {
       this.files.adminClass.rmsearch("* Choose the Custom Meta Box Library and remove the other", "* Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", 0, 0);
       this.files.adminClass.rmsearch("*  Custom Metabox and Fields for Wordpress", "add_filter( 'cmb_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", 0, 4);
