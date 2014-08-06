@@ -2,10 +2,12 @@
 
 var fs = require('fs');
 var readline = require('line-input-stream');
+var exec = require('child_process').exec;
 
 var Replacer = module.exports = function Replacer(file, options) {
   var module = {},
-          searches = [];
+          searches = [],
+          seds = [];
 
   module.add = function(search, replace) {
     searches.push({search: search, replace: replace});
@@ -37,7 +39,7 @@ var Replacer = module.exports = function Replacer(file, options) {
           if (err) {
             return console.log(err);
           }
-
+          
           total = searches.length;
           for (i = 0; i < total; i += 1) {
             data = data.replace(searches[i].search, searches[i].replace);
@@ -85,31 +87,47 @@ var Replacer = module.exports = function Replacer(file, options) {
         });
 
         stream.addListener("close", function() {
-          var z = 0;
-          var complete = '';
-          //console.log(_start + ' - ' + _end);
-          if (_start === 'undefined') {
+          if (typeof _start === 'undefined') {
             console.log('Not found start line in' + file + ': ' + _start);
           }
-          
-          if (_end === 'undefined') {
+
+          if (typeof _end === 'undefined') {
             console.log('Not found end line in' + file + ': ' + _end);
           }
-          
-          if(_end < _start) {
+
+          if (_end < _start) {
             console.log('Problem when parsing ' + file);
           }
           
-          for (z = _start; z < _end; z++) {
-            complete += '\n' + _file[z];
-          }
+          seds.push({start: _start, end: _end});
           
-          module.rm(complete);
         });
       }
     });
   };
 
+  module.sed = function() {
+    fs.exists(process.cwd() + '/' + file, function(exists) {
+      if (exists) {
+        var total = seds.length;
+        var line = '';
+        var i;
+        console.log(seds);
+        for (i = 0; i < total; i += 1) {
+          line += seds[i].start + ',' + seds[i].end + "d;";
+        }
+        
+        console.log("sed -i '" + line + "' " + process.cwd() + '/' + file);
+        exec("sed -i '" + line + "' " + process.cwd() + '/' + file, {cwd: process.cwd() + '/'},
+        function(err, stdout, stderr) {
+          if (stderr.length > 0)
+            console.log('stderr: ' + stderr);
+          if (err !== null)
+            console.log('exec error: ' + err);
+        });
+      }
+    });
+  };
 
   return module;
 };
