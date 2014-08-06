@@ -87,7 +87,7 @@ var Replacer = module.exports = function Replacer(file, options) {
         stream.addListener("close", function() {
           var z = 0;
           var complete = '';
-          
+          //console.log(_start + ' - ' + _end);
           if (_start === 'undefined') {
             console.log('Not found start line in' + file + ': ' + _start);
           }

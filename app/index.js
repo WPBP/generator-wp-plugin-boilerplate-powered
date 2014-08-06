@@ -121,15 +121,17 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
   console.log(this.yeoman);
 
   if (fs.existsSync(__dirname + '/../default-values.json')) {
-    default_file = '../default-values.json';
+    default_file = path.join(__dirname,'../default-values.json');
+  } else if (fs.existsSync(process.cwd() + '/default-values.json')) {
+    default_file = process.cwd() + '/default-values.json';
   } else {
     console.log('--------------------------');
     console.log('May I give you an advice?');
-    console.log('You should create the file ' + __dirname.slice(0, -3) + 'default-values.json with default values! Use the default-values-example.json as a template.');
+    console.log('You should create the file ' + process.cwd() + '/default-values.json with default values! Use the default-values-example.json as a template.');
     console.log('--------------------------');
-    default_file = '../default-values-example.json';
+    default_file = path.join(__dirname,'../default-values-example.json');
   }
-  this.defaultValues = JSON.parse(this.readFileAsString(path.join(__dirname, default_file)));
+  this.defaultValues = JSON.parse(this.readFileAsString(default_file));
 };
 
 util.inherits(WpPluginBoilerplateGenerator, yeoman.generators.Base);
@@ -176,6 +178,10 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'Deactivate Method', checked: true},
         {name: 'Uninstall File', checked: true}]
     }, {
+      type: 'confirm',
+      name: 'adminPage',
+      message: 'Does your plugin need an admin page?'
+    }, {
       type: 'checkbox',
       name: 'modules',
       message: 'Which library your plugin needs?',
@@ -186,19 +192,20 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'HM Custom Meta Boxes for WordPress', checked: true},
         {name: 'Custom Metaboxes and Fields for WordPress', checked: true},
         {name: 'Fake Page Class', checked: true},
-        {name: 'Template system (like WooCommerce)', checked: true},
+        {name: 'Template system (like WooCommerce)', checked: false},
         {name: 'Language function support (WPML/Ceceppa Multilingua/Polylang)', checked: true}]
     }, {
       type: 'checkbox',
       name: 'snippet',
       message: 'Which snippet your plugin needs?',
       choices: [
-        {name: 'Support Dashboard At Glance Widget', checked: true}
+        {name: 'Support Dashboard At Glance Widget', checked: true},
+        {name: 'Javascript DOM-based Routing', checked: false},
+        {name: 'Bubble notification on cpt', checked: true},
+        {name: 'Import/Export settings system', checked: true},
+        {name: 'Capability system', checked: true},
+        {name: 'Debug system (Debug Bar support)', checked: true}
       ]
-    }, {
-      type: 'confirm',
-      name: 'adminPage',
-      message: 'Does your plugin need an admin page?'
     }, {
       type: 'confirm',
       name: 'git',
@@ -231,7 +238,8 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       uninstall: new Replacer(this.pluginSlug + '/uninstall.php', this),
       readme: new Replacer(this.pluginSlug + '/README.txt', this),
       gitmodules: new Replacer(this.pluginSlug + '/.gitmodules', this),
-      template: new Replacer(this.pluginSlug + '/includes/template.php', this)
+      template: new Replacer(this.pluginSlug + '/includes/template.php', this),
+      publicjs: new Replacer(this.pluginSlug + '/public/assets/js/public.js', this)
     };
 
     cb();
@@ -344,12 +352,18 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
         console.log(error);
       }
     });
+    this.files.publicClass.rmsearch('* Example for override the template system on the frontend','return $original_template;',1,-2);
+    this.files.publicClass.rm('//Ovveride the template hierachy for load /templates/content-demo.php');
+    this.files.publicClass.rm("add_filter( 'template_include', array( $this, 'load_content_demo' ) );");
     this.files.primary.rm("\n/*\n * Load template system\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/template.php' );\n");
   }
   if (this.modules.indexOf('Language function support (WPML/Ceceppa Multilingua/Polylang)') === -1) {
     fs.unlink(this.pluginSlug + '/includes/language.php');
     this.files.primary.rm("\n/*\n * Load Language wrapper function for WPML/Ceceppa Multilingua/Polylang\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/language.php' );\n");
   }
+  if (this.snippet.indexOf('Javascript DOM-based Routing') === -1) {
+      this.files.publicjs.rmsearch('* DOM-based Routing', '$(document).ready(UTIL.loadEvents);', 1, 1);
+    }
   if (this.git === false) {
     fs.unlink(this.pluginSlug + '.gitmodules');
     rmdir(this.pluginSlug + '/.git', function(error) {
