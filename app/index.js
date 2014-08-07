@@ -12,7 +12,11 @@ var sys = require('sys');
 var spawn = require('child_process').spawn;
 var colors = require('colors');
 var Replacer = require('./replacer');
-var version = 'master';
+var args = process.argv.slice(2);
+var version = '1.0.0';
+if(args[1] === 'dev') {
+  version = 'master';
+}
 
 function cleanFolder(path) {
   var default_file = [
@@ -44,6 +48,7 @@ function cleanFolder(path) {
 
   fs.exists('./' + path + '/index.php', function(exists) {
     if (!exists) {
+      //cleanFolder('./' + path);
       fs.writeFile('./' + path + '/index.php',
               "<?php // Silence is golden",
               'utf8', function() {
@@ -73,8 +78,8 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
       '         git submodule add -f $url $path',
       '       fi',
       '   done',
-      'rm $0'
-    ].join('\n');
+      
+    ].join('\n'); //'rm $0'
 
     fs.writeFile(self.pluginSlug + '/submodules.sh', submodulessh, 'utf8',
             function(err) {
@@ -84,8 +89,12 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 fs.chmodSync(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', '0777');
                 console.log(('Generate git config on the fly').white);
                 console.log(('Download submodules').white);
-                var submodule = spawn('./submodules.sh', [], {cwd: process.cwd() + '/' + self.pluginSlug + '/'});
+                var submodule = spawn(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', [], {cwd: process.cwd() + '/' + self.pluginSlug + '/'});
                 submodule.stdout.on('data',
+                        function(data) {
+                          console.log(data.toString());
+                        });
+                submodule.stderr.on('data',
                         function(data) {
                           console.log(data.toString());
                         });
@@ -123,6 +132,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                           for (key in self.files) {
                             if (self.files.hasOwnProperty(key)) {
                               self.files[key].sed();
+                              self.files[key].replace();
                             }
                           }
                           
@@ -203,11 +213,11 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       name: 'modules',
       message: 'Which library your plugin needs?',
       choices: [
-        {name: 'CPT_Core', checked: false},
-        {name: 'Taxonomy_Core', checked: false},
-        {name: 'Widget-Boilerplate', checked: false},
-        {name: 'HM Custom Meta Boxes for WordPress', checked: false},
-        {name: 'Custom Metaboxes and Fields for WordPress', checked: false},
+        {name: 'CPT_Core', checked: true},
+        {name: 'Taxonomy_Core', checked: true},
+        {name: 'Widget-Boilerplate', checked: true},
+        {name: 'HM Custom Meta Boxes for WordPress', checked: true},
+        {name: 'Custom Metaboxes and Fields for WordPress', checked: true},
         {name: 'Fake Page Class', checked: true},
         {name: 'Template system (like WooCommerce)', checked: true},
         {name: 'Language function support (WPML/Ceceppa Multilingua/Polylang)', checked: true}]
@@ -222,7 +232,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'Import/Export settings system', checked: true},
         {name: 'Capability system', checked: true},
         {name: 'Debug system (Debug Bar support)', checked: true},
-        {name: 'Add body class', checked: false}
+        {name: 'Add body class', checked: true}
       ]
     }, {
       type: 'confirm',

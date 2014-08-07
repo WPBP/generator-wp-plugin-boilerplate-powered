@@ -2,7 +2,6 @@
 
 A generator for [Yeoman](http://yeoman.io) to customize the [WP Plugin Boilerplate Powered](https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered)
 
-
 ## Getting Started
 
 ### What is Yeoman?
@@ -25,7 +24,7 @@ $ npm install -g yo
 $ npm install -g generator-wp-plugin-boilerplate-powered
 ```
   
-NOTE: require git!
+NOTE: require git and sed!
 
 ### How to use it
 
@@ -34,7 +33,11 @@ NOTE: require git!
 cd wp-content/plugins
 # Run the generator
 $ yo wp-plugin-boilerplate-powered
+# Use development version (not perfect)
+$ yo wp-plugin-boilerplate-powered dev
 ```
+
+If exist a plugin.zip file in the root, the boilerplate is not downloaded
 
 ## License
 

@@ -37,6 +37,7 @@ var Replacer = module.exports = function Replacer(file, options) {
   module.add(/pn-/g, options.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '-');
 
   module.replace = function() {
+    //console.log(file);
     fs.exists(file, function(exists) {
       if (exists) {
         fs.readFile(file, 'utf8', function(err, data) {
@@ -126,8 +127,6 @@ var Replacer = module.exports = function Replacer(file, options) {
               console.log(('exec error: ' + err).red);
             }
           });
-          
-          module.replace();
         }
       }
     });
