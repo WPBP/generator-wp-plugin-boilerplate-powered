@@ -58,14 +58,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
   yeoman.generators.Base.apply(this, arguments);
 
   this.on('end', function() {
-    var key = null;
-    for (key in self.files) {
-      if (self.files.hasOwnProperty(key)) {
-        self.files[key].sed();
-        //self.files[key].replace();
-      }
-    }
-    
+
     var submodulessh =
             ['#!/bin/sh',
               'set -e',
@@ -122,6 +115,14 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                           }
 
                           console.log('Inserted index.php files in all the folders');
+
+                          var key = null;
+                          for (key in self.files) {
+                            if (self.files.hasOwnProperty(key)) {
+                              self.files[key].sed();
+                            }
+                          }
+
                           console.log('All done!');
                         });
               }

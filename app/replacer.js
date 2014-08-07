@@ -17,6 +17,10 @@ var Replacer = module.exports = function Replacer(file, options) {
     searches.push({search: search, replace: ''});
   };
 
+  module.addsed = function(_start, _end) {
+    seds.push({start: _start, end: _end});
+  };
+
   module.file = file;
 
   // Base replacements
@@ -39,7 +43,7 @@ var Replacer = module.exports = function Replacer(file, options) {
           if (err) {
             return console.log(err);
           }
-          
+
           total = searches.length;
           for (i = 0; i < total; i += 1) {
             data = data.replace(searches[i].search, searches[i].replace);
@@ -58,7 +62,6 @@ var Replacer = module.exports = function Replacer(file, options) {
   module.rmsearch = function(start, end, count_initial, count_end) {
     var stream, _start, _end;
     var i = -1;
-    var _file = [];
     start = start.replace(/ /g, '');
     end = end.replace(/ /g, '');
     fs.exists(file, function(exists) {
@@ -67,11 +70,8 @@ var Replacer = module.exports = function Replacer(file, options) {
         stream.setDelimiter("\n");
 
         //start reading the file
-        stream.addListener('line', function(line) {
+        stream.on('line', function(line) {
           i++;
-          // pause stream if a newline char is found
-          stream.pause();
-          _file.push(line);
           line = line.replace(/(\r\n|\n|\r|\t)/gm, '').replace(/ /g, '');
 
           if (line === start) {
@@ -79,14 +79,12 @@ var Replacer = module.exports = function Replacer(file, options) {
             if (!end.length) {
               _end = i + count_end;
             }
-            stream.resume();
           } else if (line === end && end) {
             _end = i - count_end;
-            stream.resume();
           }
         });
 
-        stream.addListener("close", function() {
+        stream.on("end", function() {
           if (typeof _start === 'undefined') {
             console.log('Not found start line in' + file + ': ' + _start);
           }
@@ -98,9 +96,9 @@ var Replacer = module.exports = function Replacer(file, options) {
           if (_end < _start) {
             console.log('Problem when parsing ' + file);
           }
-          
-          seds.push({start: _start, end: _end});
-          
+
+          module.addsed(_start, _end);
+
         });
       }
     });
@@ -109,22 +107,27 @@ var Replacer = module.exports = function Replacer(file, options) {
   module.sed = function() {
     fs.exists(process.cwd() + '/' + file, function(exists) {
       if (exists) {
-        var total = seds.length;
-        var line = '';
-        var i;
-        console.log(seds);
-        for (i = 0; i < total; i += 1) {
-          line += seds[i].start + ',' + seds[i].end + "d;";
+        if (seds.length !== 0) {
+          var total = seds.length;
+          var line = '';
+          var i;
+
+          for (i = 0; i < total; i += 1) {
+            line += seds[i].start + ',' + seds[i].end + "d;";
+          }
+
+          exec("sed -i '" + line + "' " + process.cwd() + '/' + file, {cwd: process.cwd() + '/'},
+          function(err, stdout, stderr) {
+            if (stderr.length > 0) {
+              console.log('stderr: ' + stderr);
+            }
+            if (err !== null) {
+              console.log('exec error: ' + err);
+            }
+          });
+          
+          module.replace();
         }
-        
-        console.log("sed -i '" + line + "' " + process.cwd() + '/' + file);
-        exec("sed -i '" + line + "' " + process.cwd() + '/' + file, {cwd: process.cwd() + '/'},
-        function(err, stdout, stderr) {
-          if (stderr.length > 0)
-            console.log('stderr: ' + stderr);
-          if (err !== null)
-            console.log('exec error: ' + err);
-        });
       }
     });
   };
