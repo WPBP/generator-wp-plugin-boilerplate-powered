@@ -8,9 +8,9 @@ var request = require('request');
 var admzip = require('adm-zip');
 var rmdir = require('rimraf');
 var _s = require('underscore.string');
-var ncp = require('ncp');
 var sys = require('sys');
 var spawn = require('child_process').spawn;
+var colors = require('colors');
 var Replacer = require('./replacer');
 var version = 'master';
 
@@ -140,8 +140,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
     default_file = process.cwd() + '/default-values.json';
   } else {
     console.log('--------------------------');
-    console.log('May I give you an advice?');
-    console.log('You should create the file ' + process.cwd() + '/default-values.json with default values in the parent folder! Use the default-values-example.json as a template.');
+    console.log(('You should create the file ' + process.cwd() + '/default-values.json with default values in the parent folder! Use the default-values-example.json as a template.').white);
     console.log('--------------------------');
     default_file = path.join(__dirname, '../default-values-example.json');
   }
@@ -217,7 +216,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'Javascript DOM-based Routing', checked: true},
         {name: 'Bubble notification on cpt', checked: true},
         {name: 'Import/Export settings system', checked: true},
-        {name: 'Capability system', checked: false},
+        {name: 'Capability system', checked: true},
         {name: 'Debug system (Debug Bar support)', checked: true}
       ]
     }, {
@@ -337,8 +336,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
   if (this.activateDeactivate.indexOf('Deactivate Method') === -1) {
     this.files.primary.rm("\nregister_deactivation_hook( __FILE__, array( '" + this.pluginClassName + "', 'deactivate' ) );");
   }
-
-  // Options
+  //repo
   if (this.modules.indexOf('CPT_Core') === -1 && this.modules.indexOf('Taxonomy_Core') === -1) {
     this.files.primary.rm("\n/*\n * Load library for simple and fast creation of Taxonomy and Custom Post Type\n *\n */");
   }
@@ -370,6 +368,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
     });
     this.files.primary.rm("\n/*\n * Load Widget boilerplate\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/Widget-Boilerplate/widget-boilerplate/plugin.php' );\n");
   }
+  //Function
   if (this.modules.indexOf('Fake Page Class') === -1) {
     fs.unlink(this.pluginSlug + '/includes/fake-page.php');
     this.files.primary.rm("\n/*\n * Load Fake Page class\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/fake-page.php' );\n");
@@ -414,18 +413,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   this.files.adminClass.rm("\t\t/*\n\t\t * Call $plugin_slug from public plugin class.\n\t\t *\n\t\t * @TODO:\n\t\t *\n\t\t * - Rename \"" + this.pluginClassName + "\" to the name of your initial plugin class\n\t\t *\n\t\t */\n");
   this.files.adminClass.rm(new RegExp("\\* \\@TODO:\\n\\t \\*\\n\\t \\* - Rename \"" + this.pluginClassName + "\" to the name your plugin\\n\\t \\*\\n\\t ", "g"));
 
-  // this.adminPage
-  if (this.adminPage === false) {
-    this.files.adminClass.rm("\n\t\t// Add an action link pointing to the options page.\n\t\t$plugin_basename = plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_slug . '.php' );\n\t\tadd_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );");
-    this.files.adminClass.rm("\n\n\t\t// Load admin style sheet and JavaScript.\n\t\tadd_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );\n\t\tadd_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );\n\n\t\t// Add the options page and menu item.\n\t\tadd_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );");
-    this.files.adminClass.rm("\n\t/**\n\t * Register and enqueue admin-specific style sheet.\n\t *\n\t * @since     1.0.0\n\t *\n\t * @return    null    Return early if no settings page is registered.\n\t */\n\tpublic function enqueue_admin_styles() {\n\n\t\tif ( ! isset( $this->plugin_screen_hook_suffix ) ) {\n\t\t\treturn;\n\t\t}\n\n\t\t$screen = get_current_screen();\n\t\tif ( $this->plugin_screen_hook_suffix == $screen->id ) {\n\t\t\twp_enqueue_style( $this->plugin_slug .'-admin-styles', plugins_url( 'assets/css/admin.css', __FILE__ ), array(), MyNewPlugin::VERSION );\n\t\t}\n\n\t}\n\n\t/**\n\t * Register and enqueue admin-specific JavaScript.\n\t *\n\t * @since     1.0.0\n\t *\n\t * @return    null    Return early if no settings page is registered.\n\t */\n\tpublic function enqueue_admin_scripts() {\n\n\t\tif ( ! isset( $this->plugin_screen_hook_suffix ) ) {\n\t\t\treturn;\n\t\t}\n\n\t\t$screen = get_current_screen();\n\t\tif ( $this->plugin_screen_hook_suffix == $screen->id ) {\n\t\t\twp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'assets/js/admin.js', __FILE__ ), array( 'jquery' ), MyNewPlugin::VERSION );\n\t\t}\n\n\t}\n\n\t/**\n\t * Register the administration menu for this plugin into the WordPress Dashboard menu.\n\t *\n\t * @since    1.0.0\n\t */\n\tpublic function add_plugin_admin_menu() {\n\n\t\t/*\n\t\t * Add a settings page for this plugin to the Settings menu.\n\t\t *\n\t\t * NOTE:  Alternative menu locations are available via WordPress administration menu functions.\n\t\t *\n\t\t *        Administration Menus: http://codex.wordpress.org/Administration_Menus\n\t\t *\n\t\t * @TODO:\n\t\t *\n\t\t * - Change 'Page Title' to the title of your plugin admin page\n\t\t * - Change 'Menu Text' to the text for menu item for the plugin settings page\n\t\t * - Change 'manage_options' to the capability you see fit\n\t\t *   For reference: http://codex.wordpress.org/Roles_and_Capabilities\n\t\t */\n\t\t$this->plugin_screen_hook_suffix = add_options_page(\n\t\t\t__( 'Page Title', $this->plugin_slug ),\n\t\t\t__( 'Menu Text', $this->plugin_slug ),\n\t\t\t'manage_options',\n\t\t\t$this->plugin_slug,\n\t\t\tarray( $this, 'display_plugin_admin_page' )\n\t\t);\n\n\t}\n\n\t/**\n\t * Render the settings page for this plugin.\n\t *\n\t * @since    1.0.0\n\t */\n\tpublic function display_plugin_admin_page() {\n\t\tinclude_once( 'views/admin.php' );\n\t}\n\n\t/**\n\t * Add settings action link to the plugins page.\n\t *\n\t * @since    1.0.0\n\t */\n\tpublic function add_action_links( $links ) {\n\n\t\treturn array_merge(\n\t\t\tarray(\n\t\t\t\t'settings' => '<a href=\"' . admin_url( 'options-general.php?page=' . $this->plugin_slug ) . '\">' . __( 'Settings', $this->plugin_slug ) . '</a>'\n\t\t\t),\n\t\t\t$links\n\t\t);\n\n\t}");
-  } else {
-    if (this.snippet.indexOf('Support Dashboard At Glance Widget') === -1) {
-      this.files.adminClass.rm("\n\t\t// At Glance Dashboard widget for your cpts\n\t\tadd_filter( 'dashboard_glance_items', array( $this, 'cpt_dashboard_support' ), 10, 1 );\n");
-      this.files.adminClass.rmsearch('* Add the counter of your CPTs in At Glance widget in the dashboard<br>', '* NOTE:     Your metabox on Demo CPT', 1, 1);
-      this.files.adminCss.rmsearch('#dashboard_right_now a.demo-count:before {', '', 0, 3);
-    }
-  }
+  //Repo
   if (this.modules.indexOf('Custom Metaboxes and Fields for WordPress') === -1 && this.modules.indexOf('HM Custom Meta Boxes for WordPress') === -1) {
     this.files.adminClass.rmsearch("add_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );", "add_filter( 'cmb_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", -1, 0);
     this.files.adminClass.rmsearch("* NOTE:     Your metabox on Demo CPT", "return $meta_boxes;", 1, -3);
@@ -461,6 +449,18 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     });
     this.files.adminClass.rmsearch("* Choose the Custom Meta Box Library and remove the other", "*  Custom Metabox and Fields for Wordpress", 0, 0);
     this.files.adminClass.rmsearch("*  Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", "require_once( plugin_dir_path( __FILE__ ) . 'includes/CMB/custom-meta-boxes.php' );", -1, 1);
+  }
+  //Snippet
+  if (this.adminPage === false) {
+    this.files.adminClass.rm("\n\t\t// Add an action link pointing to the options page.\n\t\t$plugin_basename = plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_slug . '.php' );\n\t\tadd_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );");
+    this.files.adminClass.rm("\n\n\t\t// Load admin style sheet and JavaScript.\n\t\tadd_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );\n\t\tadd_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );\n\n\t\t// Add the options page and menu item.\n\t\tadd_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );");
+    this.files.adminClass.rm("\n\t/**\n\t * Register and enqueue admin-specific style sheet.\n\t *\n\t * @since     1.0.0\n\t *\n\t * @return    null    Return early if no settings page is registered.\n\t */\n\tpublic function enqueue_admin_styles() {\n\n\t\tif ( ! isset( $this->plugin_screen_hook_suffix ) ) {\n\t\t\treturn;\n\t\t}\n\n\t\t$screen = get_current_screen();\n\t\tif ( $this->plugin_screen_hook_suffix == $screen->id ) {\n\t\t\twp_enqueue_style( $this->plugin_slug .'-admin-styles', plugins_url( 'assets/css/admin.css', __FILE__ ), array(), MyNewPlugin::VERSION );\n\t\t}\n\n\t}\n\n\t/**\n\t * Register and enqueue admin-specific JavaScript.\n\t *\n\t * @since     1.0.0\n\t *\n\t * @return    null    Return early if no settings page is registered.\n\t */\n\tpublic function enqueue_admin_scripts() {\n\n\t\tif ( ! isset( $this->plugin_screen_hook_suffix ) ) {\n\t\t\treturn;\n\t\t}\n\n\t\t$screen = get_current_screen();\n\t\tif ( $this->plugin_screen_hook_suffix == $screen->id ) {\n\t\t\twp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'assets/js/admin.js', __FILE__ ), array( 'jquery' ), MyNewPlugin::VERSION );\n\t\t}\n\n\t}\n\n\t/**\n\t * Register the administration menu for this plugin into the WordPress Dashboard menu.\n\t *\n\t * @since    1.0.0\n\t */\n\tpublic function add_plugin_admin_menu() {\n\n\t\t/*\n\t\t * Add a settings page for this plugin to the Settings menu.\n\t\t *\n\t\t * NOTE:  Alternative menu locations are available via WordPress administration menu functions.\n\t\t *\n\t\t *        Administration Menus: http://codex.wordpress.org/Administration_Menus\n\t\t *\n\t\t * @TODO:\n\t\t *\n\t\t * - Change 'Page Title' to the title of your plugin admin page\n\t\t * - Change 'Menu Text' to the text for menu item for the plugin settings page\n\t\t * - Change 'manage_options' to the capability you see fit\n\t\t *   For reference: http://codex.wordpress.org/Roles_and_Capabilities\n\t\t */\n\t\t$this->plugin_screen_hook_suffix = add_options_page(\n\t\t\t__( 'Page Title', $this->plugin_slug ),\n\t\t\t__( 'Menu Text', $this->plugin_slug ),\n\t\t\t'manage_options',\n\t\t\t$this->plugin_slug,\n\t\t\tarray( $this, 'display_plugin_admin_page' )\n\t\t);\n\n\t}\n\n\t/**\n\t * Render the settings page for this plugin.\n\t *\n\t * @since    1.0.0\n\t */\n\tpublic function display_plugin_admin_page() {\n\t\tinclude_once( 'views/admin.php' );\n\t}\n\n\t/**\n\t * Add settings action link to the plugins page.\n\t *\n\t * @since    1.0.0\n\t */\n\tpublic function add_action_links( $links ) {\n\n\t\treturn array_merge(\n\t\t\tarray(\n\t\t\t\t'settings' => '<a href=\"' . admin_url( 'options-general.php?page=' . $this->plugin_slug ) . '\">' . __( 'Settings', $this->plugin_slug ) . '</a>'\n\t\t\t),\n\t\t\t$links\n\t\t);\n\n\t}");
+  } else {
+    if (this.snippet.indexOf('Support Dashboard At Glance Widget') === -1) {
+      this.files.adminClass.rm("\n\t\t// At Glance Dashboard widget for your cpts\n\t\tadd_filter( 'dashboard_glance_items', array( $this, 'cpt_dashboard_support' ), 10, 1 );\n");
+      this.files.adminClass.rmsearch('* Add the counter of your CPTs in At Glance widget in the dashboard<br>', '* NOTE:     Your metabox on Demo CPT', 1, 1);
+      this.files.adminCss.rmsearch('#dashboard_right_now a.demo-count:before {', '', 0, 3);
+    }
   }
   if (this.snippet.indexOf('Bubble notification on cpt') === -1) {
     this.files.adminClass.rmsearch("* Bubble Notification for pending cpt<br>", "if ( $needle === $value OR ( is_array( $value ) && self::recursive_array_search_php( $needle, $value ) !== false) ) {", 1, -5);
@@ -504,7 +504,6 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   if (this.activateDeactivate.indexOf('Deactivate Method') === -1) {
     this.files.publicClass.rm("\n\t/**\n\t * Fired when the plugin is deactivated.\n\t *\n\t * @since    1.0.0\n\t *\n\t * @param    boolean    $network_wide    True if WPMU superadmin uses\n\t *                                       \"Network Deactivate\" action, false if\n\t *                                       WPMU is disabled or plugin is\n\t *                                       deactivated on an individual blog.\n\t */\n\tpublic static function deactivate( $network_wide ) {\n\n\t\tif ( function_exists( 'is_multisite' ) && is_multisite() ) {\n\n\t\t\tif ( $network_wide ) {\n\n\t\t\t\t// Get all blog ids\n\t\t\t\t$blog_ids = self::get_blog_ids();\n\n\t\t\t\tforeach ( $blog_ids as $blog_id ) {\n\n\t\t\t\t\tswitch_to_blog( $blog_id );\n\t\t\t\t\tself::single_deactivate();\n\n\t\t\t\t}\n\n\t\t\t\trestore_current_blog();\n\n\t\t\t} else {\n\t\t\t\tself::single_deactivate();\n\t\t\t}\n\n\t\t} else {\n\t\t\tself::single_deactivate();\n\t\t}\n\n\t}\n\n\t/**\n\t * Fired for each blog when the plugin is deactivated.\n\t *\n\t * @since    1.0.0\n\t */\n\tprivate static function single_deactivate() {\n\t\t// @TODO: Define deactivation functionality here\n\t}\n");
   }
-
 };
 
 WpPluginBoilerplateGenerator.prototype.setReadme = function setReadme() {
@@ -517,8 +516,8 @@ WpPluginBoilerplateGenerator.prototype.setUninstall = function setUninstall() {
     delete this.files.uninstall;
   } else if(this.snippet.indexOf('Capability system') === -1) {
     this.files.uninstall.add('global $wpdb, $wp_roles;','global $wpdb;');
-    this.files.uninstall.rmsearch('$plugin_roles = array(', 'if ( is_multisite() ) {', 1, 0);
-    this.files.uninstall.rmsearch('if ( !isset( $wp_roles ) ) {', 'restore_current_blog();', -1, 2);
-    //this.files.uninstall.rmsearch('} else {', '$wp_roles->remove_cap( $cap );', -16, -3);
+    this.files.uninstall.rmsearch('$plugin_roles = array(', 'if ( is_multisite() ) {', -1, 0);
+    this.files.uninstall.rmsearch("switch_to_blog( $blog[ 'blog_id' ] );", 'restore_current_blog();', -19, 0);
+    this.files.uninstall.rmsearch('} else {', '$wp_roles->remove_cap( $cap );', -19, -4);
   }
 };

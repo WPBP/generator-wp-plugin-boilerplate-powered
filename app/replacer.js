@@ -125,7 +125,6 @@ var Replacer = module.exports = function Replacer(file, options) {
             if (err !== null) {
               console.log(('exec error: ' + err).red);
             }
-            console.log("sed -i '" + line + "' " + process.cwd() + '/' + file)
           });
           
           module.replace();
