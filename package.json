@@ -27,7 +27,8 @@
     "rimraf" : "~2.1",
     "underscore.string" : "~2.3",
     "ncp" : "~0.4.2",
-    "line-input-stream" : "~1.0.1"
+    "line-input-stream" : "~1.0.1",
+	"colors" : "~0.6.2"
   },
   "devDependencies" : {
     "mocha" : "~1.14.0"

@@ -59,23 +59,22 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
 
   this.on('end', function() {
 
-    var submodulessh =
-            ['#!/bin/sh',
-              'set -e',
-              'git init',
-              "git config -f .gitmodules --get-regexp '^submodule..*.path$' |",
-              'while read path_key path',
-              '   do',
-              "     url_key=$(echo $path_key | sed 's/.path/.url/')",
-              '     url=$(git config -f .gitmodules --get $url_key)',
-              '       if [ -d $path ]; then',
-              '         rm -r $path',
-              '         echo "Add $url in $path"',
-              '         git submodule add -f $url $path',
-              '       fi',
-              '   done',
-              'rm $0'
-            ].join('\n');
+    var submodulessh = ['#!/bin/sh',
+      'set -e',
+      'git init',
+      "git config -f .gitmodules --get-regexp '^submodule..*.path$' |",
+      'while read path_key path',
+      '   do',
+      "     url_key=$(echo $path_key | sed 's/.path/.url/')",
+      '     url=$(git config -f .gitmodules --get $url_key)',
+      '       if [ -d $path ]; then',
+      '         rm -r $path',
+      '         echo "Add $url in $path"',
+      '         git submodule add -f $url $path',
+      '       fi',
+      '   done',
+      'rm $0'
+    ].join('\n');
 
     fs.writeFile(self.pluginSlug + '/submodules.sh', submodulessh, 'utf8',
             function(err) {
@@ -83,8 +82,8 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 return console.log(err);
               } else {
                 fs.chmodSync(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', '0777');
-                console.log('Generate git config on the fly');
-                console.log('Download submodules');
+                console.log(('Generate git config on the fly').white);
+                console.log(('Download submodules').white);
                 var submodule = spawn('./submodules.sh', [], {cwd: process.cwd() + '/' + self.pluginSlug + '/'});
                 submodule.stdout.on('data',
                         function(data) {
@@ -114,7 +113,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                             cleanFolder(self.pluginSlug + '/admin/includes/CMB');
                           }
 
-                          console.log('Inserted index.php files in all the folders');
+                          console.log(('Inserted index.php files in all the folders').white);
 
                           var key = null;
                           for (key in self.files) {
@@ -122,8 +121,9 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                               self.files[key].sed();
                             }
                           }
-
-                          console.log('All done!');
+                          
+                          console.log(('Parsed all the files').white);
+                          console.log(('All done!').white);
                         });
               }
             }
@@ -206,7 +206,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'HM Custom Meta Boxes for WordPress', checked: false},
         {name: 'Custom Metaboxes and Fields for WordPress', checked: false},
         {name: 'Fake Page Class', checked: true},
-        {name: 'Template system (like WooCommerce)', checked: false},
+        {name: 'Template system (like WooCommerce)', checked: true},
         {name: 'Language function support (WPML/Ceceppa Multilingua/Polylang)', checked: true}]
     }, {
       type: 'checkbox',
@@ -214,10 +214,10 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       message: 'Which snippet your plugin needs?',
       choices: [
         {name: 'Support Dashboard At Glance Widget', checked: true},
-        {name: 'Javascript DOM-based Routing', checked: false},
+        {name: 'Javascript DOM-based Routing', checked: true},
         {name: 'Bubble notification on cpt', checked: true},
         {name: 'Import/Export settings system', checked: true},
-        {name: 'Capability system', checked: true},
+        {name: 'Capability system', checked: false},
         {name: 'Debug system (Debug Bar support)', checked: true}
       ]
     }, {
@@ -267,7 +267,7 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
           zip = "";
 
   if (fs.existsSync(process.cwd() + '/plugin.zip')) {
-    console.log('Extract Plugin boilerplate');
+    console.log(('Extract Plugin boilerplate').white);
     zip = new admzip('./plugin.zip');
     zip.extractAllTo('plugin_temp', true);
     fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules');
@@ -280,7 +280,7 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
       });
     });
   } else {
-    console.log('Downloading the WP Plugin Boilerplate Powered...');
+    console.log(('Downloading the WP Plugin Boilerplate Powered...').white);
 
     if (version === 'master') {
       path = 'https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/master.zip';
@@ -290,7 +290,7 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
             .pipe(fs.createWriteStream('plugin.zip'))
             .on('close', function() {
               zip = new admzip('./plugin.zip');
-              console.log('File downloaded');
+              console.log(('File downloaded').white);
               zip.extractAllTo('plugin_temp', true);
               fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules');
               fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/', './' + self.pluginSlug, function() {
@@ -394,6 +394,10 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
   if (this.snippet.indexOf('Javascript DOM-based Routing') === -1) {
     this.files.publicjs.rmsearch('* DOM-based Routing', '$(document).ready(UTIL.loadEvents);', 1, 1);
   }
+  if (this.snippet.indexOf('Capability system') === -1) {
+    this.files.publicClass.rmsearch('* Array of capabilities by roles', '* Initialize the plugin by setting localization and loading public scripts', 1, 2);
+    this.files.publicClass.rmsearch('// @TODO: Define activation functionality here', '* Fired for each blog when the plugin is deactivated.', 1, 1);
+  }
   if (this.git === false) {
     fs.unlink(this.pluginSlug + '.gitmodules');
     rmdir(this.pluginSlug + '/.git', function(error) {
@@ -440,8 +444,8 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     this.files.adminClass.rm("$settings[ 1 ] = get_option( $this->plugin_slug . '-settings-second' );");
     this.files.adminClass.rm("update_option( $this->plugin_slug . '-settings-second', get_object_vars( $settings[ 1 ] ) );");
     this.files.adminView.rmsearch("//Required for multi CMB form", "jQuery('.cmb-form #wp_meta_box_nonce').appendTo('.cmb-form');", 1, -4);
-    this.files.adminView.rmsearch('<div id="tabs-1">', "cmb_metabox_form( $option_fields, $this->plugin_slug . '-settings' );", -1, -2);
-    this.files.adminView.rmsearch('<div id="tabs-2">', "cmb_metabox_form( $option_fields_second, $this->plugin_slug . '-settings-second' );", -1, -2);
+    this.files.adminView.rmsearch('<div id="tabs-1">', "cmb_metabox_form( $option_fields, $this->plugin_slug . '-settings' );", -2, -2);
+    this.files.adminView.rmsearch('<div id="tabs-2">', "cmb_metabox_form( $option_fields_second, $this->plugin_slug . '-settings-second' );", -2, -2);
 
     if (this.modules.indexOf('HM Custom Meta Boxes for WordPress') !== -1) {
       this.files.adminClass.rmsearch("* Choose the Custom Meta Box Library and remove the other", "* Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", 0, 0);
@@ -457,6 +461,16 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     });
     this.files.adminClass.rmsearch("* Choose the Custom Meta Box Library and remove the other", "*  Custom Metabox and Fields for Wordpress", 0, 0);
     this.files.adminClass.rmsearch("*  Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", "require_once( plugin_dir_path( __FILE__ ) . 'includes/CMB/custom-meta-boxes.php' );", -1, 1);
+  }
+  if (this.snippet.indexOf('Bubble notification on cpt') === -1) {
+    this.files.adminClass.rmsearch("* Bubble Notification for pending cpt<br>", "if ( $needle === $value OR ( is_array( $value ) && self::recursive_array_search_php( $needle, $value ) !== false) ) {", 1, -5);
+  }
+  if (this.snippet.indexOf('Import/Export settings system') === -1) {
+    this.files.adminClass.rmsearch("function settings_export() {", "wp_safe_redirect( admin_url( 'options-general.php?page=' . $this->plugin_slug ) );", 1, -3);
+    this.files.adminView.rmsearch('<div id="tabs-3">', "<?php submit_button( __( 'Import' ), 'secondary', 'submit', false ); ?>", -2, -5);
+  }
+  if (this.snippet.indexOf('Debug system (Debug Bar support)') === -1) {
+    this.files.adminClass.rmsearch("* Debug mode", "$debug->log( __( 'Plugin Loaded', $this->plugin_slug ) );", 1, -1);
   }
 };
 
@@ -501,5 +515,10 @@ WpPluginBoilerplateGenerator.prototype.setUninstall = function setUninstall() {
   if (this.activateDeactivate.indexOf('Uninstall File') === -1) {
     fs.unlink(this.files.uninstall.file);
     delete this.files.uninstall;
+  } else if(this.snippet.indexOf('Capability system') === -1) {
+    this.files.uninstall.add('global $wpdb, $wp_roles;','global $wpdb;');
+    this.files.uninstall.rmsearch('$plugin_roles = array(', 'if ( is_multisite() ) {', 1, 0);
+    this.files.uninstall.rmsearch('if ( !isset( $wp_roles ) ) {', 'restore_current_blog();', -1, 2);
+    //this.files.uninstall.rmsearch('} else {', '$wp_roles->remove_cap( $cap );', -16, -3);
   }
 };

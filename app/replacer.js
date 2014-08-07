@@ -3,6 +3,7 @@
 var fs = require('fs');
 var readline = require('line-input-stream');
 var exec = require('child_process').exec;
+var colors = require('colors');
 
 var Replacer = module.exports = function Replacer(file, options) {
   var module = {},
@@ -86,15 +87,15 @@ var Replacer = module.exports = function Replacer(file, options) {
 
         stream.on("end", function() {
           if (typeof _start === 'undefined') {
-            console.log('Not found start line in' + file + ': ' + _start);
+            console.log(('Not found start line in ' + file + ': ' + _start).red);
           }
 
           if (typeof _end === 'undefined') {
-            console.log('Not found end line in' + file + ': ' + _end);
+            console.log(('Not found end line in ' + file + ': ' + _end).red);
           }
 
-          if (_end < _start) {
-            console.log('Problem when parsing ' + file);
+          if (_start > _end) {
+            console.log(('Problem when parsing ' + file).red);
           }
 
           module.addsed(_start, _end);
@@ -119,11 +120,12 @@ var Replacer = module.exports = function Replacer(file, options) {
           exec("sed -i '" + line + "' " + process.cwd() + '/' + file, {cwd: process.cwd() + '/'},
           function(err, stdout, stderr) {
             if (stderr.length > 0) {
-              console.log('stderr: ' + stderr);
+              console.log(('stderr: ' + stderr).red);
             }
             if (err !== null) {
-              console.log('exec error: ' + err);
+              console.log(('exec error: ' + err).red);
             }
+            
           });
           
           module.replace();
