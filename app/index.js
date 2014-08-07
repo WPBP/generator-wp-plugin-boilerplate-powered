@@ -14,7 +14,7 @@ var colors = require('colors');
 var Replacer = require('./replacer');
 var args = process.argv.slice(2);
 var version = '1.0.0';
-if(args[1] === 'dev') {
+if (args[1] === 'dev') {
   version = 'master';
 }
 
@@ -78,8 +78,8 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
       '         git submodule add -f $url $path',
       '       fi',
       '   done',
-      
-    ].join('\n'); //'rm $0'
+      'rm $0'
+    ].join('\n');
 
     fs.writeFile(self.pluginSlug + '/submodules.sh', submodulessh, 'utf8',
             function(err) {
@@ -89,6 +89,14 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 fs.chmodSync(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', '0777');
                 console.log(('Generate git config on the fly').white);
                 console.log(('Download submodules').white);
+
+                var key = null;
+                for (key in self.files) {
+                  if (self.files.hasOwnProperty(key)) {
+                    self.files[key].sed();
+                    self.files[key].replace();
+                  }
+                }
                 var submodule = spawn(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', [], {cwd: process.cwd() + '/' + self.pluginSlug + '/'});
                 submodule.stdout.on('data',
                         function(data) {
@@ -121,21 +129,13 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                           if (self.modules.indexOf('HM Custom Meta Boxes for WordPress') !== -1) {
                             cleanFolder(self.pluginSlug + '/admin/includes/CMB');
                           }
-                          
+
                           if (self.modules.indexOf('Template system (like WooCommerce)') !== -1) {
                             cleanFolder(self.pluginSlug + '/templates');
                           }
 
                           console.log(('Inserted index.php files in all the folders').white);
 
-                          var key = null;
-                          for (key in self.files) {
-                            if (self.files.hasOwnProperty(key)) {
-                              self.files[key].sed();
-                              self.files[key].replace();
-                            }
-                          }
-                          
                           console.log(('Parsed all the files').white);
                           console.log(('All done!').white);
                         });
@@ -534,8 +534,8 @@ WpPluginBoilerplateGenerator.prototype.setUninstall = function setUninstall() {
   if (this.activateDeactivate.indexOf('Uninstall File') === -1) {
     fs.unlink(this.files.uninstall.file);
     delete this.files.uninstall;
-  } else if(this.snippet.indexOf('Capability system') === -1) {
-    this.files.uninstall.add('global $wpdb, $wp_roles;','global $wpdb;');
+  } else if (this.snippet.indexOf('Capability system') === -1) {
+    this.files.uninstall.add('global $wpdb, $wp_roles;', 'global $wpdb;');
     this.files.uninstall.rmsearch('$plugin_roles = array(', 'if ( is_multisite() ) {', -1, 0);
     this.files.uninstall.rmsearch("switch_to_blog( $blog[ 'blog_id' ] );", 'restore_current_blog();', -19, 0);
     this.files.uninstall.rmsearch('} else {', '$wp_roles->remove_cap( $cap );', -19, -4);
