@@ -80,7 +80,7 @@ var Replacer = module.exports = function Replacer(file, options) {
             if (!end.length) {
               _end = i + count_end;
             }
-          } else if (line === end && end) {
+          } else if (line === end && end && (i - count_end > _start)) {
             _end = i - count_end;
           }
         });
@@ -125,7 +125,7 @@ var Replacer = module.exports = function Replacer(file, options) {
             if (err !== null) {
               console.log(('exec error: ' + err).red);
             }
-            
+            console.log("sed -i '" + line + "' " + process.cwd() + '/' + file)
           });
           
           module.replace();
