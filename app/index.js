@@ -112,6 +112,10 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                           if (self.modules.indexOf('HM Custom Meta Boxes for WordPress') !== -1) {
                             cleanFolder(self.pluginSlug + '/admin/includes/CMB');
                           }
+                          
+                          if (self.modules.indexOf('Template system (like WooCommerce)') !== -1) {
+                            cleanFolder(self.pluginSlug + '/templates');
+                          }
 
                           console.log(('Inserted index.php files in all the folders').white);
 
@@ -217,7 +221,8 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'Bubble notification on cpt', checked: true},
         {name: 'Import/Export settings system', checked: true},
         {name: 'Capability system', checked: true},
-        {name: 'Debug system (Debug Bar support)', checked: true}
+        {name: 'Debug system (Debug Bar support)', checked: true},
+        {name: 'Add body class', checked: false}
       ]
     }, {
       type: 'confirm',
@@ -382,7 +387,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
       }
     });
     this.files.publicClass.rmsearch('* Example for override the template system on the frontend', 'return $original_template;', 1, -2);
-    this.files.publicClass.rm('//Ovveride the template hierachy for load /templates/content-demo.php');
+    this.files.publicClass.rm('//Override the template hierachy for load /templates/content-demo.php');
     this.files.publicClass.rm("add_filter( 'template_include', array( $this, 'load_content_demo' ) );");
     this.files.primary.rm("\n/*\n * Load template system\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/template.php' );\n");
   }
@@ -392,10 +397,6 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
   }
   if (this.snippet.indexOf('Javascript DOM-based Routing') === -1) {
     this.files.publicjs.rmsearch('* DOM-based Routing', '$(document).ready(UTIL.loadEvents);', 1, 1);
-  }
-  if (this.snippet.indexOf('Capability system') === -1) {
-    this.files.publicClass.rmsearch('* Array of capabilities by roles', '* Initialize the plugin by setting localization and loading public scripts', 1, 2);
-    this.files.publicClass.rmsearch('// @TODO: Define activation functionality here', '* Fired for each blog when the plugin is deactivated.', 1, 1);
   }
   if (this.git === false) {
     fs.unlink(this.pluginSlug + '.gitmodules');
@@ -472,6 +473,15 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   if (this.snippet.indexOf('Debug system (Debug Bar support)') === -1) {
     this.files.adminClass.rmsearch("* Debug mode", "$debug->log( __( 'Plugin Loaded', $this->plugin_slug ) );", 1, -1);
   }
+  if (this.snippet.indexOf('Capability system') === -1) {
+    this.files.publicClass.rmsearch('* Array of capabilities by roles', '* Initialize the plugin by setting localization and loading public scripts', 1, 2);
+    this.files.publicClass.rmsearch('// @TODO: Define activation functionality here', '* Fired for each blog when the plugin is deactivated.', 1, 1);
+    this.files.publicClass.rm("'edit_others_posts' => 'edit_other_demo',");
+  }
+  if (this.snippet.indexOf('Add body class') === -1) {
+    this.files.publicClass.rmsearch('* Add class in the body on the frontend', 'return $classes;', 1, -1);
+    this.files.publicClass.rm("add_filter( 'body_class', array( $this, 'add_pn_class' ), 10, 3 );".replace(/pn_/g, this.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '_'));
+  }
 };
 
 WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass() {
@@ -493,7 +503,7 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
     this.files.publicClass.rm("\n\n\t/**\n\t * Register and enqueue public-facing style sheet.\n\t *\n\t * @since    " + this.pluginVersion + "\n\t */\n\tpublic function enqueue_styles() {\n\t\twp_enqueue_style( $this->plugin_slug . '-plugin-styles', plugins_url( 'assets/css/public.css', __FILE__ ), array(), self::VERSION );\n\t}");
   }
 
-  // Activate/desactivate
+  // Activate/deactivate
   if (this.activateDeactivate.indexOf('Activate Method') === -1) {
     this.files.publicClass.rm("\n\t\t// Activate plugin when new blog is added\n\t\tadd_action( 'wpmu_new_blog', array( $this, 'activate_new_site' ) );\n");
     this.files.publicClass.rm("\n\t/**\n\t * Fired when the plugin is activated.\n\t *\n\t * @since    1.0.0\n\t *\n\t * @param    boolean    $network_wide    True if WPMU superadmin uses\n\t *                                       \"Network Activate\" action, false if\n\t *                                       WPMU is disabled or plugin is\n\t *                                       activated on an individual blog.\n\t */\n\tpublic static function activate( $network_wide ) {\n\n\t\tif ( function_exists( 'is_multisite' ) && is_multisite() ) {\n\n\t\t\tif ( $network_wide  ) {\n\n\t\t\t\t// Get all blog ids\n\t\t\t\t$blog_ids = self::get_blog_ids();\n\n\t\t\t\tforeach ( $blog_ids as $blog_id ) {\n\n\t\t\t\t\tswitch_to_blog( $blog_id );\n\t\t\t\t\tself::single_activate();\n\t\t\t\t}\n\n\t\t\t\trestore_current_blog();\n\n\t\t\t} else {\n\t\t\t\tself::single_activate();\n\t\t\t}\n\n\t\t} else {\n\t\t\tself::single_activate();\n\t\t}\n\n\t}\n");
