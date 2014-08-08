@@ -368,7 +368,6 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
     });
     this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/CPT_Core/CPT_Core.php' );\n");
     this.files.primary.rm("and Custom Post Type");
-    this.files.publicClass.rmsearch('// Create Custom Post Type https://github.com/jtsternberg/CPT_Core/blob/master/README.md', "'map_meta_cap' => true", 0, -3);
   }
   if (this.modules.indexOf('Taxonomy_Core') === -1) {
     rmdir(this.pluginSlug + '/includes/Taxonomy_Core', function(error) {
@@ -378,7 +377,6 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
     });
     this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/Taxonomy_Core/Taxonomy_Core.php' );\n");
     this.files.primary.rm("Taxonomy and");
-    this.files.publicClass.rmsearch('// Create Custom Taxonomy https://github.com/jtsternberg/Taxonomy_Core/blob/master/README.md', "), array( 'demo' )", 0, -2);
   }
   if (this.modules.indexOf('Widget-Boilerplate') === -1) {
     rmdir(this.pluginSlug + '/includes/Widget-Boilerplate', function(error) {
@@ -401,17 +399,11 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
         console.log(error);
       }
     });
-    this.files.publicClass.rmsearch('* Example for override the template system on the frontend', 'return $original_template;', 1, -2);
-    this.files.publicClass.rm('//Override the template hierachy for load /templates/content-demo.php');
-    this.files.publicClass.rm("add_filter( 'template_include', array( $this, 'load_content_demo' ) );");
     this.files.primary.rm("\n/*\n * Load template system\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/template.php' );\n");
   }
   if (this.modules.indexOf('Language function support (WPML/Ceceppa Multilingua/Polylang)') === -1) {
     fs.unlink(this.pluginSlug + '/includes/language.php');
     this.files.primary.rm("\n/*\n * Load Language wrapper function for WPML/Ceceppa Multilingua/Polylang\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/language.php' );\n");
-  }
-  if (this.snippet.indexOf('Javascript DOM-based Routing') === -1) {
-    this.files.publicjs.rmsearch('* DOM-based Routing', '$(document).ready(UTIL.loadEvents);', 1, 1);
   }
   if (this.git === false) {
     fs.unlink(this.pluginSlug + '.gitmodules');
@@ -420,7 +412,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
         console.log(error);
       }
     });
-    console.log('Remove git config generated');
+    console.log(('Remove git config generated').white);
   }
 };
 
@@ -488,15 +480,6 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   if (this.snippet.indexOf('Debug system (Debug Bar support)') === -1) {
     this.files.adminClass.rmsearch("* Debug mode", "$debug->log( __( 'Plugin Loaded', $this->plugin_slug ) );", 1, -1);
   }
-  if (this.snippet.indexOf('Capability system') === -1) {
-    this.files.publicClass.rmsearch('* Array of capabilities by roles', '* Initialize the plugin by setting localization and loading public scripts', 1, 2);
-    this.files.publicClass.rmsearch('// @TODO: Define activation functionality here', '* Fired for each blog when the plugin is deactivated.', 1, 1);
-    this.files.publicClass.rm("'edit_others_posts' => 'edit_other_demo',");
-  }
-  if (this.snippet.indexOf('Add body class') === -1) {
-    this.files.publicClass.rmsearch('* Add class in the body on the frontend', 'return $classes;', 1, -1);
-    this.files.publicClass.rm("add_filter( 'body_class', array( $this, 'add_pn_class' ), 10, 3 );".replace(/pn_/g, this.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '_'));
-  }
 };
 
 WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass() {
@@ -528,6 +511,33 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   }
   if (this.activateDeactivate.indexOf('Deactivate Method') === -1) {
     this.files.publicClass.rm("\n\t/**\n\t * Fired when the plugin is deactivated.\n\t *\n\t * @since    1.0.0\n\t *\n\t * @param    boolean    $network_wide    True if WPMU superadmin uses\n\t *                                       \"Network Deactivate\" action, false if\n\t *                                       WPMU is disabled or plugin is\n\t *                                       deactivated on an individual blog.\n\t */\n\tpublic static function deactivate( $network_wide ) {\n\n\t\tif ( function_exists( 'is_multisite' ) && is_multisite() ) {\n\n\t\t\tif ( $network_wide ) {\n\n\t\t\t\t// Get all blog ids\n\t\t\t\t$blog_ids = self::get_blog_ids();\n\n\t\t\t\tforeach ( $blog_ids as $blog_id ) {\n\n\t\t\t\t\tswitch_to_blog( $blog_id );\n\t\t\t\t\tself::single_deactivate();\n\n\t\t\t\t}\n\n\t\t\t\trestore_current_blog();\n\n\t\t\t} else {\n\t\t\t\tself::single_deactivate();\n\t\t\t}\n\n\t\t} else {\n\t\t\tself::single_deactivate();\n\t\t}\n\n\t}\n\n\t/**\n\t * Fired for each blog when the plugin is deactivated.\n\t *\n\t * @since    1.0.0\n\t */\n\tprivate static function single_deactivate() {\n\t\t// @TODO: Define deactivation functionality here\n\t}\n");
+  }
+
+  //Repo
+  if (this.modules.indexOf('CPT_Core') === -1) {
+    this.files.publicClass.rmsearch('// Create Custom Post Type https://github.com/jtsternberg/CPT_Core/blob/master/README.md', "'map_meta_cap' => true", 0, -3);
+  }
+  if (this.modules.indexOf('Taxonomy_Core') === -1) {
+    this.files.publicClass.rmsearch('// Create Custom Taxonomy https://github.com/jtsternberg/Taxonomy_Core/blob/master/README.md', "), array( 'demo' )", 0, -2);
+  }
+  //Function
+  if (this.modules.indexOf('Template system (like WooCommerce)') === -1) {
+    this.files.publicClass.rmsearch('* Example for override the template system on the frontend', 'return $original_template;', 1, -2);
+    this.files.publicClass.rm('//Override the template hierachy for load /templates/content-demo.php');
+    this.files.publicClass.rm("add_filter( 'template_include', array( $this, 'load_content_demo' ) );");
+  }
+  //Snippet
+  if (this.snippet.indexOf('Javascript DOM-based Routing') === -1) {
+    this.files.publicjs.rmsearch('* DOM-based Routing', '$(document).ready(UTIL.loadEvents);', 1, 1);
+  }
+  if (this.snippet.indexOf('Capability system') === -1) {
+    this.files.publicClass.rmsearch('* Array of capabilities by roles', '* Initialize the plugin by setting localization and loading public scripts', 1, 2);
+    this.files.publicClass.rmsearch('// @TODO: Define activation functionality here', '* Fired for each blog when the plugin is deactivated.', 1, 1);
+    this.files.publicClass.rm("'edit_others_posts' => 'edit_other_demo',");
+  }
+  if (this.snippet.indexOf('Add body class') === -1) {
+    this.files.publicClass.rmsearch('* Add class in the body on the frontend', 'return $classes;', 1, -1);
+    this.files.publicClass.rm("add_filter( 'body_class', array( $this, 'add_pn_class' ), 10, 3 );".replace(/pn_/g, this.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '_'));
   }
 };
 
