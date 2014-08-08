@@ -22,6 +22,11 @@ if (args[1] === 'verbose' || args[2] === 'verbose') {
   verbose = true;
 }
 
+/*
+ * Remove the unuseful file and folder, insert the index.php in the folders
+ * 
+ * @param string path
+ */
 function cleanFolder(path) {
   var default_file = [
     'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json',
@@ -29,7 +34,8 @@ function cleanFolder(path) {
     '.travis.yml', '.bowerrc', '.gitignore', 'README.txt'
   ];
   var default_folder = ['tests'];
-
+  
+  //Remove the unuseful files
   default_file.forEach(function(element, index, array) {
     fs.exists('./' + path + '/' + element, function(exists) {
       if (exists) {
@@ -37,19 +43,21 @@ function cleanFolder(path) {
       }
     });
   });
-
+  
+  //Remove the unuseful directory
   default_folder.forEach(function(element, index, array) {
     fs.stat('./' + path + '/' + element, function(error, stats) {
       if (!error) {
         rmdir('./' + path + '/' + element, function(err) {
           if (error) {
-            console.log(error);
+            console.log((error).red);
           }
         });
       }
     });
   });
-
+  
+  //Insert a blank index.php
   fs.exists('./' + path + '/index.php', function(exists) {
     if (!exists) {
       fs.writeFile('./' + path + '/index.php',
@@ -67,7 +75,8 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
   yeoman.generators.Base.apply(this, arguments);
 
   this.on('end', function() {
-
+    //Generate the bash script for download the git submodules
+    //Initialize git and clean the submodules not required
     var submodulessh = ['#!/bin/sh',
       'set -e',
       'git init',
@@ -84,22 +93,23 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
       '   done',
       'rm $0'
     ].join('\n');
-
     fs.writeFile(self.pluginSlug + '/submodules.sh', submodulessh, 'utf8',
             function(err) {
               if (err) {
-                return console.log(err);
+                return console.log((err).red);
               } else {
                 fs.chmodSync(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', '0777');
                 console.log(('Generate git config on the fly').white);
                 console.log(('Download submodules').white);
-
+                //Execute the magic for clean, destroy, brick, brock the code
                 var key = null;
                 for (key in self.files) {
                   if (self.files.hasOwnProperty(key)) {
                     self.files[key].sed();
                   }
                 }
+                console.log(('Parsed all the files').white);
+                //Call the bash script
                 var submodule = spawn(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', [], {cwd: process.cwd() + '/' + self.pluginSlug + '/'});
                 submodule.stdout.on('data',
                         function(data) {
@@ -107,10 +117,11 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                         });
                 submodule.stderr.on('data',
                         function(data) {
-                          console.log(data.toString());
+                          console.log((data.toString()).red);
                         });
                 submodule.on('close',
                         function(code) {
+                          //Clean all the folders!!
                           if (self.modules.indexOf('CPT_Core') !== -1) {
                             cleanFolder(self.pluginSlug + '/includes/CPT_Core');
                           }
@@ -136,9 +147,8 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                           if (self.modules.indexOf('Template system (like WooCommerce)') !== -1) {
                             cleanFolder(self.pluginSlug + '/templates');
                           }
-
+                          //Console.log are cool and bowtie are cool!
                           console.log(('Inserted index.php files in all the folders').white);
-                          console.log(('Parsed all the files').white);
                           console.log(('All done!').white);
                         });
               }
@@ -147,16 +157,16 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
 
   });
 
-// have Yeoman greet the user.
+  //have Yeoman greet the user.
   console.log(this.yeoman);
-
+  //Check the default file for the default values, I have already said default?
   if (fs.existsSync(__dirname + '/../default-values.json')) {
     default_file = path.join(__dirname, '../default-values.json');
   } else if (fs.existsSync(process.cwd() + '/default-values.json')) {
     default_file = process.cwd() + '/default-values.json';
   } else {
     console.log('--------------------------');
-    console.log(('You should create the file ' + process.cwd() + '/default-values.json with default values in the parent folder! Use the default-values-example.json as a template.').white);
+    console.log(('You should create the file ' + process.cwd() + '/default-values.json with default values in the parent folder! Use the default-values-example.json as a template.').bold);
     console.log('--------------------------');
     default_file = path.join(__dirname, '../default-values-example.json');
   }
@@ -168,7 +178,7 @@ util.inherits(WpPluginBoilerplateGenerator, yeoman.generators.Base);
 WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
   var cb = this.async(),
           prompts = [];
-
+  //The boilerplate have the steroids then there are many questions. I know I'm not funny. 
   prompts = [{
       name: 'name',
       message: 'What do you want to call your plugin?',
@@ -257,7 +267,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
     this.snippet = props.snippet;
     this.adminPage = props.adminPage;
 
-    // Set the path of the files
+    //Set the path of the files
     this.files = {
       primary: new Replacer(this.pluginSlug + '/' + this.pluginSlug + '.php', this),
       publicClass: new Replacer(this.pluginSlug + '/public/class-' + this.pluginSlug + '.php', this),
@@ -281,7 +291,7 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
           self = this,
           path = 'http://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/' + version + '.zip',
           zip = "";
-
+  //Check if exist the plugin.zip
   if (fs.existsSync(process.cwd() + '/plugin.zip')) {
     console.log(('Extract Plugin boilerplate').white);
     zip = new admzip('./plugin.zip');
@@ -290,14 +300,15 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
     fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/', './' + self.pluginSlug, function() {
       rmdir('plugin_temp', function(error) {
         if (error) {
-          console.log(error);
+          console.log((error).red);
         }
         cb();
       });
     });
+  //else download the zip
   } else {
     console.log(('Downloading the WP Plugin Boilerplate Powered...').white);
-
+    //Do you want the development version? 
     if (version === 'master') {
       path = 'https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/master.zip';
     }
@@ -312,7 +323,7 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
               fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/', './' + self.pluginSlug, function() {
                 rmdir('plugin_temp', function(error) {
                   if (error) {
-                    console.log(error);
+                    console.log((error).red);
                   }
                   cb();
                 });
@@ -323,14 +334,15 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
 };
 
 WpPluginBoilerplateGenerator.prototype.setFiles = function setName() {
-  // Change path of gitmodules
+  //Change path of gitmodules
   this.files.gitmodules.add(new RegExp(this.pluginSlug + '/', "g"), '');
 
-  // Rename files
+  //Rename files
   fs.rename(this.pluginSlug + '/plugin-name.php', this.files.primary.file);
   fs.rename(this.pluginSlug + '/admin/class-plugin-name-admin.php', this.files.adminClass.file);
   fs.rename(this.pluginSlug + '/public/class-plugin-name.php', this.files.publicClass.file);
   fs.rename(this.pluginSlug + '/languages/plugin-name.pot', this.pluginSlug + '/languages/' + this.pluginSlug + '.pot');
+  
   if (verbose) {
     console.log(('Renamed files').italic);
   }
@@ -346,7 +358,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
   this.files.primary.rm("/*\n * @TODO:\n *\n * - replace " + this.pluginClassName + " with the name of the class defined in\n *   `class-" + this.pluginSlug + ".php`\n */");
   this.files.primary.rm(" * @TODO:\n *\n * - replace `class-plugin-admin.php` with the name of the plugin's admin file\n * - replace " + this.pluginClassName + "Admin with the name of the class defined in\n *   `class-" + this.pluginSlug + "-admin.php`\n *\n");
 
-  // Activate/desactivate
+  //Activate/deactivate
   if (this.activateDeactivate.indexOf('Activate Method') === -1 && this.activateDeactivate.indexOf('Deactivate Method') === -1) {
     this.files.primary.rm("\n/*\n * Register hooks that are fired when the plugin is activated or deactivated.\n * When the plugin is deleted, the uninstall.php file is loaded.\n */\nregister_activation_hook( __FILE__, array( '" + this.pluginClassName + "', 'activate' ) );\nregister_deactivation_hook( __FILE__, array( '" + this.pluginClassName + "', 'deactivate' ) );\n");
   }
@@ -356,14 +368,15 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
   if (this.activateDeactivate.indexOf('Deactivate Method') === -1) {
     this.files.primary.rm("\nregister_deactivation_hook( __FILE__, array( '" + this.pluginClassName + "', 'deactivate' ) );");
   }
-  //repo
+  
+  //Repo
   if (this.modules.indexOf('CPT_Core') === -1 && this.modules.indexOf('Taxonomy_Core') === -1) {
     this.files.primary.rm("\n/*\n * Load library for simple and fast creation of Taxonomy and Custom Post Type\n *\n */");
   }
   if (this.modules.indexOf('CPT_Core') === -1) {
     rmdir(this.pluginSlug + '/includes/CPT_Core', function(error) {
       if (error) {
-        console.log(error);
+        console.log((error).red);
       }
     });
     this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/CPT_Core/CPT_Core.php' );\n");
@@ -372,7 +385,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
   if (this.modules.indexOf('Taxonomy_Core') === -1) {
     rmdir(this.pluginSlug + '/includes/Taxonomy_Core', function(error) {
       if (error) {
-        console.log(error);
+        console.log((error).red);
       }
     });
     this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/Taxonomy_Core/Taxonomy_Core.php' );\n");
@@ -381,11 +394,12 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
   if (this.modules.indexOf('Widget-Boilerplate') === -1) {
     rmdir(this.pluginSlug + '/includes/Widget-Boilerplate', function(error) {
       if (error) {
-        console.log(error);
+        console.log((error).red);
       }
     });
     this.files.primary.rm("\n/*\n * Load Widget boilerplate\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/Widget-Boilerplate/widget-boilerplate/plugin.php' );\n");
   }
+  
   //Function
   if (this.modules.indexOf('Fake Page Class') === -1) {
     fs.unlink(this.pluginSlug + '/includes/fake-page.php');
@@ -396,7 +410,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
     fs.unlink(this.pluginSlug + '/includes/template.php');
     rmdir(this.pluginSlug + '/templates', function(error) {
       if (error) {
-        console.log(error);
+        console.log((error).red);
       }
     });
     this.files.primary.rm("\n/*\n * Load template system\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/template.php' );\n");
@@ -409,7 +423,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
     fs.unlink(this.pluginSlug + '.gitmodules');
     rmdir(this.pluginSlug + '/.git', function(error) {
       if (error) {
-        console.log(error);
+        console.log((error).red);
       }
     });
     console.log(('Remove git config generated').white);
@@ -429,12 +443,12 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   if (this.modules.indexOf('Custom Metaboxes and Fields for WordPress') === -1) {
     rmdir(this.pluginSlug + '/admin/includes/CMBF', function(error) {
       if (error) {
-        console.log(error);
+        console.log((error).red);
       }
     });
     rmdir(this.pluginSlug + '/admin/includes/CMBF-Select2', function(error) {
       if (error) {
-        console.log(error);
+        console.log((error).red);
       }
     });
     this.files.adminClass.rm("$settings[ 1 ] = get_option( $this->plugin_slug . '-settings-second' );");
@@ -453,11 +467,12 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   if (this.modules.indexOf('HM Custom Meta Boxes for WordPress') === -1) {
     rmdir(this.pluginSlug + '/admin/includes/CMB', function(error) {
       if (error) {
-        console.log(error);
+        console.log((error).red);
       }
     });
     this.files.adminClass.rmsearch("*  Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", "require_once( plugin_dir_path( __FILE__ ) . 'includes/CMB/custom-meta-boxes.php' );", -1, -1);
   }
+  
   //Snippet
   if (this.adminPage === false) {
     this.files.adminClass.rm("\n\t\t// Add an action link pointing to the options page.\n\t\t$plugin_basename = plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_slug . '.php' );\n\t\tadd_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );");
@@ -488,7 +503,7 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   regexp = new RegExp("\\* \\@TODO - Rename \"" + this.pluginSlug + "\" to the name your your plugin\\n\\t \\*\\n\\t ", "g");
   this.files.publicClass.rm(regexp);
 
-  // Assets - JS/CSS
+  //Assets - JS/CSS
   if (this.publicResources.length === 0) {
     this.files.publicClass.rm("\n\n\t\t// Load public-facing style sheet and JavaScript.");
   }
@@ -501,7 +516,7 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
     this.files.publicClass.rm("\n\n\t/**\n\t * Register and enqueue public-facing style sheet.\n\t *\n\t * @since    " + this.pluginVersion + "\n\t */\n\tpublic function enqueue_styles() {\n\t\twp_enqueue_style( $this->plugin_slug . '-plugin-styles', plugins_url( 'assets/css/public.css', __FILE__ ), array(), self::VERSION );\n\t}");
   }
 
-  // Activate/deactivate
+  //Activate/deactivate
   if (this.activateDeactivate.indexOf('Activate Method') === -1) {
     this.files.publicClass.rm("\n\t\t// Activate plugin when new blog is added\n\t\tadd_action( 'wpmu_new_blog', array( $this, 'activate_new_site' ) );\n");
     this.files.publicClass.rm("\n\t/**\n\t * Fired when the plugin is activated.\n\t *\n\t * @since    1.0.0\n\t *\n\t * @param    boolean    $network_wide    True if WPMU superadmin uses\n\t *                                       \"Network Activate\" action, false if\n\t *                                       WPMU is disabled or plugin is\n\t *                                       activated on an individual blog.\n\t */\n\tpublic static function activate( $network_wide ) {\n\n\t\tif ( function_exists( 'is_multisite' ) && is_multisite() ) {\n\n\t\t\tif ( $network_wide  ) {\n\n\t\t\t\t// Get all blog ids\n\t\t\t\t$blog_ids = self::get_blog_ids();\n\n\t\t\t\tforeach ( $blog_ids as $blog_id ) {\n\n\t\t\t\t\tswitch_to_blog( $blog_id );\n\t\t\t\t\tself::single_activate();\n\t\t\t\t}\n\n\t\t\t\trestore_current_blog();\n\n\t\t\t} else {\n\t\t\t\tself::single_activate();\n\t\t\t}\n\n\t\t} else {\n\t\t\tself::single_activate();\n\t\t}\n\n\t}\n");
@@ -520,12 +535,14 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   if (this.modules.indexOf('Taxonomy_Core') === -1) {
     this.files.publicClass.rmsearch('// Create Custom Taxonomy https://github.com/jtsternberg/Taxonomy_Core/blob/master/README.md', "), array( 'demo' )", 0, -2);
   }
+  
   //Function
   if (this.modules.indexOf('Template system (like WooCommerce)') === -1) {
     this.files.publicClass.rmsearch('* Example for override the template system on the frontend', 'return $original_template;', 1, -2);
     this.files.publicClass.rm('//Override the template hierachy for load /templates/content-demo.php');
     this.files.publicClass.rm("add_filter( 'template_include', array( $this, 'load_content_demo' ) );");
   }
+  
   //Snippet
   if (this.snippet.indexOf('Javascript DOM-based Routing') === -1) {
     this.files.publicjs.rmsearch('* DOM-based Routing', '$(document).ready(UTIL.loadEvents);', 1, 1);

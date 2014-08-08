@@ -13,22 +13,38 @@ var Replacer = module.exports = function Replacer(file, options) {
   var module = {},
           searches = [],
           seds = [];
-
+  /*
+   * Add string for the replace
+   * 
+   * @param string search
+   * @param string replace
+   */
   module.add = function(search, replace) {
     searches.push({search: search, replace: replace});
   };
 
+  /*
+   * Remove the string with a blank line
+   * 
+   * @param string search
+   */
   module.rm = function(search) {
     searches.push({search: search, replace: ''});
   };
 
+  /*
+   * The rows for sed
+   * 
+   * @param number _start
+   * @param number _end
+   */
   module.addsed = function(_start, _end) {
     seds.push({start: _start, end: _end});
   };
 
   module.file = file;
 
-  // Base replacements
+  Base replacements
   module.add(/plugin-name/g, options.pluginSlug);
   module.add(/Plugin_Name_Admin/g, options.pluginClassName + '_Admin');
   module.add(/Plugin_Name/g, options.pluginClassName);
@@ -40,6 +56,10 @@ var Replacer = module.exports = function Replacer(file, options) {
   module.add(/pn_/g, options.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '_');
   module.add(/pn-/g, options.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '-');
 
+  /*
+   * Replace the strings
+   * 
+   */
   module.replace = function() {
     fs.exists(file, function(exists) {
       if (exists) {
@@ -56,7 +76,7 @@ var Replacer = module.exports = function Replacer(file, options) {
 
           fs.writeFile(file, data, 'utf8', function(err) {
             if (err) {
-              return console.log(err);
+              return console.log((err).red);
             }
             if(verbose){
               console.log(('Replace ' + file).italic);
@@ -67,6 +87,14 @@ var Replacer = module.exports = function Replacer(file, options) {
     });
   };
 
+  /*
+   * Search the block of rows for sed
+   * 
+   * @param number start
+   * @param number end
+   * @param number count_initial
+   * @param number count_end
+   */
   module.rmsearch = function(start, end, count_initial, count_end) {
     var stream, _start, _end;
     var i = -1;
@@ -106,12 +134,15 @@ var Replacer = module.exports = function Replacer(file, options) {
           }
 
           module.addsed(_start, _end);
-
         });
       }
     });
   };
 
+  /*
+   * Call sed command and replace method
+   * 
+   */
   module.sed = function() {
     fs.exists(process.cwd() + '/' + file, function(exists) {
       if (exists) {
