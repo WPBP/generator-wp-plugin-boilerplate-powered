@@ -35,6 +35,10 @@ cd wp-content/plugins
 $ yo wp-plugin-boilerplate-powered
 # Use development version (not perfect)
 $ yo wp-plugin-boilerplate-powered dev
+# Verbose mode with verbose parameter
+$ yo wp-plugin-boilerplate-powered dev verbose
+# Or
+$ yo wp-plugin-boilerplate-powered verbose
 ```
 
 If exist a plugin.zip file in the root, the boilerplate is not downloaded

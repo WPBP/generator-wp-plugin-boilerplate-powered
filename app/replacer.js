@@ -3,8 +3,12 @@
 var fs = require('fs');
 var readline = require('line-input-stream');
 var exec = require('child_process').exec;
+var args = process.argv.slice(2);
 var colors = require('colors');
-
+var verbose = false;
+if (args[1] === 'verbose' || args[2] === 'verbose') {
+  verbose = true;
+}
 var Replacer = module.exports = function Replacer(file, options) {
   var module = {},
           searches = [],
@@ -37,7 +41,6 @@ var Replacer = module.exports = function Replacer(file, options) {
   module.add(/pn-/g, options.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '-');
 
   module.replace = function() {
-    //console.log(file);
     fs.exists(file, function(exists) {
       if (exists) {
         fs.readFile(file, 'utf8', function(err, data) {
@@ -54,6 +57,9 @@ var Replacer = module.exports = function Replacer(file, options) {
           fs.writeFile(file, data, 'utf8', function(err) {
             if (err) {
               return console.log(err);
+            }
+            if(verbose){
+              console.log(('Replace ' + file).italic);
             }
           });
         });
@@ -126,7 +132,13 @@ var Replacer = module.exports = function Replacer(file, options) {
             if (err !== null) {
               console.log(('exec error: ' + err).red);
             }
+            if(verbose){
+              console.log(('Sed ' + file).italic);
+            }
+            module.replace();
           });
+        } else {
+          module.replace();
         }
       }
     });

@@ -14,8 +14,12 @@ var colors = require('colors');
 var Replacer = require('./replacer');
 var args = process.argv.slice(2);
 var version = '1.0.0';
+var verbose = false;
 if (args[1] === 'dev') {
   version = 'master';
+}
+if (args[1] === 'verbose' || args[2] === 'verbose') {
+  verbose = true;
 }
 
 function cleanFolder(path) {
@@ -94,7 +98,6 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 for (key in self.files) {
                   if (self.files.hasOwnProperty(key)) {
                     self.files[key].sed();
-                    //self.files[key].replace();
                   }
                 }
                 var submodule = spawn(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', [], {cwd: process.cwd() + '/' + self.pluginSlug + '/'});
@@ -135,7 +138,6 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                           }
 
                           console.log(('Inserted index.php files in all the folders').white);
-
                           console.log(('Parsed all the files').white);
                           console.log(('All done!').white);
                         });
@@ -329,6 +331,9 @@ WpPluginBoilerplateGenerator.prototype.setFiles = function setName() {
   fs.rename(this.pluginSlug + '/admin/class-plugin-name-admin.php', this.files.adminClass.file);
   fs.rename(this.pluginSlug + '/public/class-plugin-name.php', this.files.publicClass.file);
   fs.rename(this.pluginSlug + '/languages/plugin-name.pot', this.pluginSlug + '/languages/' + this.pluginSlug + '.pot');
+  if (verbose) {
+    console.log(('Renamed files').italic);
+  }
 };
 
 WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
