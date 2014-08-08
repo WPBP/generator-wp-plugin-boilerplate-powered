@@ -29,7 +29,7 @@ var Replacer = module.exports = function Replacer(file, options) {
    * @param string search
    */
   module.rm = function(search) {
-    searches.push({search: search, replace: ''});
+    searches.push({search: search + "\r\n", replace: ''});
   };
 
   /*
@@ -44,7 +44,7 @@ var Replacer = module.exports = function Replacer(file, options) {
 
   module.file = file;
 
-  Base replacements
+  //Base replacements
   module.add(/plugin-name/g, options.pluginSlug);
   module.add(/Plugin_Name_Admin/g, options.pluginClassName + '_Admin');
   module.add(/Plugin_Name/g, options.pluginClassName);
