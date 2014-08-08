@@ -5,9 +5,9 @@ var path = require('path');
 var yeoman = require('yeoman-generator');
 var fs = require('fs');
 var request = require('request');
-var admzip = require('adm-zip');
+var Admzip = require('adm-zip');
 var rmdir = require('rimraf');
-var _s = require('underscore.string');
+var s = require('underscore.string');
 var sys = require('sys');
 var spawn = require('child_process').spawn;
 var colors = require('colors');
@@ -22,48 +22,90 @@ if (args[1] === 'verbose' || args[2] === 'verbose') {
   verbose = true;
 }
 
+/**
+ * Checks whether a path starts with or contains a hidden file or a folder.
+ * @param {string} source - The path of the file that needs to be validated.
+ * returns {boolean} - `true` if the source is blacklisted and otherwise `false`.
+ */
+var isUnixHiddenPath = function(path) {
+  return (/(^|.\/)\.+[^\/\.]/g).test(path);
+};
+
 /*
  * Remove the unuseful file and folder, insert the index.php in the folders
  * 
  * @param string path
  */
 function cleanFolder(path) {
+  console.log(('Parsing ' + path).italic);
+  cleanParsing(path);
+  
+  //Recursive scanning for the subfolder
+  var list = fs.readdirSync(path);
+  list.forEach(function(file) {
+    var pathrec = path + '/' + file;
+    var i = pathrec.lastIndexOf('.');
+    var ext = (i < 0) ? '' : pathrec.substr(i);
+    if (!isUnixHiddenPath(pathrec) && ext === '') {
+      var stat = fs.statSync(pathrec);
+      if (stat && stat.isDirectory()) {
+        if (verbose) {
+          console.log(('Parsing ' + pathrec).italic);
+        }
+        cleanParsing(path);
+        cleanFolder(pathrec);
+      }
+    }
+  });
+}
+
+function cleanParsing(pathrec) {
   var default_file = [
     'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json',
     'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json',
-    '.travis.yml', '.bowerrc', '.gitignore', 'README.txt'
+    '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'release.sh', 'select2.jquery.json'
   ];
-  var default_folder = ['tests'];
-  
+  var default_folder = ['tests', 'bin'];
   //Remove the unuseful files
   default_file.forEach(function(element, index, array) {
-    fs.exists('./' + path + '/' + element, function(exists) {
+    fs.exists('./' + pathrec + '/' + element, function(exists) {
       if (exists) {
-        fs.unlink(path + '/' + element);
+        fs.unlink(pathrec + '/' + element, function(err) {
+//          if (err) {
+//            console.log((err).red);
+//          }
+        });
+        if (verbose) {
+          console.log(('Removed ' + pathrec + '/' + element).italic);
+        }
       }
     });
   });
-  
   //Remove the unuseful directory
   default_folder.forEach(function(element, index, array) {
-    fs.stat('./' + path + '/' + element, function(error, stats) {
+    fs.stat('./' + pathrec + '/' + element, function(error, stats) {
       if (!error) {
-        rmdir('./' + path + '/' + element, function(err) {
-          if (error) {
-            console.log((error).red);
+        rmdir('./' + pathrec + '/' + element, function(err) {
+//          if (err) {
+//            console.log((err).red);
+//          }
+          if (verbose) {
+            console.log(('Removed ' + pathrec + '/' + element).italic);
           }
         });
       }
     });
   });
-  
   //Insert a blank index.php
-  fs.exists('./' + path + '/index.php', function(exists) {
+  fs.exists('./' + pathrec + '/index.php', function(exists) {
     if (!exists) {
-      fs.writeFile('./' + path + '/index.php',
+      fs.writeFile('./' + pathrec + '/index.php',
               "<?php // Silence is golden",
               'utf8', function() {
               });
+      if (verbose) {
+        console.log(('Created ' + pathrec + '/index.php').italic);
+      }
     }
   });
 }
@@ -113,11 +155,11 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 var submodule = spawn(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', [], {cwd: process.cwd() + '/' + self.pluginSlug + '/'});
                 submodule.stdout.on('data',
                         function(data) {
-                          console.log(data.toString());
+                          console.log((data.toString()).green);
                         });
                 submodule.stderr.on('data',
                         function(data) {
-                          console.log((data.toString()).red);
+                          console.log((data.toString()).blue);
                         });
                 submodule.on('close',
                         function(code) {
@@ -227,7 +269,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       choices: [
         {name: 'CPT_Core', checked: true},
         {name: 'Taxonomy_Core', checked: true},
-        {name: 'Widget-Boilerplate', checked: true},
+        {name: 'Widget-Boilerplate', checked: false},
         {name: 'HM Custom Meta Boxes for WordPress', checked: true},
         {name: 'Custom Metaboxes and Fields for WordPress', checked: true},
         {name: 'Fake Page Class', checked: true},
@@ -254,8 +296,8 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
 
   this.prompt(prompts, function(props) {
     this.pluginName = props.name;
-    this.pluginSlug = _s.slugify(props.name);
-    this.pluginClassName = _s.titleize(props.name).replace(/ /g, "_");
+    this.pluginSlug = s.slugify(props.name);
+    this.pluginClassName = s.titleize(props.name).replace(/ /g, "_");
     this.author = props.author;
     this.authorEmail = props.authorEmail;
     this.authorURI = props.authorURI;
@@ -294,7 +336,7 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
   //Check if exist the plugin.zip
   if (fs.existsSync(process.cwd() + '/plugin.zip')) {
     console.log(('Extract Plugin boilerplate').white);
-    zip = new admzip('./plugin.zip');
+    zip = new Admzip('./plugin.zip');
     zip.extractAllTo('plugin_temp', true);
     fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules');
     fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/', './' + self.pluginSlug, function() {
@@ -305,7 +347,7 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
         cb();
       });
     });
-  //else download the zip
+    //else download the zip
   } else {
     console.log(('Downloading the WP Plugin Boilerplate Powered...').white);
     //Do you want the development version? 
@@ -316,7 +358,7 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
     request(path)
             .pipe(fs.createWriteStream('plugin.zip'))
             .on('close', function() {
-              zip = new admzip('./plugin.zip');
+              zip = new Admzip('./plugin.zip');
               console.log(('File downloaded').white);
               zip.extractAllTo('plugin_temp', true);
               fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules');
@@ -342,7 +384,7 @@ WpPluginBoilerplateGenerator.prototype.setFiles = function setName() {
   fs.rename(this.pluginSlug + '/admin/class-plugin-name-admin.php', this.files.adminClass.file);
   fs.rename(this.pluginSlug + '/public/class-plugin-name.php', this.files.publicClass.file);
   fs.rename(this.pluginSlug + '/languages/plugin-name.pot', this.pluginSlug + '/languages/' + this.pluginSlug + '.pot');
-  
+
   if (verbose) {
     console.log(('Renamed files').italic);
   }
@@ -368,7 +410,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
   if (this.activateDeactivate.indexOf('Deactivate Method') === -1) {
     this.files.primary.rm("\nregister_deactivation_hook( __FILE__, array( '" + this.pluginClassName + "', 'deactivate' ) );");
   }
-  
+
   //Repo
   if (this.modules.indexOf('CPT_Core') === -1 && this.modules.indexOf('Taxonomy_Core') === -1) {
     this.files.primary.rm("\n/*\n * Load library for simple and fast creation of Taxonomy and Custom Post Type\n *\n */");
@@ -399,7 +441,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
     });
     this.files.primary.rm("\n/*\n * Load Widget boilerplate\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/Widget-Boilerplate/widget-boilerplate/plugin.php' );\n");
   }
-  
+
   //Function
   if (this.modules.indexOf('Fake Page Class') === -1) {
     fs.unlink(this.pluginSlug + '/includes/fake-page.php');
@@ -472,7 +514,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     });
     this.files.adminClass.rmsearch("*  Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", "require_once( plugin_dir_path( __FILE__ ) . 'includes/CMB/custom-meta-boxes.php' );", -1, -1);
   }
-  
+
   //Snippet
   if (this.adminPage === false) {
     this.files.adminClass.rm("\n\t\t// Add an action link pointing to the options page.\n\t\t$plugin_basename = plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_slug . '.php' );\n\t\tadd_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );");
@@ -535,14 +577,14 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   if (this.modules.indexOf('Taxonomy_Core') === -1) {
     this.files.publicClass.rmsearch('// Create Custom Taxonomy https://github.com/jtsternberg/Taxonomy_Core/blob/master/README.md', "), array( 'demo' )", 0, -2);
   }
-  
+
   //Function
   if (this.modules.indexOf('Template system (like WooCommerce)') === -1) {
     this.files.publicClass.rmsearch('* Example for override the template system on the frontend', 'return $original_template;', 1, -2);
     this.files.publicClass.rm('//Override the template hierachy for load /templates/content-demo.php');
     this.files.publicClass.rm("add_filter( 'template_include', array( $this, 'load_content_demo' ) );");
   }
-  
+
   //Snippet
   if (this.snippet.indexOf('Javascript DOM-based Routing') === -1) {
     this.files.publicjs.rmsearch('* DOM-based Routing', '$(document).ready(UTIL.loadEvents);', 1, 1);

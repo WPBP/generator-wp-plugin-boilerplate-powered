@@ -35,11 +35,11 @@ var Replacer = module.exports = function Replacer(file, options) {
   /*
    * The rows for sed
    * 
-   * @param number _start
+   * @param number startok
    * @param number _end
    */
-  module.addsed = function(_start, _end) {
-    seds.push({start: _start, end: _end});
+  module.addsed = function(startok, endok) {
+    seds.push({start: startok, end: endok});
   };
 
   module.file = file;
@@ -96,7 +96,7 @@ var Replacer = module.exports = function Replacer(file, options) {
    * @param number count_end
    */
   module.rmsearch = function(start, end, count_initial, count_end) {
-    var stream, _start, _end;
+    var stream, startok, endok;
     var i = -1;
     start = start.replace(/ /g, '');
     end = end.replace(/ /g, '');
@@ -111,29 +111,29 @@ var Replacer = module.exports = function Replacer(file, options) {
           line = line.replace(/(\r\n|\n|\r|\t)/gm, '').replace(/ /g, '');
 
           if (line === start) {
-            _start = i - count_initial;
+            startok = i - count_initial;
             if (!end.length) {
-              _end = i + count_end;
+              endok = i + count_end;
             }
-          } else if (line === end && end && (i - count_end > _start)) {
-            _end = i - count_end;
+          } else if (line === end && end && (i - count_end > startok)) {
+            endok = i - count_end;
           }
         });
 
         stream.on("end", function() {
-          if (typeof _start === 'undefined') {
-            console.log(('Not found start line in ' + file + ': ' + _start).red);
+          if (typeof startok === 'undefined') {
+            console.log(('Not found start line in ' + file + ': ' + startok).red);
           }
 
-          if (typeof _end === 'undefined') {
-            console.log(('Not found end line in ' + file + ': ' + _end).red);
+          if (typeof endok === 'undefined') {
+            console.log(('Not found end line in ' + file + ': ' + endok).red);
           }
 
-          if (_start > _end) {
+          if (startok > endok) {
             console.log(('Problem when parsing ' + file).red);
           }
 
-          module.addsed(_start, _end);
+          module.addsed(startok, endok);
         });
       }
     });
