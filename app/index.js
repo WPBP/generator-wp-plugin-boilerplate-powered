@@ -48,7 +48,6 @@ function cleanFolder(path) {
 
   fs.exists('./' + path + '/index.php', function(exists) {
     if (!exists) {
-      //cleanFolder('./' + path);
       fs.writeFile('./' + path + '/index.php',
               "<?php // Silence is golden",
               'utf8', function() {
@@ -56,6 +55,7 @@ function cleanFolder(path) {
     }
   });
 }
+
 var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplateGenerator(args, options, config) {
   var self = this,
           default_file;
@@ -94,7 +94,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 for (key in self.files) {
                   if (self.files.hasOwnProperty(key)) {
                     self.files[key].sed();
-                    self.files[key].replace();
+                    //self.files[key].replace();
                   }
                 }
                 var submodule = spawn(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', [], {cwd: process.cwd() + '/' + self.pluginSlug + '/'});
@@ -442,13 +442,14 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     });
     this.files.adminClass.rm("$settings[ 1 ] = get_option( $this->plugin_slug . '-settings-second' );");
     this.files.adminClass.rm("update_option( $this->plugin_slug . '-settings-second', get_object_vars( $settings[ 1 ] ) );");
+    this.files.adminClass.rmsearch('*  Custom Metabox and Fields for Wordpress', "* Filter is the same", -1, 1);
+    this.files.adminClass.rmsearch('* Load CMBF', "require_once( plugin_dir_path( __FILE__ ) . 'includes/CMBF-Select2/cmb-field-select2.php' );", 0, -2);
     this.files.adminView.rmsearch("//Required for multi CMB form", "jQuery('.cmb-form #wp_meta_box_nonce').appendTo('.cmb-form');", 1, -4);
     this.files.adminView.rmsearch('<div id="tabs-1">', "cmb_metabox_form( $option_fields, $this->plugin_slug . '-settings' );", -2, -2);
     this.files.adminView.rmsearch('<div id="tabs-2">', "cmb_metabox_form( $option_fields_second, $this->plugin_slug . '-settings-second' );", -2, -2);
 
     if (this.modules.indexOf('HM Custom Meta Boxes for WordPress') !== -1) {
-      this.files.adminClass.rmsearch("* Choose the Custom Meta Box Library and remove the other", "* Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", 0, 0);
-      this.files.adminClass.rmsearch("*  Custom Metabox and Fields for Wordpress", "add_filter( 'cmb_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", 0, 4);
+      this.files.adminClass.rmsearch("* Choose the Custom Meta Box Library and remove the other", "* Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", -1, 0);
       this.files.adminClass.add('https://github.com/humanmade/Custom-Meta-Boxes/', 'https://github.com/humanmade/Custom-Meta-Boxes/	*/' + "\n");
     }
   }
@@ -458,8 +459,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
         console.log(error);
       }
     });
-    this.files.adminClass.rmsearch("* Choose the Custom Meta Box Library and remove the other", "*  Custom Metabox and Fields for Wordpress", 0, 0);
-    this.files.adminClass.rmsearch("*  Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", "require_once( plugin_dir_path( __FILE__ ) . 'includes/CMB/custom-meta-boxes.php' );", -1, 1);
+    this.files.adminClass.rmsearch("*  Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", "require_once( plugin_dir_path( __FILE__ ) . 'includes/CMB/custom-meta-boxes.php' );", -1, -1);
   }
   //Snippet
   if (this.adminPage === false) {
