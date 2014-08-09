@@ -24,7 +24,7 @@ if (args[1] === 'verbose' || args[2] === 'verbose') {
 
 /**
  * Checks whether a path starts with or contains a hidden file or a folder.
- * @param {string} source - The path of the file that needs to be validated.
+ * @param {string} path - The path of the file that needs to be validated.
  * returns {boolean} - `true` if the source is blacklisted and otherwise `false`.
  */
 var isUnixHiddenPath = function(path) {
@@ -321,7 +321,8 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       readme: new Replacer(this.pluginSlug + '/README.txt', this),
       gitmodules: new Replacer(this.pluginSlug + '/.gitmodules', this),
       template: new Replacer(this.pluginSlug + '/includes/template.php', this),
-      publicjs: new Replacer(this.pluginSlug + '/public/assets/js/public.js', this)
+      publicjs: new Replacer(this.pluginSlug + '/public/assets/js/public.js', this),
+      debug: new Replacer(this.pluginSlug + '/admin/includes/debug.php', this)
     };
 
     cb();
