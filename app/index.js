@@ -287,7 +287,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'Fake Page Class', checked: true},
         {name: 'Template system (like WooCommerce)', checked: true},
         {name: 'Language function support (WPML/Ceceppa Multilingua/Polylang)', checked: true},
-        {name: 'Requirements system on activation', checked: true}
+        {name: 'Requirements system on activation', checked: false}
       ]
     }, {
       type: 'checkbox',
@@ -618,6 +618,10 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
     this.files.publicClass.rmsearch('* Example for override the template system on the frontend', 'return $original_template;', 1, -2);
     this.files.publicClass.rm('//Override the template hierachy for load /templates/content-demo.php');
     this.files.publicClass.rm("add_filter( 'template_include', array( $this, 'load_content_demo' ) );");
+  }
+  if (this.modules.indexOf('Requirements system on activation') === -1) {
+    fs.unlink(this.pluginSlug + '/public/includes/requirements.php');
+    this.files.publicClass.rmsearch('//Requirements Detection System - read the doc in the library file', "'WP' => new WordPress_Requirement( '3.9.0' ),", -1, -2);
   }
 
   //Snippet
