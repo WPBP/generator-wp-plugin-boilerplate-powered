@@ -39,7 +39,7 @@ var isUnixHiddenPath = function(path) {
 function cleanFolder(path) {
   console.log(('Parsing ' + path).italic);
   cleanParsing(path);
-  
+
   //Recursive scanning for the subfolder
   var list = fs.readdirSync(path);
   list.forEach(function(file) {
@@ -61,9 +61,9 @@ function cleanFolder(path) {
 
 function cleanParsing(pathrec) {
   var default_file = [
-    'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json',
-    'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json',
-    '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'release.sh', 'select2.jquery.json'
+    'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json', 'production.rb',
+    'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json', 'Capfile', 'screenshot-1.png',
+    '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'select2.jquery.json'
   ];
   var default_folder = ['tests', 'bin'];
   //Remove the unuseful files
@@ -83,8 +83,14 @@ function cleanParsing(pathrec) {
   });
   //Remove the unuseful directory
   default_folder.forEach(function(element, index, array) {
+    var isEmpty = false;
     fs.stat('./' + pathrec + '/' + element, function(error, stats) {
-      if (!error) {
+      fs.readdir('./' + pathrec + '/' + element, function(err, items) {
+        if (!items || !items.length) {
+          isEmpty = true;
+        }
+      });
+      if (!error || isEmpty) {
         rmdir('./' + pathrec + '/' + element, function(err) {
 //          if (err) {
 //            console.log((err).red);
@@ -189,6 +195,11 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                           if (self.modules.indexOf('Template system (like WooCommerce)') !== -1) {
                             cleanFolder(self.pluginSlug + '/templates');
                           }
+
+                          if (self.modules.indexOf('WP-Contextual-Help') !== -1) {
+                            cleanFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help');
+                          }
+
                           //Console.log are cool and bowtie are cool!
                           console.log(('Inserted index.php files in all the folders').white);
                           console.log(('All done!').white);
@@ -267,14 +278,17 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       name: 'modules',
       message: 'Which library your plugin needs?',
       choices: [
-        {name: 'CPT_Core', checked: true},
-        {name: 'Taxonomy_Core', checked: true},
+        {name: 'CPT_Core', checked: false},
+        {name: 'Taxonomy_Core', checked: false},
         {name: 'Widget-Boilerplate', checked: false},
-        {name: 'HM Custom Meta Boxes for WordPress', checked: true},
-        {name: 'Custom Metaboxes and Fields for WordPress', checked: true},
+        {name: 'HM Custom Meta Boxes for WordPress', checked: false},
+        {name: 'Custom Metaboxes and Fields for WordPress', checked: false},
+        {name: 'WP-Contextual-Help', checked: false},
         {name: 'Fake Page Class', checked: true},
         {name: 'Template system (like WooCommerce)', checked: true},
-        {name: 'Language function support (WPML/Ceceppa Multilingua/Polylang)', checked: true}]
+        {name: 'Language function support (WPML/Ceceppa Multilingua/Polylang)', checked: true},
+        {name: 'Requirements system on activation', checked: true}
+      ]
     }, {
       type: 'checkbox',
       name: 'snippet',
@@ -292,6 +306,10 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       type: 'confirm',
       name: 'git',
       message: 'Do you need an initialized git repo?'
+    }, {
+      type: 'confirm',
+      name: 'cleanFolder',
+      message: 'Do you want clean the folders?'
     }];
 
   this.prompt(prompts, function(props) {
@@ -514,6 +532,22 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
       }
     });
     this.files.adminClass.rmsearch("*  Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", "require_once( plugin_dir_path( __FILE__ ) . 'includes/CMB/custom-meta-boxes.php' );", -1, -1);
+  }
+  if (this.modules.indexOf('WP-Contextual-Help') === -1) {
+    rmdir(this.pluginSlug + '/admin/includes/WP-Contextual-Help', function(error) {
+      if (error) {
+        console.log((error).red);
+      }
+    });
+    rmdir(this.pluginSlug + '/help-docs', function(error) {
+      if (error) {
+        console.log((error).red);
+      }
+    });
+    this.files.adminClass.rmsearch('* Load Wp_Contextual_Help', "add_action( 'init', array( $this, 'contextual_help' ) );", 1, -1);
+    this.files.adminClass.rmsearch('* Filter for change the folder of Contextual Help', "return plugin_dir_path( __FILE__ ) . '../help-docs/';", 1, -2);
+    this.files.adminClass.rmsearch('* Filter for change the folder image of Contextual Help', "return plugin_dir_path( __FILE__ ) . '../help-docs/img';", 1, -2);
+    this.files.adminClass.rmsearch('* Contextual Help, docs in /help-docs folter', "'page' => 'settings_page_' . $this->plugin_slug,", 1, -4);
   }
 
   //Snippet
