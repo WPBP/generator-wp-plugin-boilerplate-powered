@@ -12,6 +12,7 @@ var sys = require('sys');
 var spawn = require('child_process').spawn;
 var colors = require('colors');
 var Replacer = require('./replacer');
+var cleanfolder = false;
 var args = process.argv.slice(2);
 var version = '1.0.0';
 var verbose = false;
@@ -61,47 +62,49 @@ function cleanFolder(path) {
 
 function cleanParsing(pathrec) {
   var default_file = [
-    'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json', 'production.rb',
+    'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json', 'production.rb', 'composer.json',
     'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json', 'Capfile', 'screenshot-1.png',
     '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'select2.jquery.json'
   ];
   var default_folder = ['tests', 'bin'];
-  //Remove the unuseful files
-  default_file.forEach(function(element, index, array) {
-    fs.exists('./' + pathrec + '/' + element, function(exists) {
-      if (exists) {
-        fs.unlink(pathrec + '/' + element, function(err) {
+  if (cleanfolder !== false) {
+    //Remove the unuseful files
+    default_file.forEach(function(element, index, array) {
+      fs.exists('./' + pathrec + '/' + element, function(exists) {
+        if (exists) {
+          fs.unlink(pathrec + '/' + element, function(err) {
 //          if (err) {
 //            console.log((err).red);
 //          }
-        });
-        if (verbose) {
-          console.log(('Removed ' + pathrec + '/' + element).italic);
-        }
-      }
-    });
-  });
-  //Remove the unuseful directory
-  default_folder.forEach(function(element, index, array) {
-    var isEmpty = false;
-    fs.stat('./' + pathrec + '/' + element, function(error, stats) {
-      fs.readdir('./' + pathrec + '/' + element, function(err, items) {
-        if (!items || !items.length) {
-          isEmpty = true;
-        }
-      });
-      if (!error || isEmpty) {
-        rmdir('./' + pathrec + '/' + element, function(err) {
-//          if (err) {
-//            console.log((err).red);
-//          }
+          });
           if (verbose) {
             console.log(('Removed ' + pathrec + '/' + element).italic);
           }
-        });
-      }
+        }
+      });
     });
-  });
+    //Remove the unuseful directory
+    default_folder.forEach(function(element, index, array) {
+      var isEmpty = false;
+      fs.stat('./' + pathrec + '/' + element, function(error, stats) {
+        fs.readdir('./' + pathrec + '/' + element, function(err, items) {
+          if (!items || !items.length) {
+            isEmpty = true;
+          }
+        });
+        if (!error || isEmpty) {
+          rmdir('./' + pathrec + '/' + element, function(err) {
+//          if (err) {
+//            console.log((err).red);
+//          }
+            if (verbose) {
+              console.log(('Removed ' + pathrec + '/' + element).italic);
+            }
+          });
+        }
+      });
+    });
+  }
   //Insert a blank index.php
   fs.exists('./' + pathrec + '/index.php', function(exists) {
     if (!exists) {
@@ -198,6 +201,12 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
 
                           if (self.modules.indexOf('WP-Contextual-Help') !== -1) {
                             cleanFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help');
+                            if (cleanfolder !== false) {
+                              rmdir(self.pluginSlug + +'/admin/includes/WP-Contextual-Help/assets', function(err) {
+                              });
+                              rmdir(self.pluginSlug + +'/admin/includes/WP-Contextual-Help/config', function(err) {
+                              });
+                            }
                           }
 
                           //Console.log are cool and bowtie are cool!
@@ -278,16 +287,16 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       name: 'modules',
       message: 'Which library your plugin needs?',
       choices: [
-        {name: 'CPT_Core', checked: false},
-        {name: 'Taxonomy_Core', checked: false},
-        {name: 'Widget-Boilerplate', checked: false},
-        {name: 'HM Custom Meta Boxes for WordPress', checked: false},
-        {name: 'Custom Metaboxes and Fields for WordPress', checked: false},
-        {name: 'WP-Contextual-Help', checked: false},
+        {name: 'CPT_Core', checked: true},
+        {name: 'Taxonomy_Core', checked: true},
+        {name: 'Widget-Boilerplate', checked: true},
+        {name: 'HM Custom Meta Boxes for WordPress', checked: true},
+        {name: 'Custom Metaboxes and Fields for WordPress', checked: true},
+        {name: 'WP-Contextual-Help', checked: true},
         {name: 'Fake Page Class', checked: true},
         {name: 'Template system (like WooCommerce)', checked: true},
         {name: 'Language function support (WPML/Ceceppa Multilingua/Polylang)', checked: true},
-        {name: 'Requirements system on activation', checked: false}
+        {name: 'Requirements system on activation', checked: true}
       ]
     }, {
       type: 'checkbox',
@@ -395,6 +404,7 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
 };
 
 WpPluginBoilerplateGenerator.prototype.setFiles = function setName() {
+  cleanfolder = this.cleanFolder;
   //Change path of gitmodules
   this.files.gitmodules.add(new RegExp(this.pluginSlug + '/', "g"), '');
 
@@ -621,6 +631,7 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   }
   if (this.modules.indexOf('Requirements system on activation') === -1) {
     fs.unlink(this.pluginSlug + '/public/includes/requirements.php');
+    fs.unlink(this.pluginSlug + '/languages/requirements.pot');
     this.files.publicClass.rmsearch('//Requirements Detection System - read the doc in the library file', "'WP' => new WordPress_Requirement( '3.9.0' ),", -1, -2);
   }
 
