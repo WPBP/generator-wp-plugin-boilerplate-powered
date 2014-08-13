@@ -63,10 +63,10 @@ function cleanFolder(path) {
 function cleanParsing(pathrec) {
   var default_file = [
     'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json', 'production.rb', 'composer.json',
-    'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json', 'Capfile', 'screenshot-1.png',
+    'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json', 'Capfile', 'screenshot-1.png', 'component.json',
     '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'select2.jquery.json'
   ];
-  var default_folder = ['tests', 'bin'];
+  var default_folder = ['tests', 'bin', 'deploy','config'];
   if (cleanfolder !== false) {
     //Remove the unuseful files
     default_file.forEach(function(element, index, array) {
@@ -200,13 +200,11 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                           }
 
                           if (self.modules.indexOf('WP-Contextual-Help') !== -1) {
-                            cleanFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help');
                             if (cleanfolder !== false) {
-                              rmdir(self.pluginSlug + +'/admin/includes/WP-Contextual-Help/assets', function(err) {
-                              });
-                              rmdir(self.pluginSlug + +'/admin/includes/WP-Contextual-Help/config', function(err) {
+                              rmdir(self.pluginSlug + +'/admin/includes/WP-Contextual-Help/assets/', function(err) {
                               });
                             }
+                            cleanFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help');
                           }
 
                           //Console.log are cool and bowtie are cool!
