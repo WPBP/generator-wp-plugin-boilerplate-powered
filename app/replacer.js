@@ -78,7 +78,7 @@ var Replacer = module.exports = function Replacer(file, options) {
             if (err) {
               return console.log((err).red);
             }
-            if(verbose){
+            if (verbose) {
               console.log(('Replace ' + file).italic);
             }
           });
@@ -122,15 +122,15 @@ var Replacer = module.exports = function Replacer(file, options) {
 
         stream.on("end", function() {
           if (typeof startok === 'undefined') {
-            console.log(('Not found start line in ' + file + ': ' + startok).red);
+            return console.log(('Not found start line in ' + file + ': ' + startok).red);
           }
 
           if (typeof endok === 'undefined') {
-            console.log(('Not found end line in ' + file + ': ' + endok).red);
+            return console.log(('Not found end line in ' + file + ': ' + endok).red);
           }
 
           if (startok > endok) {
-            console.log(('Problem when parsing ' + file).red);
+            return console.log(('Problem when parsing ' + file).red);
           }
 
           module.addsed(startok, endok);
@@ -158,12 +158,12 @@ var Replacer = module.exports = function Replacer(file, options) {
           exec("sed -i '" + line + "' " + process.cwd() + '/' + file, {cwd: process.cwd() + '/'},
           function(err, stdout, stderr) {
             if (stderr.length > 0) {
-              console.log(('stderr: ' + stderr).red);
+              return console.log(('stderr: ' + stderr).red);
             }
             if (err !== null) {
-              console.log(('exec error: ' + err).red);
+              return console.log(('exec error: ' + err).red);
             }
-            if(verbose){
+            if (verbose) {
               console.log(('Sed ' + file).italic);
             }
             module.replace();
