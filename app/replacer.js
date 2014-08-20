@@ -98,7 +98,9 @@ var Replacer = module.exports = function Replacer(file, options) {
   module.rmsearch = function(start, end, count_initial, count_end) {
     var stream, startok, endok;
     var i = -1;
+    var startspace = start;
     start = start.replace(/ /g, '');
+    var endspace = end;
     end = end.replace(/ /g, '');
     fs.exists(file, function(exists) {
       if (exists) {
@@ -122,14 +124,14 @@ var Replacer = module.exports = function Replacer(file, options) {
 
         stream.on("end", function() {
           if (typeof startok === 'undefined') {
-            return console.log(('Not found start line <<' + start + '>> in ' + file + ': ' + startok).red);
+            return console.log(('Not found start line <<' + startspace + '>> in ' + file).red);
           }
 
           if (typeof endok === 'undefined') {
-            return console.log(('Not found end line <<' + end + '>> in ' + file + ': ' + endok).red);
+            return console.log(('Not found end line <<' + endspace + '>> in ' + file).red);
           }
 
-          if (startok > endok) {
+          if (endok !== '' && startok > endok) {
             return console.log(('Problem when parsing ' + file).red);
           }
 

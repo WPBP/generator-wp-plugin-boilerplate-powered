@@ -468,7 +468,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
         console.log((error).red);
       }
     });
-    this.files.primary.rmsearch(' * Load Widget boilerplate', "require_once( plugin_dir_path( __FILE__ ) . 'includes/Widget-Boilerplate/widget-boilerplate/plugin.php' );", -1, 1);
+    this.files.primary.rmsearch(' * Load Widget boilerplate', '', 1, 3);
   }
 
   //Function
@@ -483,11 +483,11 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
         console.log((error).red);
       }
     });
-    this.files.primary.rmsearch(' * Load template system', "require_once( plugin_dir_path( __FILE__ ) . 'includes/template.php' );", -1, 1);
+    this.files.primary.rmsearch(' * Load template system', '', 1, 3);
   }
   if (this.modules.indexOf('Language function support (WPML/Ceceppa Multilingua/Polylang)') === -1) {
     fs.unlink(this.pluginSlug + '/includes/language.php');
-    this.files.primary.rmsearch(' * Load Language wrapper function for WPML/Ceceppa Multilingua/Polylang', "require_once( plugin_dir_path( __FILE__ ) . 'includes/language.php' );", -1, 1);
+    this.files.primary.rmsearch(' * Load Language wrapper function for WPML/Ceceppa Multilingua/Polylang', '', 1, 3);
   }
   if (this.git === false) {
     fs.unlink(this.pluginSlug + '.gitmodules');
