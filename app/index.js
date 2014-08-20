@@ -291,6 +291,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'HM Custom Meta Boxes for WordPress', checked: true},
         {name: 'Custom Metaboxes and Fields for WordPress', checked: true},
         {name: 'WP-Contextual-Help', checked: true},
+        {name: 'WP-Admin-Notice', checked: true},
         {name: 'Fake Page Class', checked: true},
         {name: 'Template system (like WooCommerce)', checked: true},
         {name: 'Language function support (WPML/Ceceppa Multilingua/Polylang)', checked: true},
@@ -307,7 +308,8 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'Import/Export settings system', checked: true},
         {name: 'Capability system', checked: true},
         {name: 'Debug system (Debug Bar support)', checked: true},
-        {name: 'Add body class', checked: true}
+        {name: 'Add body class', checked: true},
+        {name: 'wp_localize_script for PHP var to JS', checked: true}
       ]
     }, {
       type: 'confirm',
@@ -417,7 +419,7 @@ WpPluginBoilerplateGenerator.prototype.setFiles = function setName() {
   }
 };
 
-WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
+WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
   this.files.primary.add(/Plugin Name:( {7})@TODO/g, 'Plugin Name:       ' + this.pluginName);
   this.files.primary.add(/Version:( {11})1\.0\.0/g, 'Version:           ' + this.pluginVersion);
   this.files.primary.add(/Author:( {12})@TODO/g, 'Author:            ' + this.author);
@@ -448,7 +450,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
         console.log((error).red);
       }
     });
-    this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/CPT_Core/CPT_Core.php' );\n");
+    this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/CPT_Core/CPT_Core.php' );");
     this.files.primary.rm("and Custom Post Type");
   }
   if (this.modules.indexOf('Taxonomy_Core') === -1) {
@@ -457,7 +459,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
         console.log((error).red);
       }
     });
-    this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/Taxonomy_Core/Taxonomy_Core.php' );\n");
+    this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/Taxonomy_Core/Taxonomy_Core.php' );");
     this.files.primary.rm("Taxonomy and");
   }
   if (this.modules.indexOf('Widget-Boilerplate') === -1) {
@@ -466,14 +468,13 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
         console.log((error).red);
       }
     });
-    this.files.primary.rm("\n/*\n * Load Widget boilerplate\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/Widget-Boilerplate/widget-boilerplate/plugin.php' );\n");
+    this.files.primary.rmsearch(' * Load Widget boilerplate', "require_once( plugin_dir_path( __FILE__ ) . 'includes/Widget-Boilerplate/widget-boilerplate/plugin.php' );", -1, 1);
   }
 
   //Function
   if (this.modules.indexOf('Fake Page Class') === -1) {
     fs.unlink(this.pluginSlug + '/includes/fake-page.php');
-    this.files.primary.rm("\n/*\n * Load Fake Page class\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/fake-page.php' );\n");
-    this.files.primary.rm("\nnew Fake_Page(\n\t\tarray(\n\t'slug' => 'fake_slug',\n\t'post_title' => 'Fake Page Title',\n\t'post content' => 'This is the fake page content'\n\t\t)\n);\n");
+    this.files.primary.rmsearch(' * Load Fake Page class', "'post content' => 'This is the fake page content'", 1, -3);
   }
   if (this.modules.indexOf('Template system (like WooCommerce)') === -1) {
     fs.unlink(this.pluginSlug + '/includes/template.php');
@@ -482,11 +483,11 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setName() {
         console.log((error).red);
       }
     });
-    this.files.primary.rm("\n/*\n * Load template system\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/template.php' );\n");
+    this.files.primary.rmsearch(' * Load template system', "require_once( plugin_dir_path( __FILE__ ) . 'includes/template.php' );", -1, 1);
   }
   if (this.modules.indexOf('Language function support (WPML/Ceceppa Multilingua/Polylang)') === -1) {
     fs.unlink(this.pluginSlug + '/includes/language.php');
-    this.files.primary.rm("\n/*\n * Load Language wrapper function for WPML/Ceceppa Multilingua/Polylang\n */\nrequire_once( plugin_dir_path( __FILE__ ) . 'includes/language.php' );\n");
+    this.files.primary.rmsearch(' * Load Language wrapper function for WPML/Ceceppa Multilingua/Polylang', "require_once( plugin_dir_path( __FILE__ ) . 'includes/language.php' );", -1, 1);
   }
   if (this.git === false) {
     fs.unlink(this.pluginSlug + '.gitmodules');
@@ -552,10 +553,18 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
         console.log((error).red);
       }
     });
-    this.files.adminClass.rmsearch('* Load Wp_Contextual_Help', "add_action( 'init', array( $this, 'contextual_help' ) );", 1, -1);
-    this.files.adminClass.rmsearch('* Filter for change the folder of Contextual Help', "return plugin_dir_path( __FILE__ ) . '../help-docs/';", 1, -2);
-    this.files.adminClass.rmsearch('* Filter for change the folder image of Contextual Help', "return plugin_dir_path( __FILE__ ) . '../help-docs/img';", 1, -2);
+    this.files.adminClass.rmsearch('* Load Wp_Contextual_Help for the help tabs', "add_action( 'init', array( $this, 'contextual_help' ) );", 1, -1);
+    this.files.adminClass.rmsearch('* Filter for change the folder of Contextual Help', "$paths[] = plugin_dir_path( __FILE__ ) . '../help-docs/';", 1, -3);
+    this.files.adminClass.rmsearch('* Filter for change the folder image of Contextual Help', "$paths[] = plugin_dir_path( __FILE__ ) . '../help-docs/img';", 1, -3);
     this.files.adminClass.rmsearch('* Contextual Help, docs in /help-docs folter', "'page' => 'settings_page_' . $this->plugin_slug,", 1, -4);
+  }
+  if (this.modules.indexOf('WP-Admin-Notice') === -1) {
+    rmdir(this.pluginSlug + '/admin/includes/WP-Admin-Notice', function(error) {
+      if (error) {
+        console.log((error).red);
+      }
+    });
+    this.files.adminClass.rmsearch('* Load Wp_Admin_Notice for the notices in the backend', "new WP_Admin_Notice( __( 'Error Messages' ), 'error' );", 1, -1);
   }
 
   //Snippet
@@ -578,7 +587,9 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     this.files.adminView.rmsearch('<div id="tabs-3">', "<?php submit_button( __( 'Import' ), 'secondary', 'submit', false ); ?>", -2, -5);
   }
   if (this.snippet.indexOf('Debug system (Debug Bar support)') === -1) {
+    fs.unlink(this.pluginSlug + '/admin/includes/debug.php');
     this.files.adminClass.rmsearch("* Debug mode", "$debug->log( __( 'Plugin Loaded', $this->plugin_slug ) );", 1, -1);
+    
   }
 };
 
@@ -645,6 +656,11 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   if (this.snippet.indexOf('Add body class') === -1) {
     this.files.publicClass.rmsearch('* Add class in the body on the frontend', 'return $classes;', 1, -1);
     this.files.publicClass.rm("add_filter( 'body_class', array( $this, 'add_pn_class' ), 10, 3 );".replace(/pn_/g, this.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '_'));
+  }
+  if (this.snippet.indexOf('wp_localize_script for PHP var to JS') === -1) {
+    this.files.publicClass.rm("add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_js_vars' ) );");
+    this.files.publicClass.rmsearch('* Print the PHP var in the HTML of the frontend for access by JavaScript', "'alert' => __( 'Hey! You have clicked the button!', $this->get_plugin_slug() )", 1, -3);
+    this.files.publicjs.rmsearch('// Write in console log the PHP value passed in enqueue_js_vars in public/class-plugin-name.php', 'console.log( pn_js_vars.alert );', 1, 1);
   }
 };
 
