@@ -122,11 +122,11 @@ var Replacer = module.exports = function Replacer(file, options) {
 
         stream.on("end", function() {
           if (typeof startok === 'undefined') {
-            return console.log(('Not found start line in ' + file + ': ' + startok).red);
+            return console.log(('Not found start line <<' + start + '>> in ' + file + ': ' + startok).red);
           }
 
           if (typeof endok === 'undefined') {
-            return console.log(('Not found end line in ' + file + ': ' + endok).red);
+            return console.log(('Not found end line <<' + end + '>> in ' + file + ': ' + endok).red);
           }
 
           if (startok > endok) {
