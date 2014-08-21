@@ -66,7 +66,7 @@ function cleanParsing(pathrec) {
     'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json', 'Capfile', 'screenshot-1.png', 'component.json',
     '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'select2.jquery.json'
   ];
-  var default_folder = ['tests', 'bin', 'deploy','config'];
+  var default_folder = ['tests', 'bin', 'deploy', 'config'];
   if (cleanfolder !== false) {
     //Remove the unuseful files
     default_file.forEach(function(element, index, array) {
@@ -366,7 +366,12 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
     console.log(('Extract Plugin boilerplate').white);
     zip = new Admzip('./plugin.zip');
     zip.extractAllTo('plugin_temp', true);
-    fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules');
+    fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules', function(err) {
+      if (err) {
+        console.log(('Error: Maybe you want the development version? call this generator with the dev parameter').red);
+        process.exit(1);
+      }
+    });
     fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/', './' + self.pluginSlug, function() {
       rmdir('plugin_temp', function(error) {
         if (error) {
@@ -589,7 +594,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   if (this.snippet.indexOf('Debug system (Debug Bar support)') === -1) {
     fs.unlink(this.pluginSlug + '/admin/includes/debug.php');
     this.files.adminClass.rmsearch("* Debug mode", "$debug->log( __( 'Plugin Loaded', $this->plugin_slug ) );", 1, -1);
-    
+
   }
 };
 
