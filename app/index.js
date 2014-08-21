@@ -361,8 +361,15 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
           self = this,
           path = 'http://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/' + version + '.zip',
           zip = "";
+  //Force the remove of the same plugin folder
+  if (args[2] === 'force' || args[3] === 'force') {
+    rmdir.sync('./' + self.pluginSlug, function(error) {
+      if (error) {
+        console.log((error).red);
+      }
+    });
   //Check plugin folder if exist
-  if (fs.existsSync('./' + self.pluginSlug)) {
+  } else if (fs.existsSync('./' + self.pluginSlug)) {
     console.log(('Error: Folder ' + self.pluginSlug + ' already exist, change the name of the plugin!').red);
     process.exit(1);
   }
