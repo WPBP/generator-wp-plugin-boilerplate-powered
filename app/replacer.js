@@ -29,6 +29,7 @@ var Replacer = module.exports = function Replacer(file, options) {
    * @param string search
    */
   module.rm = function(search) {
+    searches.push({search: "        " + search, replace: ''});
     searches.push({search: search, replace: ''});
   };
 
