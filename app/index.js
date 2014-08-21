@@ -361,6 +361,11 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
           self = this,
           path = 'http://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/' + version + '.zip',
           zip = "";
+  //Check plugin folder if exist
+  if (fs.existsSync('./' + self.pluginSlug)) {
+    console.log(('Error: Folder ' + self.pluginSlug + ' already exist, change the name of the plugin!').red);
+    process.exit(1);
+  }
   //Check if exist the plugin.zip
   if (fs.existsSync(process.cwd() + '/plugin.zip')) {
     console.log(('Extract Plugin boilerplate').white);
