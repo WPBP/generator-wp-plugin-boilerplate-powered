@@ -302,14 +302,17 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       name: 'snippet',
       message: 'Which snippet your plugin needs?',
       choices: [
-        {name: 'Support Dashboard At Glance Widget', checked: true},
+        {name: 'Support Dashboard At Glance Widget for CPT', checked: true},
         {name: 'Javascript DOM-based Routing', checked: true},
         {name: 'Bubble notification on cpt', checked: true},
         {name: 'Import/Export settings system', checked: true},
         {name: 'Capability system', checked: true},
         {name: 'Debug system (Debug Bar support)', checked: true},
         {name: 'Add body class', checked: true},
-        {name: 'wp_localize_script for PHP var to JS', checked: true}
+        {name: 'wp_localize_script for PHP var to JS', checked: true},
+        {name: 'Custom action', checked: true},
+        {name: 'Custom filter', checked: true},
+        {name: 'Custom shortcode', checked: true}
       ]
     }, {
       type: 'confirm',
@@ -368,7 +371,7 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
         console.log((error).red);
       }
     });
-  //Check plugin folder if exist
+    //Check plugin folder if exist
   } else if (fs.existsSync('./' + self.pluginSlug)) {
     console.log(('Error: Folder ' + self.pluginSlug + ' already exist, change the name of the plugin!').red);
     process.exit(1);
@@ -592,7 +595,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     this.files.adminClass.rm("\n\n\t\t// Load admin style sheet and JavaScript.\n\t\tadd_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );\n\t\tadd_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );\n\n\t\t// Add the options page and menu item.\n\t\tadd_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );");
     this.files.adminClass.rm("\n\t/**\n\t * Register and enqueue admin-specific style sheet.\n\t *\n\t * @since     1.0.0\n\t *\n\t * @return    null    Return early if no settings page is registered.\n\t */\n\tpublic function enqueue_admin_styles() {\n\n\t\tif ( ! isset( $this->plugin_screen_hook_suffix ) ) {\n\t\t\treturn;\n\t\t}\n\n\t\t$screen = get_current_screen();\n\t\tif ( $this->plugin_screen_hook_suffix == $screen->id ) {\n\t\t\twp_enqueue_style( $this->plugin_slug .'-admin-styles', plugins_url( 'assets/css/admin.css', __FILE__ ), array(), MyNewPlugin::VERSION );\n\t\t}\n\n\t}\n\n\t/**\n\t * Register and enqueue admin-specific JavaScript.\n\t *\n\t * @since     1.0.0\n\t *\n\t * @return    null    Return early if no settings page is registered.\n\t */\n\tpublic function enqueue_admin_scripts() {\n\n\t\tif ( ! isset( $this->plugin_screen_hook_suffix ) ) {\n\t\t\treturn;\n\t\t}\n\n\t\t$screen = get_current_screen();\n\t\tif ( $this->plugin_screen_hook_suffix == $screen->id ) {\n\t\t\twp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'assets/js/admin.js', __FILE__ ), array( 'jquery' ), MyNewPlugin::VERSION );\n\t\t}\n\n\t}\n\n\t/**\n\t * Register the administration menu for this plugin into the WordPress Dashboard menu.\n\t *\n\t * @since    1.0.0\n\t */\n\tpublic function add_plugin_admin_menu() {\n\n\t\t/*\n\t\t * Add a settings page for this plugin to the Settings menu.\n\t\t *\n\t\t * NOTE:  Alternative menu locations are available via WordPress administration menu functions.\n\t\t *\n\t\t *        Administration Menus: http://codex.wordpress.org/Administration_Menus\n\t\t *\n\t\t * @TODO:\n\t\t *\n\t\t * - Change 'Page Title' to the title of your plugin admin page\n\t\t * - Change 'Menu Text' to the text for menu item for the plugin settings page\n\t\t * - Change 'manage_options' to the capability you see fit\n\t\t *   For reference: http://codex.wordpress.org/Roles_and_Capabilities\n\t\t */\n\t\t$this->plugin_screen_hook_suffix = add_options_page(\n\t\t\t__( 'Page Title', $this->plugin_slug ),\n\t\t\t__( 'Menu Text', $this->plugin_slug ),\n\t\t\t'manage_options',\n\t\t\t$this->plugin_slug,\n\t\t\tarray( $this, 'display_plugin_admin_page' )\n\t\t);\n\n\t}\n\n\t/**\n\t * Render the settings page for this plugin.\n\t *\n\t * @since    1.0.0\n\t */\n\tpublic function display_plugin_admin_page() {\n\t\tinclude_once( 'views/admin.php' );\n\t}\n\n\t/**\n\t * Add settings action link to the plugins page.\n\t *\n\t * @since    1.0.0\n\t */\n\tpublic function add_action_links( $links ) {\n\n\t\treturn array_merge(\n\t\t\tarray(\n\t\t\t\t'settings' => '<a href=\"' . admin_url( 'options-general.php?page=' . $this->plugin_slug ) . '\">' . __( 'Settings', $this->plugin_slug ) . '</a>'\n\t\t\t),\n\t\t\t$links\n\t\t);\n\n\t}");
   } else {
-    if (this.snippet.indexOf('Support Dashboard At Glance Widget') === -1) {
+    if (this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1) {
       this.files.adminClass.rm("\n\t\t// At Glance Dashboard widget for your cpts\n\t\tadd_filter( 'dashboard_glance_items', array( $this, 'cpt_dashboard_support' ), 10, 1 );\n");
       this.files.adminClass.rmsearch('* Add the counter of your CPTs in At Glance widget in the dashboard<br>', '* NOTE:     Your metabox on Demo CPT', 1, 1);
       this.files.adminCss.rmsearch('#dashboard_right_now a.demo-count:before {', '', 0, 3);
@@ -661,6 +664,18 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
     fs.unlink(this.pluginSlug + '/public/includes/requirements.php');
     fs.unlink(this.pluginSlug + '/languages/requirements.pot');
     this.files.publicClass.rmsearch('//Requirements Detection System - read the doc in the library file', "'WP' => new WordPress_Requirement( '3.9.0' ),", -1, -2);
+  }
+  if (this.modules.indexOf('Custom action') === -1 && this.modules.indexOf('Custom filter') === -1 && this.modules.indexOf('Custom shortcode') === -1) {
+    this.files.publicClass.rmsearch('* Define custom functionality.', '* Refer To http://codex.wordpress.org/Plugin_API#Hooks.2C_Actions_and_Filters', 1, -2);
+  }
+  if (this.modules.indexOf('Custom action') === -1) {
+    this.files.publicClass.rm("add_action( '@TODO', array( $this, 'action_method_name' ) );");
+  }
+  if (this.modules.indexOf('Custom filter') === -1) {
+    this.files.publicClass.rm("add_filter( '@TODO', array( $this, 'filter_method_name' ) );");
+  }
+  if (this.modules.indexOf('Custom shortcode') === -1) {
+    this.files.publicClass.rm("add_shortcode( '@TODO', array( $this, 'shortcode_method_name' ) );");
   }
 
   //Snippet
