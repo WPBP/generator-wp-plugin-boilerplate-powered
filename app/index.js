@@ -442,7 +442,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
   this.files.primary.add(/Author:( {12})@TODO/g, 'Author:            ' + this.author);
   this.files.primary.add(/Author URI:( {8})@TODO/g, 'Author URI:        ' + this.authorURI);
   this.files.primary.rm("/*\n * @TODO:\n *\n * - replace `class-" + this.pluginSlug + ".php` with the name of the plugin's class file\n *\n */");
-  this.files.primary.rm("/*\n * @TODO:\n *\n * - replace `class-" + this.pluginSlug + "-admin.php` with the name of the plugin's admin class file\n");
+  this.files.primary.rm(" * @TODO:\n *\n * - replace `class-" + this.pluginSlug + "-admin.php` with the name of the plugin's admin file\n");
   this.files.primary.rm(" *\n * @TODO:\n *\n * - replace " + this.pluginClassName + " with the name of the class defined in\n *   `class-" + this.pluginSlug + ".php`\n");
   this.files.primary.rm("/*\n * @TODO:\n *\n * - replace " + this.pluginClassName + " with the name of the class defined in\n *   `class-" + this.pluginSlug + ".php`\n */");
   this.files.primary.rm(" * - replace " + this.pluginClassName + "_Admin with the name of the class defined in\n *   `class-" + this.pluginSlug + "-admin.php`\n");
@@ -654,7 +654,7 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   //Function
   if (this.modules.indexOf('Template system (like WooCommerce)') === -1) {
     this.files.publicClass.rmsearch('* Example for override the template system on the frontend', 'return $original_template;', 1, -2);
-    this.files.publicClass.rm('//Override the template hierachy for load /templates/content-demo.php');
+    this.files.publicClass.rm('//Override the template hierarchy for load /templates/content-demo.php');
     this.files.publicClass.rm("add_filter( 'template_include', array( $this, 'load_content_demo' ) );");
   }
   if (this.modules.indexOf('Requirements system on activation') === -1) {

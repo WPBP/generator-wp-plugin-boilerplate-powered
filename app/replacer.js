@@ -29,7 +29,7 @@ var Replacer = module.exports = function Replacer(file, options) {
    * @param string search
    */
   module.rm = function(search) {
-    searches.push({search: search + "\r\n", replace: ''});
+    searches.push({search: search, replace: ''});
   };
 
   /*
@@ -64,6 +64,7 @@ var Replacer = module.exports = function Replacer(file, options) {
     fs.exists(file, function(exists) {
       if (exists) {
         fs.readFile(file, 'utf8', function(err, data) {
+          module.add(/\n\n\n/g, "\n");
           var i, total;
           if (err) {
             return console.log(err);
