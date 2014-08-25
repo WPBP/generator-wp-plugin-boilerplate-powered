@@ -103,7 +103,9 @@ var Replacer = module.exports = function Replacer(file, options) {
     var startspace = start;
     start = start.replace(/ /g, '');
     var endspace = end;
-    end = end.replace(/ /g, '');
+    if (end.length > 0) {
+      end = end.replace(/ /g, '');
+    }
     fs.exists(file, function(exists) {
       if (exists) {
         stream = readline(fs.createReadStream(file, {flags: 'r'}));
@@ -125,11 +127,11 @@ var Replacer = module.exports = function Replacer(file, options) {
         });
 
         stream.on("end", function() {
-          if (typeof startok === 'undefined') {
-            return console.log(('Not found start line <<' + startspace + '>> in ' + file).red);
+          if (typeof startok === 'undefined' || isNaN(startok)) {
+            return console.log(('Not found start line <<' + startspace + startok + '>> in ' + file).red);
           }
 
-          if (typeof endok === 'undefined') {
+          if (typeof endok === 'undefined' || isNaN(endok)) {
             return console.log(('Not found end line <<' + endspace + '>> in ' + file).red);
           }
 
@@ -162,6 +164,7 @@ var Replacer = module.exports = function Replacer(file, options) {
           exec("sed -i '" + line + "' " + process.cwd() + '/' + file, {cwd: process.cwd() + '/'},
           function(err, stdout, stderr) {
             if (stderr.length > 0) {
+              console.log(("sed -i '" + line + "' " + process.cwd() + '/' + file).red);
               return console.log(('stderr: ' + stderr).red);
             }
             if (err !== null) {
