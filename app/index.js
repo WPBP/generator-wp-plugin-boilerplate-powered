@@ -530,8 +530,8 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
 WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() {
   this.files.adminClass.rm(" * @TODO: Rename this class to a proper name for your plugin.\n *\n");
   this.files.adminClass.rm("*\n * Call $plugin_slug from public plugin class.\n *\n * @TODO:\n *\n * - Rename \"" + this.pluginClassName + "\" to the name of your initial plugin class\n *\n */\n");
-  this.files.adminClass.rmsearch('* Register and enqueue admin-specific style sheet.','* - Rename "Plugin_Name" to the name your plugin',-2,-1);
-  this.files.adminClass.rmsearch('* Register and enqueue admin-specific JavaScript.','* - Rename "Plugin_Name" to the name your plugin',-2,-1);
+  this.files.adminClass.rmsearch('* Register and enqueue admin-specific style sheet.', '* - Rename "Plugin_Name" to the name your plugin', -2, -1);
+  this.files.adminClass.rmsearch('* Register and enqueue admin-specific JavaScript.', '* - Rename "Plugin_Name" to the name your plugin', -2, -1);
 
   //Repo
   if (this.modules.indexOf('Custom Metaboxes and Fields for WordPress') === -1 && this.modules.indexOf('HM Custom Meta Boxes for WordPress') === -1) {
@@ -634,7 +634,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
 
 WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass() {
   this.files.publicClass.rm("* @TODO: Rename this class to a proper name for your plugin.\n *\n ");
-  this.files.publicClass.rm('* @TODO - Rename "' + this.pluginName + '" to the name of your plugin'/* + "\n"*/);
+  this.files.publicClass.rm('* @TODO - Rename "' + this.pluginName + '" to the name of your plugin');
   this.files.publicClass.rm('* @TODO - Rename "' + this.pluginSlug + '" to the name of your plugin' + "\n     ");
 
   //Assets - JS/CSS
@@ -652,14 +652,15 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
 
   //Activate/deactivate
   if (this.activateDeactivate.indexOf('Activate Method') === -1) {
-    this.files.publicClass.rm("\n// Activate plugin when new blog is added\nadd_action( 'wpmu_new_blog', array( $this, 'activate_new_site' ) );\n");
-    this.files.publicClass.rm("\n/**\n * Fired when the plugin is activated.\n *\n * @since    1.0.0\n *\n * @param    boolean    $network_wide    True if WPMU superadmin uses\n *                                       \"Network Activate\" action, false if\n *                                       WPMU is disabled or plugin is\n *                                       activated on an individual blog.\n */\npublic static function activate( $network_wide ) {\n\nif ( function_exists( 'is_multisite' ) && is_multisite() ) {\n\nif ( $network_wide  ) {\n\n// Get all blog ids\n$blog_ids = self::get_blog_ids();\n\nforeach ( $blog_ids as $blog_id ) {\n\nswitch_to_blog( $blog_id );\nself::single_activate();\n}\n\nrestore_current_blog();\n\n} else {\nself::single_activate();\n}\n\n} else {\nself::single_activate();\n}\n\n}\n");
-    this.files.publicClass.rm("\n/**\n * Fired when a new site is activated with a WPMU environment.\n *\n * @since    1.0.0\n *\n * @param    int    $blog_id    ID of the new blog.\n */\npublic function activate_new_site( $blog_id ) {\n\nif ( 1 !== did_action( 'wpmu_new_blog' ) ) {\nreturn;\n}\n\nswitch_to_blog( $blog_id );\nself::single_activate();\nrestore_current_blog();\n\n}\n");
-    this.files.publicClass.rm("\n/**\n * Get all blog ids of blogs in the current network that are:\n * - not archived\n * - not spam\n * - not deleted\n *\n * @since    1.0.0\n *\n * @return   array|false    The blog ids, false if no matches.\n */\nprivate static function get_blog_ids() {\n\nglobal $wpdb;\n\n// get an array of blog ids\n$sql = \"SELECT blog_id FROM $wpdb->blogs\nWHERE archived = '0' AND spam = '0'\nAND deleted = '0'\";\n\nreturn $wpdb->get_col( $sql );\n\n}\n");
-    this.files.publicClass.rm("\n/**\n * Fired for each blog when the plugin is activated.\n *\n * @since    1.0.0\n */\nprivate static function single_activate() {\n// @TODO: Define activation functionality here\n}\n");
+    this.files.publicClass.rmsearch('// Activate plugin when new blog is added', "add_action( 'wpmu_new_blog', array( $this, 'activate_new_site' ) );", 1, 1);
+    this.files.publicClass.rmsearch('* Fired when the plugin is activated.', '', 1, 32);
+    this.files.publicClass.rmsearch('* Fired when a new site is activated with a WPMU environment.', '', 1, 16);
+    this.files.publicClass.rmsearch('* Get all blog ids of blogs in the current network that are:', 'return $wpdb->get_col( $sql );', 1, -2);
+    this.files.publicClass.rmsearch("* Fired for each blog when the plugin is activated.", '', 1, 33);
   }
   if (this.activateDeactivate.indexOf('Deactivate Method') === -1) {
-    this.files.publicClass.rm("\n/**\n * Fired when the plugin is deactivated.\n *\n * @since    1.0.0\n *\n * @param    boolean    $network_wide    True if WPMU superadmin uses\n *                                       \"Network Deactivate\" action, false if\n *                                       WPMU is disabled or plugin is\n *                                       deactivated on an individual blog.\n */\npublic static function deactivate( $network_wide ) {\n\nif ( function_exists( 'is_multisite' ) && is_multisite() ) {\n\nif ( $network_wide ) {\n\n// Get all blog ids\n$blog_ids = self::get_blog_ids();\n\nforeach ( $blog_ids as $blog_id ) {\n\nswitch_to_blog( $blog_id );\nself::single_deactivate();\n\n}\n\nrestore_current_blog();\n\n} else {\nself::single_deactivate();\n}\n\n} else {\nself::single_deactivate();\n}\n\n}\n\n/**\n * Fired for each blog when the plugin is deactivated.\n *\n * @since    1.0.0\n */\nprivate static function single_deactivate() {\n// @TODO: Define deactivation functionality here\n}\n");
+    this.files.publicClass.rmsearch('* Fired when the plugin is deactivated.', '', 1, 32);
+    this.files.publicClass.rmsearch('* Fired for each blog when the plugin is deactivated.', '', 1, 10);
   }
 
   //Repo
