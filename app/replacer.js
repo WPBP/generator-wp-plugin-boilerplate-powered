@@ -128,7 +128,7 @@ var Replacer = module.exports = function Replacer(file, options) {
 
         stream.on("end", function() {
           if (typeof startok === 'undefined' || isNaN(startok)) {
-            return console.log(('Not found start line <<' + startspace + startok + '>> in ' + file).red);
+            return console.log(('Not found start line <<' + startspace + '>> in ' + file).red);
           }
 
           if (typeof endok === 'undefined' || isNaN(endok)) {

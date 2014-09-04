@@ -352,7 +352,10 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       gitmodules: new Replacer(this.pluginSlug + '/.gitmodules', this),
       template: new Replacer(this.pluginSlug + '/includes/template.php', this),
       publicjs: new Replacer(this.pluginSlug + '/public/assets/js/public.js', this),
-      debug: new Replacer(this.pluginSlug + '/admin/includes/debug.php', this)
+      debug: new Replacer(this.pluginSlug + '/admin/includes/debug.php', this),
+      requirements: new Replacer(this.pluginSlug + '/public/includes/requirements.php', this),
+      language: new Replacer(this.pluginSlug + '/includes/language.php', this),
+      fakepage: new Replacer(this.pluginSlug + '/includes/fake-page.php', this)
     };
 
     cb();
