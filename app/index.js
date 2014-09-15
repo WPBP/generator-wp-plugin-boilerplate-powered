@@ -14,7 +14,7 @@ var colors = require('colors');
 var Replacer = require('./replacer');
 var cleanfolder = false;
 var args = process.argv.slice(2);
-var version = '1.0.0';
+var version = '1.1.0beta';
 var verbose = false;
 if (args[1] === 'dev') {
   version = 'master';
