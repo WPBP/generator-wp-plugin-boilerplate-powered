@@ -1,5 +1,5 @@
 {
-  "name" : "generator-wp-pbp",
+  "name" : "generator-wp-plugin-boilerplate-powered",
   "version" : "0.1.3",
   "description" : "A generator for Yeoman to customize the WP Plugin Boilerplate Powered (https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered).",
   "keywords" : [ "yeoman", "yeoman-generator", "wordpress", "wordpress-plugin", "PHP" ],
