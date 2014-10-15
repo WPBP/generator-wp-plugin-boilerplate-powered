@@ -49,7 +49,7 @@ var Replacer = module.exports = function Replacer(file, options) {
   module.add(/plugin-name/g, options.pluginSlug);
   module.add(/Plugin_Name_Admin/g, options.pluginClassName + '_Admin');
   module.add(/Plugin_Name/g, options.pluginClassName);
-  module.add(/Plugin Name/g, options.pluginName);
+  module.add(/Plugin Name:( {7})@TODO/g, 'Plugin Name:       ' + options.pluginName);
   module.add(/Your Name <email@example\.com>/g, options.author + ' <' + options.authorEmail + '>');
   module.add(/1\.0\.0/g, options.pluginVersion);
   module.add(/Your Name or Company Name/g, options.pluginCopyright);
