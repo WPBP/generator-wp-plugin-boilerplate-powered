@@ -348,7 +348,11 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
     }];
 
   if (this.defaultValues.name !== '') {
+    if (fs.existsSync('./' + s.slugify(this.defaultValues.name))) {
+      console.log(('Warning folder ' + s.slugify(this.defaultValues.name) + ' already exist, change the name of the plugin!').red);
+    }
     prompts[0].default = this.defaultValues.name;
+
   }
   if (this.defaultValues.version !== '') {
     prompts[1].default = this.defaultValues.pluginVersion;
@@ -463,7 +467,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       fakepage: new Replacer(this.pluginSlug + '/includes/fake-page.php', this)
     };
 
-    if (this.saveSettings !== true) {
+    if (props.saveSettings === true) {
       var cleaned = props;
       delete cleaned['authorEmail'];
       delete cleaned['authorEmail'];
@@ -876,7 +880,7 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
     this.files.publicClass.rmsearch('* NOTE:  Shortcode simple set of functions for creating macro codes for use', '// @TODO: Define your shortcode here', 1, -2);
   }
   if (this.snippet.indexOf('Javascript DOM-based Routing') === -1) {
-    this.files.publicjs.rmsearch('* DOM-based Routing', '$(document).ready(UTIL.loadEvents);', 1, 1);
+    this.files.publicjs.rmsearch('* DOM-based Routing', '$(document).ready(UTIL.loadEvents);', 1, -1);
   }
   if (this.snippet.indexOf('Capability system') === -1) {
     this.files.publicClass.rmsearch('* Array of capabilities by roles', '* Initialize the plugin by setting localization and loading public scripts', 1, 2);
@@ -890,7 +894,8 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   if (this.snippet.indexOf('wp_localize_script for PHP var to JS') === -1) {
     this.files.publicClass.rm("add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_js_vars' ) );");
     this.files.publicClass.rmsearch('* Print the PHP var in the HTML of the frontend for access by JavaScript', "'alert' => __( 'Hey! You have clicked the button!', $this->get_plugin_slug() )", 1, -4);
-    this.files.publicjs.rmsearch('// Write in console log the PHP value passed in enqueue_js_vars in public/class-plugin-name.php', 'console.log( pn_js_vars.alert );', 1, 1);
+    this.files.publicjs.rm('// Write in console log the PHP value passed in enqueue_js_vars in public/class-' + this.pluginSlug + '.php' + "\n");
+    this.files.publicjs.rm('console.log( tp_js_vars.alert );' + "\n");
   }
 };
 

@@ -41,6 +41,8 @@ $ yo wp-plugin-boilerplate-powered dev verbose
 $ yo wp-plugin-boilerplate-powered verbose
 ```
 
+Can generate a config file for reuse it the settings!  
+
 If exist a plugin.zip file in the root, the boilerplate is not downloaded
 
 ## License
