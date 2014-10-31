@@ -28,7 +28,7 @@ if (args[1] === 'verbose' || args[2] === 'verbose') {
  * @param {string} path - The path of the file that needs to be validated.
  * returns {boolean} - `true` if the source is blacklisted and otherwise `false`.
  */
-var isUnixHiddenPath = function(path) {
+var isUnixHiddenPath = function (path) {
   return (/(^|.\/)\.+[^\/\.]/g).test(path);
 };
 
@@ -43,7 +43,7 @@ function cleanFolder(path) {
 
   //Recursive scanning for the subfolder
   var list = fs.readdirSync(path);
-  list.forEach(function(file) {
+  list.forEach(function (file) {
     var pathrec = path + '/' + file;
     var i = pathrec.lastIndexOf('.');
     var ext = (i < 0) ? '' : pathrec.substr(i);
@@ -69,10 +69,10 @@ function cleanParsing(pathrec) {
   var default_folder = ['tests', 'bin', 'deploy', 'config'];
   if (cleanfolder !== false) {
     //Remove the unuseful files
-    default_file.forEach(function(element, index, array) {
-      fs.exists('./' + pathrec + '/' + element, function(exists) {
+    default_file.forEach(function (element, index, array) {
+      fs.exists('./' + pathrec + '/' + element, function (exists) {
         if (exists) {
-          fs.unlink(pathrec + '/' + element, function(err) {
+          fs.unlink(pathrec + '/' + element, function (err) {
 //          if (err) {
 //            console.log((err).red);
 //          }
@@ -84,16 +84,16 @@ function cleanParsing(pathrec) {
       });
     });
     //Remove the unuseful directory
-    default_folder.forEach(function(element, index, array) {
+    default_folder.forEach(function (element, index, array) {
       var isEmpty = false;
-      fs.stat('./' + pathrec + '/' + element, function(error, stats) {
-        fs.readdir('./' + pathrec + '/' + element, function(err, items) {
+      fs.stat('./' + pathrec + '/' + element, function (error, stats) {
+        fs.readdir('./' + pathrec + '/' + element, function (err, items) {
           if (!items || !items.length) {
             isEmpty = true;
           }
         });
         if (!error || isEmpty) {
-          rmdir('./' + pathrec + '/' + element, function(err) {
+          rmdir('./' + pathrec + '/' + element, function (err) {
 //          if (err) {
 //            console.log((err).red);
 //          }
@@ -106,11 +106,11 @@ function cleanParsing(pathrec) {
     });
   }
   //Insert a blank index.php
-  fs.exists('./' + pathrec + '/index.php', function(exists) {
+  fs.exists('./' + pathrec + '/index.php', function (exists) {
     if (!exists) {
       fs.writeFile('./' + pathrec + '/index.php',
               "<?php // Silence is golden",
-              'utf8', function() {
+              'utf8', function () {
               });
       if (verbose) {
         console.log(('Created ' + pathrec + '/index.php').italic);
@@ -125,7 +125,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
 
   yeoman.generators.Base.apply(this, arguments);
 
-  this.on('end', function() {
+  this.on('end', function () {
     //Generate the bash script for download the git submodules
     //Initialize git and clean the submodules not required
     var submodulessh = ['#!/bin/sh',
@@ -145,7 +145,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
       'rm $0'
     ].join('\n');
     fs.writeFile(self.pluginSlug + '/submodules.sh', submodulessh, 'utf8',
-            function(err) {
+            function (err) {
               if (err) {
                 return console.log((err).red);
               } else {
@@ -163,15 +163,28 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 //Call the bash script
                 var submodule = spawn(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', [], {cwd: process.cwd() + '/' + self.pluginSlug + '/'});
                 submodule.stdout.on('data',
-                        function(data) {
+                        function (data) {
                           console.log((data.toString()).green);
                         });
                 submodule.stderr.on('data',
-                        function(data) {
+                        function (data) {
                           console.log((data.toString()).blue);
                         });
                 submodule.on('close',
-                        function(code) {
+                        function (code) {
+                          if (this.git !== true) {
+                            fs.unlink(this.pluginSlug + '.gitmodules', function (error) {
+                              if (error) {
+                                console.log((error).red);
+                              }
+                            });
+                            rmdir(this.pluginSlug + '/.git', function (error) {
+                              if (error) {
+                                console.log((error).red);
+                              }
+                            });
+                            console.log(('Remove git config generated').white);
+                          }
                           //Clean all the folders!!
                           if (self.modules.indexOf('CPT_Core') !== -1) {
                             cleanFolder(self.pluginSlug + '/includes/CPT_Core');
@@ -201,7 +214,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
 
                           if (self.modules.indexOf('WP-Contextual-Help') !== -1) {
                             if (cleanfolder !== false) {
-                              rmdir(self.pluginSlug + +'/admin/includes/WP-Contextual-Help/assets/', function(err) {
+                              rmdir(self.pluginSlug + +'/admin/includes/WP-Contextual-Help/assets/', function (err) {
                               });
                             }
                             cleanFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help');
@@ -222,8 +235,14 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
   //Check the default file for the default values, I have already said default?
   if (fs.existsSync(__dirname + '/../default-values.json')) {
     default_file = path.join(__dirname, '../default-values.json');
+    if (verbose) {
+      console.log(('Config loaded').yellow);
+    }
   } else if (fs.existsSync(process.cwd() + '/default-values.json')) {
     default_file = process.cwd() + '/default-values.json';
+    if (verbose) {
+      console.log(('Config loaded').yellow);
+    }
   } else {
     console.log('--------------------------');
     console.log(('You should create the file ' + process.cwd() + '/default-values.json with default values in the parent folder! Use the default-values-example.json as a template.').bold);
@@ -322,9 +341,95 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       type: 'confirm',
       name: 'cleanFolder',
       message: 'Do you want clean the folders?'
+    }, {
+      type: 'confirm',
+      name: 'saveSettings',
+      message: 'Do you want save the configuration for reuse it?'
     }];
 
-  this.prompt(prompts, function(props) {
+  if (this.defaultValues.name !== '') {
+    prompts[0].default = this.defaultValues.name;
+  }
+  if (this.defaultValues.version !== '') {
+    prompts[1].default = this.defaultValues.pluginVersion;
+  }
+  if (this.defaultValues.publicResources !== '') {
+    if (this.defaultValues.publicResources.length === 0) {
+      prompts[6].choices.forEach(function (element, index, array) {
+        prompts[6].choices[index].checked = false;
+      });
+    } else {
+      var defaultvalues = this.defaultValues.publicResources;
+      prompts[6].choices.forEach(function (element, index, array) {
+        prompts[6].choices[index].checked = false;
+        defaultvalues.forEach(function (element_z, index_z, array_z) {
+          if (prompts[6].choices[index].name === element_z) {
+            prompts[6].choices[index].checked = true;
+          }
+        });
+      });
+    }
+  }
+  if (this.defaultValues.activateDeactivate !== '') {
+    if (this.defaultValues.activateDeactivate.length === 0) {
+      prompts[7].choices.forEach(function (element, index, array) {
+        prompts[7].choices[index].checked = false;
+      });
+    } else {
+      var defaultvalues = this.defaultValues.activateDeactivate;
+      prompts[7].choices.forEach(function (element, index, array) {
+        prompts[7].choices[index].checked = false;
+        defaultvalues.forEach(function (element_z, index_z, array_z) {
+          if (prompts[7].choices[index].name === element_z) {
+            prompts[7].choices[index].checked = true;
+          }
+        });
+      });
+    }
+  }
+  if (this.defaultValues.adminPage !== '') {
+    prompts[8].default = this.defaultValues.adminPage;
+  }
+  if (this.defaultValues.modules.length === 0) {
+    prompts[9].choices.forEach(function (element, index, array) {
+      prompts[9].choices[index].checked = false;
+    });
+  } else {
+    var defaultvalues = this.defaultValues.modules;
+    prompts[9].choices.forEach(function (element, index, array) {
+      prompts[9].choices[index].checked = false;
+      defaultvalues.forEach(function (element_z, index_z, array_z) {
+        if (prompts[9].choices[index].name === element_z) {
+          prompts[9].choices[index].checked = true;
+        }
+      });
+    });
+  }
+  if (this.defaultValues.snippet.length === 0) {
+    prompts[10].choices.forEach(function (element, index, array) {
+      prompts[10].choices[index].checked = false;
+    });
+  } else {
+    var defaultvalues = this.defaultValues.snippet;
+    prompts[10].choices.forEach(function (element, index, array) {
+      prompts[10].choices[index].checked = false;
+      defaultvalues.forEach(function (element_z, index_z, array_z) {
+        if (prompts[10].choices[index].name === element_z) {
+          prompts[10].choices[index].checked = true;
+        }
+      });
+    });
+  }
+  if (this.defaultValues.git !== '') {
+    prompts[11].default = this.defaultValues.git;
+  }
+  if (this.defaultValues.cleanFolder !== '') {
+    prompts[12].default = this.defaultValues.cleanFolder;
+  }
+  if (this.defaultValues.saveSettings !== '') {
+    prompts[13].default = this.defaultValues.saveSettings;
+  }
+  this.prompt(prompts, function (props) {
     this.pluginName = props.name;
     this.pluginSlug = s.slugify(props.name);
     this.pluginClassName = s.titleize(props.name).replace(/ /g, "_");
@@ -358,6 +463,20 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       fakepage: new Replacer(this.pluginSlug + '/includes/fake-page.php', this)
     };
 
+    if (this.saveSettings !== true) {
+      var cleaned = props;
+      delete cleaned['authorEmail'];
+      delete cleaned['authorEmail'];
+      delete cleaned['copyright'];
+      cleaned.author = {'name': props.author, 'email': this.authorEmail, 'url': this.authorURI, 'copyright': this.pluginCopyright};
+      fs.writeFile(props.name + '.json', JSON.stringify(cleaned, null, 2), function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log(("JSON saved to " + props.name + '.json').blue);
+        }
+      });
+    }
     cb();
   }.bind(this));
 };
@@ -369,12 +488,12 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
           zip = "";
   //Force the remove of the same plugin folder
   if (args[2] === 'force' || args[3] === 'force') {
-    rmdir.sync('./' + self.pluginSlug, function(error) {
+    rmdir.sync('./' + self.pluginSlug, function (error) {
       if (error) {
         console.log((error).red);
       }
     });
-    rmdir.sync('./plugin_temp', function(error) {
+    rmdir.sync('./plugin_temp', function (error) {
       if (error) {
         console.log((error).red);
       }
@@ -389,14 +508,14 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
     console.log(('Extract Plugin boilerplate').white);
     zip = new Admzip('./plugin.zip');
     zip.extractAllTo('plugin_temp', true);
-    fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules', function(err) {
+    fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules', function (err) {
       if (err) {
         console.log(('Error: Maybe you want the development version? call this generator with the dev parameter').red);
         process.exit(1);
       }
     });
-    fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/', './' + self.pluginSlug, function() {
-      rmdir('plugin_temp', function(error) {
+    fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/', './' + self.pluginSlug, function () {
+      rmdir('plugin_temp', function (error) {
         if (error) {
           console.log((error).red);
         }
@@ -413,13 +532,13 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
 
     request(path)
             .pipe(fs.createWriteStream('plugin.zip'))
-            .on('close', function() {
+            .on('close', function () {
               zip = new Admzip('./plugin.zip');
               console.log(('File downloaded').white);
               zip.extractAllTo('plugin_temp', true);
               fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules');
-              fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/', './' + self.pluginSlug, function() {
-                rmdir('plugin_temp', function(error) {
+              fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/', './' + self.pluginSlug, function () {
+                rmdir('plugin_temp', function (error) {
                   if (error) {
                     console.log((error).red);
                   }
@@ -458,7 +577,9 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
   this.files.primary.rm("/*\n * @TODO:\n *\n * - replace " + this.pluginClassName + " with the name of the class defined in\n *   `class-" + this.pluginSlug + ".php`\n */");
   this.files.primary.rm(" * - replace " + this.pluginClassName + "_Admin with the name of the class defined in\n *   `class-" + this.pluginSlug + "-admin.php`\n");
   this.files.primary.rm(" * @TODO:\n *\n * - replace `class-plugin-admin.php` with the name of the plugin's admin file\n * - replace " + this.pluginClassName + "Admin with the name of the class defined in\n *   `class-" + this.pluginSlug + "-admin.php`\n *\n");
-
+  if (verbose) {
+    console.log(('Added info marker replace on plugin.php').italic);
+  }
   //Activate/deactivate
   if (this.activateDeactivate.indexOf('Activate Method') === -1 && this.activateDeactivate.indexOf('Deactivate Method') === -1) {
     this.files.primary.rm("\n/*\n * Register hooks that are fired when the plugin is activated or deactivated.\n * When the plugin is deleted, the uninstall.php file is loaded.\n */\nregister_activation_hook( __FILE__, array( '" + this.pluginClassName + "', 'activate' ) );\nregister_deactivation_hook( __FILE__, array( '" + this.pluginClassName + "', 'deactivate' ) );\n");
@@ -475,58 +596,67 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
     this.files.primary.rm("\n/*\n * Load library for simple and fast creation of Taxonomy and Custom Post Type\n *\n */");
   }
   if (this.modules.indexOf('CPT_Core') === -1) {
-    rmdir(this.pluginSlug + '/includes/CPT_Core', function(error) {
+    rmdir(this.pluginSlug + '/includes/CPT_Core', function (error) {
       if (error) {
         console.log((error).red);
       }
     });
     this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/CPT_Core/CPT_Core.php' );");
     this.files.primary.rm("and Custom Post Type");
+    if (verbose) {
+      console.log(('CPT_Core removed').italic);
+    }
   }
   if (this.modules.indexOf('Taxonomy_Core') === -1) {
-    rmdir(this.pluginSlug + '/includes/Taxonomy_Core', function(error) {
+    rmdir(this.pluginSlug + '/includes/Taxonomy_Core', function (error) {
       if (error) {
         console.log((error).red);
       }
     });
     this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/Taxonomy_Core/Taxonomy_Core.php' );");
     this.files.primary.rm("Taxonomy and");
+    if (verbose) {
+      console.log(('Taxnomy_Core removed').italic);
+    }
   }
   if (this.modules.indexOf('Widget-Boilerplate') === -1) {
-    rmdir(this.pluginSlug + '/includes/Widget-Boilerplate', function(error) {
+    rmdir(this.pluginSlug + '/includes/Widget-Boilerplate', function (error) {
       if (error) {
         console.log((error).red);
       }
     });
     this.files.primary.rmsearch(' * Load Widget boilerplate', '', 1, 3);
+    if (verbose) {
+      console.log(('Removed Widget Boilerplate').italic);
+    }
   }
 
   //Function
   if (this.modules.indexOf('Fake Page Class') === -1) {
     fs.unlink(this.pluginSlug + '/includes/fake-page.php');
     this.files.primary.rmsearch(' * Load Fake Page class', "'post content' => 'This is the fake page content'", 1, -3);
+    if (verbose) {
+      console.log(('Removed Fake Class').italic);
+    }
   }
   if (this.modules.indexOf('Template system (like WooCommerce)') === -1) {
     fs.unlink(this.pluginSlug + '/includes/template.php');
-    rmdir(this.pluginSlug + '/templates', function(error) {
+    rmdir(this.pluginSlug + '/templates', function (error) {
       if (error) {
         console.log((error).red);
       }
     });
     this.files.primary.rmsearch(' * Load template system', '', 1, 3);
+    if (verbose) {
+      console.log(('Removed Template System').italic);
+    }
   }
   if (this.modules.indexOf('Language function support (WPML/Ceceppa Multilingua/Polylang)') === -1) {
     fs.unlink(this.pluginSlug + '/includes/language.php');
     this.files.primary.rmsearch(' * Load Language wrapper function for WPML/Ceceppa Multilingua/Polylang', '', 1, 3);
-  }
-  if (this.git === false) {
-    fs.unlink(this.pluginSlug + '.gitmodules');
-    rmdir(this.pluginSlug + '/.git', function(error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
-    console.log(('Remove git config generated').white);
+    if (verbose) {
+      console.log(('Removed Language function').italic);
+    }
   }
 };
 
@@ -535,19 +665,24 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   this.files.adminClass.rm("*\n * Call $plugin_slug from public plugin class.\n *\n * @TODO:\n *\n * - Rename \"" + this.pluginClassName + "\" to the name of your initial plugin class\n *\n */\n");
   this.files.adminClass.rmsearch('* Register and enqueue admin-specific style sheet.', '* - Rename "Plugin_Name" to the name your plugin', -2, -1);
   this.files.adminClass.rmsearch('* Register and enqueue admin-specific JavaScript.', '* - Rename "Plugin_Name" to the name your plugin', -2, -1);
-
+  if (verbose) {
+    console.log(('Added info marker in admin-class*.php').italic);
+  }
   //Repo
   if (this.modules.indexOf('Custom Metaboxes and Fields for WordPress') === -1 && this.modules.indexOf('HM Custom Meta Boxes for WordPress') === -1) {
     this.files.adminClass.rmsearch("add_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );", "add_filter( 'cmb_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", -1, 0);
     this.files.adminClass.rmsearch("* NOTE:     Your metabox on Demo CPT", "return $meta_boxes;", 1, -3);
+    if (verbose) {
+      console.log(('Removed CMB/CMBF').italic);
+    }
   }
   if (this.modules.indexOf('Custom Metaboxes and Fields for WordPress') === -1) {
-    rmdir(this.pluginSlug + '/admin/includes/CMBF', function(error) {
+    rmdir(this.pluginSlug + '/admin/includes/CMBF', function (error) {
       if (error) {
         console.log((error).red);
       }
     });
-    rmdir(this.pluginSlug + '/admin/includes/CMBF-Select2', function(error) {
+    rmdir(this.pluginSlug + '/admin/includes/CMBF-Select2', function (error) {
       if (error) {
         console.log((error).red);
       }
@@ -557,29 +692,36 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     this.files.adminClass.rmsearch('*  Custom Metabox and Fields for Wordpress', "* Filter is the same", -1, 1);
     this.files.adminClass.rmsearch('* Load CMBF', "require_once( plugin_dir_path( __FILE__ ) . 'includes/CMBF-Select2/cmb-field-select2.php' );", 0, -2);
     this.files.adminView.rmsearch("//Required for multi CMB form", "jQuery('.cmb-form #wp_meta_box_nonce').appendTo('.cmb-form');", 1, -4);
-    this.files.adminView.rmsearch('<div id="tabs-1">', "cmb_metabox_form( $option_fields, $this->plugin_slug . '-settings' );", -2, -2);
-    this.files.adminView.rmsearch('<div id="tabs-2">', "cmb_metabox_form( $option_fields_second, $this->plugin_slug . '-settings-second' );", -2, -2);
-
+    if (this.adminPage === true) {
+      this.files.adminView.rmsearch('<div id="tabs-1"', "cmb_metabox_form( $option_fields, $this->plugin_slug . '-settings' );", -2, -2);
+      this.files.adminView.rmsearch('<div id="tabs-2"', "cmb_metabox_form( $option_fields_second, $this->plugin_slug . '-settings-second' );", -2, -2);
+    }
     if (this.modules.indexOf('HM Custom Meta Boxes for WordPress') !== -1) {
       this.files.adminClass.rmsearch("* Choose the Custom Meta Box Library and remove the other", "* Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", -1, 0);
       this.files.adminClass.add('https://github.com/humanmade/Custom-Meta-Boxes/', 'https://github.com/humanmade/Custom-Meta-Boxes/	*/' + "\n");
     }
+    if (verbose) {
+      console.log(('Removed CMBF').italic);
+    }
   }
   if (this.modules.indexOf('HM Custom Meta Boxes for WordPress') === -1) {
-    rmdir(this.pluginSlug + '/admin/includes/CMB', function(error) {
+    rmdir(this.pluginSlug + '/admin/includes/CMB', function (error) {
       if (error) {
         console.log((error).red);
       }
     });
     this.files.adminClass.rmsearch("*  Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", "require_once( plugin_dir_path( __FILE__ ) . 'includes/CMB/custom-meta-boxes.php' );", -1, -1);
+    if (verbose) {
+      console.log(('Removed CMB').italic);
+    }
   }
   if (this.modules.indexOf('WP-Contextual-Help') === -1) {
-    rmdir(this.pluginSlug + '/admin/includes/WP-Contextual-Help', function(error) {
+    rmdir(this.pluginSlug + '/admin/includes/WP-Contextual-Help', function (error) {
       if (error) {
         console.log((error).red);
       }
     });
-    rmdir(this.pluginSlug + '/help-docs', function(error) {
+    rmdir(this.pluginSlug + '/help-docs', function (error) {
       if (error) {
         console.log((error).red);
       }
@@ -588,14 +730,20 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     this.files.adminClass.rmsearch('* Filter for change the folder of Contextual Help', "$paths[] = plugin_dir_path( __FILE__ ) . '../help-docs/';", 1, -3);
     this.files.adminClass.rmsearch('* Filter for change the folder image of Contextual Help', "$paths[] = plugin_dir_path( __FILE__ ) . '../help-docs/img';", 1, -3);
     this.files.adminClass.rmsearch('* Contextual Help, docs in /help-docs folter', "'page' => 'settings_page_' . $this->plugin_slug,", 1, -4);
+    if (verbose) {
+      console.log(('Removed Wp_Contextual_Help').italic);
+    }
   }
   if (this.modules.indexOf('WP-Admin-Notice') === -1) {
-    rmdir(this.pluginSlug + '/admin/includes/WP-Admin-Notice', function(error) {
+    rmdir(this.pluginSlug + '/admin/includes/WP-Admin-Notice', function (error) {
       if (error) {
         console.log((error).red);
       }
     });
     this.files.adminClass.rmsearch('* Load Wp_Admin_Notice for the notices in the backend', "new WP_Admin_Notice( __( 'Error Messages' ), 'error' );", 1, -1);
+    if (verbose) {
+      console.log(('Removed WP-Admin-Notice').italic);
+    }
   }
 
   //Snippet
@@ -610,17 +758,31 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
       this.files.adminCss.rmsearch('#dashboard_right_now a.demo-count:before {', '', 0, 3);
     }
   }
+  if (verbose) {
+    console.log(('Cleaning in admin-class*.php').italic);
+  }
   if (this.snippet.indexOf('Bubble notification on pending CPT') === -1) {
     this.files.adminClass.rmsearch('//Add bubble notification for cpt pending', "add_action( 'admin_menu', array( $this, 'pending_cpt_bubble' ), 999 );", 1, -1);
     this.files.adminClass.rmsearch("* Bubble Notification for pending cpt<br>", "return $current_key;", 1, -5);
+    if (verbose) {
+      console.log(('Removed Bubble Notification').italic);
+    }
   }
   if (this.snippet.indexOf('Import/Export settings system') === -1) {
     this.files.adminClass.rmsearch("* Process a settings export from config", "wp_safe_redirect( admin_url( 'options-general.php?page=' . $this->plugin_slug ) );", 1, -3);
-    this.files.adminView.rmsearch('<div id="tabs-3">', "<?php submit_button( __( 'Import' ), 'secondary', 'submit', false ); ?>", -2, -5);
+    if (this.adminPage === true) {
+      this.files.adminView.rmsearch('<div id="tabs-3"', "<?php submit_button( __( 'Import' ), 'secondary', 'submit', false ); ?>", -2, -5);
+    }
+    if (verbose) {
+      console.log(('Removed Import/Export Settings').italic);
+    }
   }
   if (this.snippet.indexOf('Debug system (Debug Bar support)') === -1) {
     fs.unlink(this.pluginSlug + '/admin/includes/debug.php');
     this.files.adminClass.rmsearch("* Debug mode", "$debug->log( __( 'Plugin Loaded', $this->plugin_slug ) );", 1, -1);
+    if (verbose) {
+      console.log(('Removed Debug system').italic);
+    }
   }
   if (this.snippet.indexOf('Custom action') === -1 && this.snippet.indexOf('Custom filter') === -1 && this.snippet.indexOf('Custom shortcode') === -1) {
     this.files.adminClass.rmsearch('* Define custom functionality.', '* http://codex.wordpress.org/Plugin_API#Hooks.2C_Actions_and_Filters', 1, -2);
@@ -628,10 +790,16 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   if (this.snippet.indexOf('Custom action') === -1) {
     this.files.adminClass.rm("add_action( '@TODO', array( $this, 'action_method_name' ) );\n");
     this.files.adminClass.rmsearch('* NOTE:     Actions are points in the execution of a page or process', '// @TODO: Define your action hook callback here', 1, -2);
+    if (verbose) {
+      console.log(('Removed Custom Action').italic);
+    }
   }
   if (this.snippet.indexOf('Custom filter') === -1) {
     this.files.adminClass.rm("add_filter( '@TODO', array( $this, 'filter_method_name' ) );\n");
     this.files.adminClass.rmsearch('* NOTE:     Filters are points of execution in which WordPress modifies data', '// @TODO: Define your filter hook callback here', 1, -2);
+    if (verbose) {
+      console.log(('Removed Custom Filter').italic);
+    }
   }
 };
 
@@ -660,10 +828,16 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
     this.files.publicClass.rmsearch('* Fired when a new site is activated with a WPMU environment.', '', 1, 16);
     this.files.publicClass.rmsearch('* Get all blog ids of blogs in the current network that are:', 'return $wpdb->get_col( $sql );', 1, -2);
     this.files.publicClass.rmsearch("* Fired for each blog when the plugin is activated.", '', 1, 33);
+    if (verbose) {
+      console.log(('Removed Activate Method').italic);
+    }
   }
   if (this.activateDeactivate.indexOf('Deactivate Method') === -1) {
     this.files.publicClass.rmsearch('* Fired when the plugin is deactivated.', '', 1, 32);
     this.files.publicClass.rmsearch('* Fired for each blog when the plugin is deactivated.', '', 1, 10);
+    if (verbose) {
+      console.log(('Removed Deactive Method').italic);
+    }
   }
 
   //Repo
@@ -706,7 +880,7 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   }
   if (this.snippet.indexOf('Capability system') === -1) {
     this.files.publicClass.rmsearch('* Array of capabilities by roles', '* Initialize the plugin by setting localization and loading public scripts', 1, 2);
-    this.files.publicClass.rmsearch('// @TODO: Define activation functionality here', '* Fired for each blog when the plugin is deactivated.', 1, 1);
+    this.files.publicClass.rmsearch('// @TODO: Define activation functionality here', '* Fired for each blog when the plugin is deactivated.', 2, 5);
     this.files.publicClass.rm("'edit_others_posts' => 'edit_other_demo',");
   }
   if (this.snippet.indexOf('Add body class') === -1) {
@@ -735,3 +909,4 @@ WpPluginBoilerplateGenerator.prototype.setUninstall = function setUninstall() {
     this.files.uninstall.rmsearch('} else {', '$wp_roles->remove_cap( $cap );', -19, -4);
   }
 };
+  
