@@ -19,7 +19,7 @@ var Replacer = module.exports = function Replacer(file, options) {
    * @param string search
    * @param string replace
    */
-  module.add = function(search, replace) {
+  module.add = function (search, replace) {
     searches.push({search: search, replace: replace});
   };
 
@@ -28,7 +28,7 @@ var Replacer = module.exports = function Replacer(file, options) {
    * 
    * @param string search
    */
-  module.rm = function(search) {
+  module.rm = function (search) {
     searches.push({search: "        " + search, replace: ''});
     searches.push({search: search, replace: ''});
   };
@@ -39,11 +39,22 @@ var Replacer = module.exports = function Replacer(file, options) {
    * @param number startok
    * @param number _end
    */
-  module.addsed = function(startok, endok) {
+  module.addsed = function (startok, endok) {
     seds.push({start: startok, end: endok});
   };
 
+
+  module.getlines = function (file) {
+    exec("wc -l < " + process.cwd() + '/' + file, {cwd: process.cwd() + '/'},
+    function (err, stdout, stderr) {
+      console.log(stdout);
+      console.log(stderr);
+    });
+  };
+
   module.file = file;
+  //console.log(module.getlines(file));
+  //module.file = module.file.replace(options.pluginSlug + '/', '');
 
   //Base replacements
   module.add(/plugin-name/g, options.pluginSlug);
@@ -61,10 +72,10 @@ var Replacer = module.exports = function Replacer(file, options) {
    * Replace the strings
    * 
    */
-  module.replace = function() {
-    fs.exists(file, function(exists) {
+  module.replace = function () {
+    fs.exists(file, function (exists) {
       if (exists) {
-        fs.readFile(file, 'utf8', function(err, data) {
+        fs.readFile(file, 'utf8', function (err, data) {
           module.add(/\n\n\n/g, "\n");
           var i, total;
           if (err) {
@@ -76,7 +87,7 @@ var Replacer = module.exports = function Replacer(file, options) {
             data = data.replace(searches[i].search, searches[i].replace);
           }
 
-          fs.writeFile(file, data, 'utf8', function(err) {
+          fs.writeFile(file, data, 'utf8', function (err) {
             if (err) {
               return console.log((err).red);
             }
@@ -97,7 +108,7 @@ var Replacer = module.exports = function Replacer(file, options) {
    * @param number count_initial
    * @param number count_end
    */
-  module.rmsearch = function(start, end, count_initial, count_end) {
+  module.rmsearch = function (start, end, count_initial, count_end) {
     var stream, startok, endok;
     var i = -1;
     var startspace = start;
@@ -106,13 +117,13 @@ var Replacer = module.exports = function Replacer(file, options) {
     if (end.length > 0) {
       end = end.replace(/ /g, '');
     }
-    fs.exists(file, function(exists) {
+    fs.exists(file, function (exists) {
       if (exists) {
         stream = readline(fs.createReadStream(file, {flags: 'r'}));
         stream.setDelimiter("\n");
 
         //start reading the file
-        stream.on('line', function(line) {
+        stream.on('line', function (line) {
           i++;
           line = line.replace(/(\r\n|\n|\r|\t)/gm, '').replace(/ /g, '');
 
@@ -126,7 +137,7 @@ var Replacer = module.exports = function Replacer(file, options) {
           }
         });
 
-        stream.on("end", function() {
+        stream.on("end", function () {
           if (typeof startok === 'undefined' || isNaN(startok)) {
             return console.log(('Not found start line <<' + startspace + '>> in ' + file).red);
           }
@@ -149,9 +160,13 @@ var Replacer = module.exports = function Replacer(file, options) {
    * Call sed command and replace method
    * 
    */
-  module.sed = function() {
-    fs.exists(process.cwd() + '/' + file, function(exists) {
+  module.sed = function () {
+    file = file.replace(options.pluginSlug, '');
+    fs.exists(process.cwd() + '/' + file, function (exists) {
       if (exists) {
+        if (verbose) {
+          console.log(('Sed ' + file).italic);
+        }
         if (seds.length !== 0) {
           var total = seds.length;
           var line = '';
@@ -162,7 +177,7 @@ var Replacer = module.exports = function Replacer(file, options) {
           }
 
           exec("sed -i '" + line + "' " + process.cwd() + '/' + file, {cwd: process.cwd() + '/'},
-          function(err, stdout, stderr) {
+          function (err, stdout, stderr) {
             if (stderr.length > 0) {
               console.log(("sed -i '" + line + "' " + process.cwd() + '/' + file).red);
               return console.log(('stderr: ' + stderr).red);
@@ -178,6 +193,8 @@ var Replacer = module.exports = function Replacer(file, options) {
         } else {
           module.replace();
         }
+      } else {
+        console.log(('File not exist: ' + file).red);
       }
     });
   };

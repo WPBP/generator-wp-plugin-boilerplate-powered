@@ -9,7 +9,7 @@ var Admzip = require('adm-zip');
 var rmdir = require('rimraf');
 var s = require('underscore.string');
 var sys = require('sys');
-var spawn = require('child_process').spawn;
+var spawn = require('child_process').spawnSync || require('spawn-sync');
 var colors = require('colors');
 var Replacer = require('./replacer');
 var cleanfolder = false;
@@ -142,8 +142,6 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
       '         rm -r $path',
       '         echo "Add $url in $path"',
       '         git submodule add -f $url $path',
-      'else',
-      'echo $path',
       '       fi',
       '   done',
       'rm $0'
@@ -169,67 +167,73 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                         });
                 //Call the bash script
                 console.log(('Download submodules').white);
-                submodule.stdout.on('data',
-                        function (data) {
-                          console.log((data.toString()).green);
-                        });
-                submodule.stderr.on('data',
-                        function (data) {
-                          console.log((data.toString()).blue);
-                        });
-                submodule.on('close',
-                        function (code) {
-                          if (this.git !== true) {
-                            fs.unlink(this.pluginSlug + '.gitmodules', function (error) {
-                              if (error) {
-                                console.log((error).red);
-                              }
-                            });
-                            rmdir(this.pluginSlug + '/.git', function (error) {
-                              if (error) {
-                                console.log((error).red);
-                              }
-                            });
-                            console.log(('Remove git config generated').white);
-                          }
-                          //Clean all the folders!!
-                          if (self.modules.indexOf('CPT_Core') !== -1) {
-                            cleanFolder(self.pluginSlug + '/includes/CPT_Core');
-                          }
 
-                          if (self.modules.indexOf('Taxonomy_Core') !== -1) {
-                            cleanFolder(self.pluginSlug + '/includes/Taxonomy_Core');
-                          }
+                /*submodule.stdout.on('data',
+                 function (data) {
+                 console.log((data.toString()).green);
+                 });*/
+                if (submodule.status !== 0) {
+                  console.log((submodule.stderr).blue);
+                } else {
+                  console.log((submodule.stdout).green);
+                }
+                /*submodule.stderr.on('data',
+                 function (data) {
+                 console.log((data.toString()).blue);
+                 });*/
+                //submodule.on('close',
+                //function (code) {
+                if (self.defaultValues.git !== true) {
+                  fs.unlink(self.pluginSlug + '.gitmodules', function (error) {
+                    if (error) {
+                      console.log((error).red);
+                    }
+                  });
+                  rmdir(self.pluginSlug + '/.git', function (error) {
+                    if (error) {
+                      console.log((error).red);
+                    }
+                  });
+                  console.log(('Remove git config generated').white);
+                }
+                //Clean all the folders!!
+                if (self.modules.indexOf('CPT_Core') !== -1) {
+                  cleanFolder(self.pluginSlug + '/includes/CPT_Core');
+                }
 
-                          if (self.modules.indexOf('Widget-Boilerplate') !== -1) {
-                            cleanFolder(self.pluginSlug + '/includes/Widget-Boilerplate');
-                            cleanFolder(self.pluginSlug + '/includes/Widget-Boilerplate/widget-boilerplate');
-                          }
+                if (self.modules.indexOf('Taxonomy_Core') !== -1) {
+                  cleanFolder(self.pluginSlug + '/includes/Taxonomy_Core');
+                }
 
-                          if (self.modules.indexOf('CMB2') !== -1) {
-                            cleanFolder(self.pluginSlug + '/admin/includes/CMB2');
-                          }
+                if (self.modules.indexOf('Widget-Boilerplate') !== -1) {
+                  cleanFolder(self.pluginSlug + '/includes/Widget-Boilerplate');
+                  cleanFolder(self.pluginSlug + '/includes/Widget-Boilerplate/widget-boilerplate');
+                }
 
-                          if (self.modules.indexOf('PointerPlus') !== -1) {
-                            cleanFolder(self.pluginSlug + '/admin/includes/PointerPlus');
-                          }
+                if (self.modules.indexOf('CMB2') !== -1) {
+                  cleanFolder(self.pluginSlug + '/admin/includes/CMB2');
+                }
 
-                          if (self.modules.indexOf('Template system (like WooCommerce)') !== -1) {
-                            cleanFolder(self.pluginSlug + '/templates');
-                          }
+                if (self.modules.indexOf('PointerPlus') !== -1) {
+                  cleanFolder(self.pluginSlug + '/admin/includes/PointerPlus');
+                }
 
-                          if (self.modules.indexOf('WP-Contextual-Help') !== -1) {
-                            if (cleanfolder !== false) {
-                              rmdir(self.pluginSlug + +'/admin/includes/WP-Contextual-Help/assets/', function (err) {
-                              });
-                            }
-                            cleanFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help');
-                          }
+                if (self.modules.indexOf('Template system (like WooCommerce)') !== -1) {
+                  cleanFolder(self.pluginSlug + '/templates');
+                }
 
-                          //Console.log are cool and bowtie are cool!
-                          console.log(('Inserted index.php files in all the folders').white);
-                          console.log(('All done!').white);
-                        });
+                if (self.modules.indexOf('WP-Contextual-Help') !== -1) {
+                  if (cleanfolder !== false) {
+                    rmdir(self.pluginSlug + +'/admin/includes/WP-Contextual-Help/assets/', function (err) {
+                    });
+                  }
+                  cleanFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help');
+                }
+
+                //Console.log are cool and bowtie are cool!
+                console.log(('Inserted index.php files in all the folders').white);
+                console.log(('All done!').white);
+                //});
               }
             }
     );
@@ -573,9 +577,7 @@ WpPluginBoilerplateGenerator.prototype.setFiles = function setFiles() {
   fs.rename(this.pluginSlug + '/public/class-plugin-name.php', this.files.publicClass.file);
   fs.rename(this.pluginSlug + '/languages/plugin-name.pot', this.pluginSlug + '/languages/' + this.pluginSlug + '.pot');
 
-  if (verbose) {
-    console.log(('Renamed files').italic);
-  }
+  console.log(('Renamed files').white);
 };
 
 WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
