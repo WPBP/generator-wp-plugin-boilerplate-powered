@@ -360,7 +360,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
 
   if (is_default === false) {
     if (this.defaultValues.name !== '') {
-      if (fs.existsSync('./' + s.slugify(this.defaultValues.name)) && s.slugify(this.defaultValues.name) !== '') {
+      if (fs.existsSync('./' + s.slugify(this.defaultValues.name)) && this.defaultValues.name !== undefined) {
         console.log(('Warning folder ' + s.slugify(this.defaultValues.name) + ' already exist, change the name of the plugin!').red);
       }
       prompts[0].default = this.defaultValues.name;
@@ -369,7 +369,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       prompts[1].default = this.defaultValues.pluginVersion;
     }
     if (this.defaultValues.publicResources !== '') {
-      if (this.defaultValues.publicResources.length === 0) {
+      if (this.defaultValues.publicResources === undefined) {
         prompts[6].choices.forEach(function (element, index, array) {
           prompts[6].choices[index].checked = false;
         });
@@ -386,7 +386,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       }
     }
     if (this.defaultValues.activateDeactivate !== '') {
-      if (this.defaultValues.activateDeactivate.length === 0) {
+      if (this.defaultValues.activateDeactivate === undefined) {
         prompts[7].choices.forEach(function (element, index, array) {
           prompts[7].choices[index].checked = false;
         });
@@ -405,7 +405,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
     if (this.defaultValues.adminPage !== '') {
       prompts[8].default = this.defaultValues.adminPage;
     }
-    if (this.defaultValues.modules.length === 0) {
+    if (this.defaultValues.modules === undefined) {
       prompts[9].choices.forEach(function (element, index, array) {
         prompts[9].choices[index].checked = false;
       });
@@ -420,7 +420,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         });
       });
     }
-    if (this.defaultValues.snippet.length === 0) {
+    if (this.defaultValues.snippet === undefined) {
       prompts[10].choices.forEach(function (element, index, array) {
         prompts[10].choices[index].checked = false;
       });
@@ -914,4 +914,4 @@ WpPluginBoilerplateGenerator.prototype.setUninstall = function setUninstall() {
     this.files.uninstall.rmsearch('} else {', '$wp_roles->remove_cap( $cap );', -19, -4);
   }
 };
-  
+
