@@ -137,12 +137,16 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
       '   do',
       "     url_key=$(echo $path_key | sed 's/.path/.url/')",
       '     url=$(git config -f .gitmodules --get $url_key)',
-      '       if [ -d $path ]; then',
+      '     path="./$path"',
+      '       if [ -d "$path" ]; then',
       '         rm -r $path',
       '         echo "Add $url in $path"',
       '         git submodule add -f $url $path',
+      'else',
+      'echo $path',
       '       fi',
       '   done',
+      'rm $0'
     ].join('\n');
     fs.writeFile(self.pluginSlug + '/submodules.sh', submodulessh, 'utf8',
             function (err) {
@@ -159,12 +163,12 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                   }
                 }
                 console.log(('Parsed all the files').white);
-                //Call the bash script
-                console.log(('Download submodules').white);
                 var submodule = spawn(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', [],
                         {
-                          cwd: process.cwd() + '/' + self.pluginSlug + '/',
+                          cwd: process.cwd() + '/' + self.pluginSlug + '/'
                         });
+                //Call the bash script
+                console.log(('Download submodules').white);
                 submodule.stdout.on('data',
                         function (data) {
                           console.log((data.toString()).green);
@@ -232,7 +236,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
 
   });
 
-  //have Yeoman greet the user.
+  //Yeoman greet the user.
   console.log(this.yeoman);
   //Check the default file for the default values, I have already said default?
   if (fs.existsSync(__dirname + '/../default-values.json')) {
@@ -518,7 +522,7 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
     zip.extractAllTo('plugin_temp', true);
     fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules', function (err) {
       if (err) {
-        console.log(('Error: Maybe you want the development version? call this generator with the dev parameter').red);
+        console.log(('Error: Maybe you want the development version? Call this generator with the dev parameter').red);
         process.exit(1);
       }
     });
@@ -558,7 +562,7 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
   }
 };
 
-WpPluginBoilerplateGenerator.prototype.setFiles = function setName() {
+WpPluginBoilerplateGenerator.prototype.setFiles = function setFiles() {
   cleanfolder = this.cleanFolder;
   //Change path of gitmodules
   this.files.gitmodules.add(new RegExp(this.pluginSlug + '/', "g"), '');
@@ -690,7 +694,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     });
     this.files.adminClass.rm("$settings[ 1 ] = get_option( $this->plugin_slug . '-settings-second' );");
     this.files.adminClass.rm("update_option( $this->plugin_slug . '-settings-second', get_object_vars( $settings[ 1 ] ) );");
-    this.files.adminClass.rmsearch('* CMB 2 for metabox and many other cool things!', "add_filter( 'cmb2_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", 1, 0);
+    this.files.adminClass.rmsearch('* CMB 2 for metabox and many other cool things!', "add_filter( 'cmb2_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", 1, -2);
     this.files.publicClass.rm("\n// Check for the CMB2 Shortcode Button");
     this.files.publicClass.rm("\n// In bundle with the boilerplate https://github.com/jtsternberg/Shortcode_Button");
     if (this.adminPage === true) {
