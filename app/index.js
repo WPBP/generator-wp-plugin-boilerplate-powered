@@ -14,7 +14,8 @@ var colors = require('colors');
 var Replacer = require('./replacer');
 var cleanfolder = false;
 var args = process.argv.slice(2);
-var version = '1.1.0beta2';
+var version = '1.1.1';
+var is_default = false;
 var verbose = false;
 if (args[1] === 'dev') {
   version = 'master';
@@ -64,7 +65,7 @@ function cleanParsing(pathrec) {
   var default_file = [
     'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json', 'production.rb', 'composer.json',
     'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json', 'Capfile', 'screenshot-1.png', 'component.json',
-    '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'select2.jquery.json'
+    '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'pointerplus.php'
   ];
   var default_folder = ['tests', 'bin', 'deploy', 'config'];
   if (cleanfolder !== false) {
@@ -142,7 +143,6 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
       '         git submodule add -f $url $path',
       '       fi',
       '   done',
-      'rm $0'
     ].join('\n');
     fs.writeFile(self.pluginSlug + '/submodules.sh', submodulessh, 'utf8',
             function (err) {
@@ -151,7 +151,6 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
               } else {
                 fs.chmodSync(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', '0777');
                 console.log(('Generate git config on the fly').white);
-                console.log(('Download submodules').white);
                 //Execute the magic for clean, destroy, brick, brock the code
                 var key = null;
                 for (key in self.files) {
@@ -161,7 +160,11 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 }
                 console.log(('Parsed all the files').white);
                 //Call the bash script
-                var submodule = spawn(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', [], {cwd: process.cwd() + '/' + self.pluginSlug + '/'});
+                console.log(('Download submodules').white);
+                var submodule = spawn(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', [],
+                        {
+                          cwd: process.cwd() + '/' + self.pluginSlug + '/',
+                        });
                 submodule.stdout.on('data',
                         function (data) {
                           console.log((data.toString()).green);
@@ -199,13 +202,12 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                             cleanFolder(self.pluginSlug + '/includes/Widget-Boilerplate/widget-boilerplate');
                           }
 
-                          if (self.modules.indexOf('Custom Metaboxes and Fields for WordPress') !== -1) {
-                            cleanFolder(self.pluginSlug + '/admin/includes/CMBF');
-                            cleanFolder(self.pluginSlug + '/admin/includes/CMBF-Select2');
+                          if (self.modules.indexOf('CMB2') !== -1) {
+                            cleanFolder(self.pluginSlug + '/admin/includes/CMB2');
                           }
 
-                          if (self.modules.indexOf('HM Custom Meta Boxes for WordPress') !== -1) {
-                            cleanFolder(self.pluginSlug + '/admin/includes/CMB');
+                          if (self.modules.indexOf('PointerPlus') !== -1) {
+                            cleanFolder(self.pluginSlug + '/admin/includes/PointerPlus');
                           }
 
                           if (self.modules.indexOf('Template system (like WooCommerce)') !== -1) {
@@ -245,9 +247,10 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
     }
   } else {
     console.log('--------------------------');
-    console.log(('You should create the file ' + process.cwd() + '/default-values.json with default values in the parent folder! Use the default-values-example.json as a template.').bold);
+    console.log(('You can create the file ' + process.cwd() + '/default-values.json with default values in the parent folder! Use the default-values-example.json as a template.').bold);
     console.log('--------------------------');
     default_file = path.join(__dirname, '../default-values-example.json');
+    is_default = true;
   }
   this.defaultValues = JSON.parse(this.readFileAsString(default_file));
 };
@@ -307,10 +310,10 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'CPT_Core', checked: true},
         {name: 'Taxonomy_Core', checked: true},
         {name: 'Widget-Boilerplate', checked: true},
-        {name: 'HM Custom Meta Boxes for WordPress', checked: true},
-        {name: 'Custom Metaboxes and Fields for WordPress', checked: true},
+        {name: 'CMB2', checked: true},
         {name: 'WP-Contextual-Help', checked: true},
         {name: 'WP-Admin-Notice', checked: true},
+        {name: 'PointerPlus', checked: true},
         {name: 'Fake Page Class', checked: true},
         {name: 'Template system (like WooCommerce)', checked: true},
         {name: 'Language function support (WPML/Ceceppa Multilingua/Polylang)', checked: true},
@@ -347,91 +350,92 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       message: 'Do you want save the configuration for reuse it?'
     }];
 
-  if (this.defaultValues.name !== '') {
-    if (fs.existsSync('./' + s.slugify(this.defaultValues.name))) {
-      console.log(('Warning folder ' + s.slugify(this.defaultValues.name) + ' already exist, change the name of the plugin!').red);
+  if (is_default === false) {
+    if (this.defaultValues.name !== '') {
+      if (fs.existsSync('./' + s.slugify(this.defaultValues.name)) && s.slugify(this.defaultValues.name) !== '') {
+        console.log(('Warning folder ' + s.slugify(this.defaultValues.name) + ' already exist, change the name of the plugin!').red);
+      }
+      prompts[0].default = this.defaultValues.name;
     }
-    prompts[0].default = this.defaultValues.name;
-
-  }
-  if (this.defaultValues.version !== '') {
-    prompts[1].default = this.defaultValues.pluginVersion;
-  }
-  if (this.defaultValues.publicResources !== '') {
-    if (this.defaultValues.publicResources.length === 0) {
-      prompts[6].choices.forEach(function (element, index, array) {
-        prompts[6].choices[index].checked = false;
+    if (this.defaultValues.version !== '') {
+      prompts[1].default = this.defaultValues.pluginVersion;
+    }
+    if (this.defaultValues.publicResources !== '') {
+      if (this.defaultValues.publicResources.length === 0) {
+        prompts[6].choices.forEach(function (element, index, array) {
+          prompts[6].choices[index].checked = false;
+        });
+      } else {
+        var defaultvalues = this.defaultValues.publicResources;
+        prompts[6].choices.forEach(function (element, index, array) {
+          prompts[6].choices[index].checked = false;
+          defaultvalues.forEach(function (element_z, index_z, array_z) {
+            if (prompts[6].choices[index].name === element_z) {
+              prompts[6].choices[index].checked = true;
+            }
+          });
+        });
+      }
+    }
+    if (this.defaultValues.activateDeactivate !== '') {
+      if (this.defaultValues.activateDeactivate.length === 0) {
+        prompts[7].choices.forEach(function (element, index, array) {
+          prompts[7].choices[index].checked = false;
+        });
+      } else {
+        var defaultvalues = this.defaultValues.activateDeactivate;
+        prompts[7].choices.forEach(function (element, index, array) {
+          prompts[7].choices[index].checked = false;
+          defaultvalues.forEach(function (element_z, index_z, array_z) {
+            if (prompts[7].choices[index].name === element_z) {
+              prompts[7].choices[index].checked = true;
+            }
+          });
+        });
+      }
+    }
+    if (this.defaultValues.adminPage !== '') {
+      prompts[8].default = this.defaultValues.adminPage;
+    }
+    if (this.defaultValues.modules.length === 0) {
+      prompts[9].choices.forEach(function (element, index, array) {
+        prompts[9].choices[index].checked = false;
       });
     } else {
-      var defaultvalues = this.defaultValues.publicResources;
-      prompts[6].choices.forEach(function (element, index, array) {
-        prompts[6].choices[index].checked = false;
+      var defaultvalues = this.defaultValues.modules;
+      prompts[9].choices.forEach(function (element, index, array) {
+        prompts[9].choices[index].checked = false;
         defaultvalues.forEach(function (element_z, index_z, array_z) {
-          if (prompts[6].choices[index].name === element_z) {
-            prompts[6].choices[index].checked = true;
+          if (prompts[9].choices[index].name === element_z) {
+            prompts[9].choices[index].checked = true;
           }
         });
       });
     }
-  }
-  if (this.defaultValues.activateDeactivate !== '') {
-    if (this.defaultValues.activateDeactivate.length === 0) {
-      prompts[7].choices.forEach(function (element, index, array) {
-        prompts[7].choices[index].checked = false;
+    if (this.defaultValues.snippet.length === 0) {
+      prompts[10].choices.forEach(function (element, index, array) {
+        prompts[10].choices[index].checked = false;
       });
     } else {
-      var defaultvalues = this.defaultValues.activateDeactivate;
-      prompts[7].choices.forEach(function (element, index, array) {
-        prompts[7].choices[index].checked = false;
+      var defaultvalues = this.defaultValues.snippet;
+      prompts[10].choices.forEach(function (element, index, array) {
+        prompts[10].choices[index].checked = false;
         defaultvalues.forEach(function (element_z, index_z, array_z) {
-          if (prompts[7].choices[index].name === element_z) {
-            prompts[7].choices[index].checked = true;
+          if (prompts[10].choices[index].name === element_z) {
+            prompts[10].choices[index].checked = true;
           }
         });
       });
     }
-  }
-  if (this.defaultValues.adminPage !== '') {
-    prompts[8].default = this.defaultValues.adminPage;
-  }
-  if (this.defaultValues.modules.length === 0) {
-    prompts[9].choices.forEach(function (element, index, array) {
-      prompts[9].choices[index].checked = false;
-    });
-  } else {
-    var defaultvalues = this.defaultValues.modules;
-    prompts[9].choices.forEach(function (element, index, array) {
-      prompts[9].choices[index].checked = false;
-      defaultvalues.forEach(function (element_z, index_z, array_z) {
-        if (prompts[9].choices[index].name === element_z) {
-          prompts[9].choices[index].checked = true;
-        }
-      });
-    });
-  }
-  if (this.defaultValues.snippet.length === 0) {
-    prompts[10].choices.forEach(function (element, index, array) {
-      prompts[10].choices[index].checked = false;
-    });
-  } else {
-    var defaultvalues = this.defaultValues.snippet;
-    prompts[10].choices.forEach(function (element, index, array) {
-      prompts[10].choices[index].checked = false;
-      defaultvalues.forEach(function (element_z, index_z, array_z) {
-        if (prompts[10].choices[index].name === element_z) {
-          prompts[10].choices[index].checked = true;
-        }
-      });
-    });
-  }
-  if (this.defaultValues.git !== '') {
-    prompts[11].default = this.defaultValues.git;
-  }
-  if (this.defaultValues.cleanFolder !== '') {
-    prompts[12].default = this.defaultValues.cleanFolder;
-  }
-  if (this.defaultValues.saveSettings !== '') {
-    prompts[13].default = this.defaultValues.saveSettings;
+    if (this.defaultValues.git !== '') {
+      prompts[11].default = this.defaultValues.git;
+    }
+    if (this.defaultValues.cleanFolder !== '') {
+      prompts[12].default = this.defaultValues.cleanFolder;
+    }
+    if (this.defaultValues.saveSettings !== '') {
+      prompts[13].default = this.defaultValues.saveSettings;
+    }
   }
   this.prompt(prompts, function (props) {
     this.pluginName = props.name;
@@ -673,50 +677,28 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     console.log(('Added info marker in admin-class*.php').italic);
   }
   //Repo
-  if (this.modules.indexOf('Custom Metaboxes and Fields for WordPress') === -1 && this.modules.indexOf('HM Custom Meta Boxes for WordPress') === -1) {
-    this.files.adminClass.rmsearch("add_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );", "add_filter( 'cmb_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", -1, 0);
-    this.files.adminClass.rmsearch("* NOTE:     Your metabox on Demo CPT", "return $meta_boxes;", 1, -3);
-    if (verbose) {
-      console.log(('Removed CMB/CMBF').italic);
-    }
-  }
-  if (this.modules.indexOf('Custom Metaboxes and Fields for WordPress') === -1) {
-    rmdir(this.pluginSlug + '/admin/includes/CMBF', function (error) {
+  if (this.modules.indexOf('CMB2') === -1) {
+    rmdir(this.pluginSlug + '/admin/includes/CMB2', function (error) {
       if (error) {
         console.log((error).red);
       }
     });
-    rmdir(this.pluginSlug + '/admin/includes/CMBF-Select2', function (error) {
+    rmdir(this.pluginSlug + '/admin/includes/CMB2-Shortcode', function (error) {
       if (error) {
         console.log((error).red);
       }
     });
     this.files.adminClass.rm("$settings[ 1 ] = get_option( $this->plugin_slug . '-settings-second' );");
     this.files.adminClass.rm("update_option( $this->plugin_slug . '-settings-second', get_object_vars( $settings[ 1 ] ) );");
-    this.files.adminClass.rmsearch('*  Custom Metabox and Fields for Wordpress', "* Filter is the same", -1, 1);
-    this.files.adminClass.rmsearch('* Load CMBF', "require_once( plugin_dir_path( __FILE__ ) . 'includes/CMBF-Select2/cmb-field-select2.php' );", 0, -2);
-    this.files.adminView.rmsearch("//Required for multi CMB form", "jQuery('.cmb-form #wp_meta_box_nonce').appendTo('.cmb-form');", 1, -4);
+    this.files.adminClass.rmsearch('* CMB 2 for metabox and many other cool things!', "add_filter( 'cmb2_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", 1, 0);
+    this.files.publicClass.rm("\n// Check for the CMB2 Shortcode Button");
+    this.files.publicClass.rm("\n// In bundle with the boilerplate https://github.com/jtsternberg/Shortcode_Button");
     if (this.adminPage === true) {
-      this.files.adminView.rmsearch('<div id="tabs-1"', "cmb_metabox_form( $option_fields, $this->plugin_slug . '-settings' );", -2, -2);
-      this.files.adminView.rmsearch('<div id="tabs-2"', "cmb_metabox_form( $option_fields_second, $this->plugin_slug . '-settings-second' );", -2, -2);
-    }
-    if (this.modules.indexOf('HM Custom Meta Boxes for WordPress') !== -1) {
-      this.files.adminClass.rmsearch("* Choose the Custom Meta Box Library and remove the other", "* Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", -1, 0);
-      this.files.adminClass.add('https://github.com/humanmade/Custom-Meta-Boxes/', 'https://github.com/humanmade/Custom-Meta-Boxes/	*/' + "\n");
+      this.files.adminView.rmsearch('<div id="tabs-1">', "cmb2_metabox_form( $option_fields, $this->plugin_slug . '-settings' );", -2, -2);
+      this.files.adminView.rmsearch('<div id="tabs-2">', "cmb2_metabox_form( $option_fields_second, $this->plugin_slug . '-settings-second' );", -2, -2);
     }
     if (verbose) {
-      console.log(('Removed CMBF').italic);
-    }
-  }
-  if (this.modules.indexOf('HM Custom Meta Boxes for WordPress') === -1) {
-    rmdir(this.pluginSlug + '/admin/includes/CMB', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
-    this.files.adminClass.rmsearch("*  Custom meta Boxes by HumanMade | PS: include natively Select2 for select box", "require_once( plugin_dir_path( __FILE__ ) . 'includes/CMB/custom-meta-boxes.php' );", -1, -1);
-    if (verbose) {
-      console.log(('Removed CMB').italic);
+      console.log(('Removed CMB2').italic);
     }
   }
   if (this.modules.indexOf('WP-Contextual-Help') === -1) {
@@ -747,6 +729,18 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     this.files.adminClass.rmsearch('* Load Wp_Admin_Notice for the notices in the backend', "new WP_Admin_Notice( __( 'Error Messages' ), 'error' );", 1, -1);
     if (verbose) {
       console.log(('Removed WP-Admin-Notice').italic);
+    }
+  }
+  if (this.modules.indexOf('PointerPlus') === -1) {
+    rmdir(this.pluginSlug + '/admin/includes/PointerPlus', function (error) {
+      if (error) {
+        console.log((error).red);
+      }
+    });
+    this.files.adminClass.rmsearch('* Load PointerPlus for the Wp Pointer', "add_filter( 'pointerplus_list', array( $this, 'custom_initial_pointers' ), 10, 2 );", 1, -1);
+    this.files.adminClass.rmsearch('* Add pointers.', "'icon_class' => 'dashicons-welcome-learn-more',", 1, -3);
+    if (verbose) {
+      console.log(('Removed PointerPlus').italic);
     }
   }
 
