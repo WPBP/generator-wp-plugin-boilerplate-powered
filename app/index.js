@@ -39,9 +39,7 @@ var isUnixHiddenPath = function (path) {
  * @param string path
  */
 function cleanFolder(path) {
-  console.log(('Parsing ' + path).italic);
   cleanParsing(path);
-
   //Recursive scanning for the subfolder
   var list = fs.readdirSync(path);
   list.forEach(function (file) {
@@ -65,7 +63,7 @@ function cleanParsing(pathrec) {
   var default_file = [
     'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json', 'production.rb', 'composer.json',
     'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json', 'Capfile', 'screenshot-1.png', 'component.json',
-    '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'pointerplus.php'
+    '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'pointerplus.php', '.DS_Store'
   ];
   var default_folder = ['tests', 'bin', 'deploy', 'config'];
   if (cleanfolder !== false) {
@@ -95,9 +93,9 @@ function cleanParsing(pathrec) {
         });
         if (!error || isEmpty) {
           rmdir('./' + pathrec + '/' + element, function (err) {
-          if (err) {
-            console.log((err).red);
-          }
+            if (err) {
+              console.log((err).red);
+            }
             if (verbose) {
               console.log(('Removed ' + pathrec + '/' + element).italic);
             }
@@ -141,7 +139,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
       '       if [ -d "$path" ]; then',
       '         rm -r $path',
       '         echo "Add $url in $path"',
-      '         git submodule add -f $url $path',
+      '         git submodule add -f $url $path >> /dev/null',
       '       fi',
       '   done',
       'rm $0'
@@ -164,70 +162,68 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                   }
                 }
                 console.log(('Parsed all the files').white);
+                //Call the bash script
+                console.log(('Download submodules').white);
                 var submodule = spawn(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', [],
                         {
                           cwd: process.cwd() + '/' + self.pluginSlug + '/'
                         });
-                //Call the bash script
-                console.log(('Download submodules').white);
 
                 if (submodule.status !== 0) {
                   console.log((submodule.stderr).blue);
+                  process.exit();
                 } else {
-                  if (submodule.stdout !== undefined) {
-                    console.log((submodule.stdout).green);
-                  }
-                }
-                if (self.defaultValues.git !== true) {
-                  fs.unlink(self.pluginSlug + '.gitmodules', function (error) {
-                    if (error) {
-                      console.log((error).red);
-                    }
-                  });
-                  rmdir(self.pluginSlug + '/.git', function (error) {
-                    if (error) {
-                      console.log((error).red);
-                    }
-                  });
-                  console.log(('Remove git config generated').white);
-                }
-                //Clean all the folders!!
-                if (self.modules.indexOf('CPT_Core') !== -1) {
-                  cleanFolder(self.pluginSlug + '/includes/CPT_Core');
-                }
-
-                if (self.modules.indexOf('Taxonomy_Core') !== -1) {
-                  cleanFolder(self.pluginSlug + '/includes/Taxonomy_Core');
-                }
-
-                if (self.modules.indexOf('Widget-Boilerplate') !== -1) {
-                  cleanFolder(self.pluginSlug + '/includes/Widget-Boilerplate');
-                  cleanFolder(self.pluginSlug + '/includes/Widget-Boilerplate/widget-boilerplate');
-                }
-
-                if (self.modules.indexOf('CMB2') !== -1) {
-                  cleanFolder(self.pluginSlug + '/admin/includes/CMB2');
-                }
-
-                if (self.modules.indexOf('PointerPlus') !== -1) {
-                  cleanFolder(self.pluginSlug + '/admin/includes/PointerPlus');
-                }
-
-                if (self.modules.indexOf('Template system (like WooCommerce)') !== -1) {
-                  cleanFolder(self.pluginSlug + '/templates');
-                }
-
-                if (self.modules.indexOf('WP-Contextual-Help') !== -1) {
-                  if (cleanfolder !== false) {
-                    rmdir(self.pluginSlug + +'/admin/includes/WP-Contextual-Help/assets/', function (err) {
+                  if (self.defaultValues.git !== true) {
+                    fs.unlink(self.pluginSlug + '.gitmodules', function (error) {
+                      if (error) {
+                        console.log((error).red);
+                      }
                     });
+                    rmdir(self.pluginSlug + '/.git', function (error) {
+                      if (error) {
+                        console.log((error).red);
+                      }
+                    });
+                    console.log(('Remove git config generated').white);
                   }
-                  cleanFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help');
-                }
+                  //Clean all the folders!!
+                  if (self.modules.indexOf('CPT_Core') !== -1) {
+                    cleanFolder(self.pluginSlug + '/includes/CPT_Core');
+                  }
 
-                //Console.log are cool and bowtie are cool!
-                console.log(('Inserted index.php files in all the folders').white);
-                console.log(('All done!').white);
+                  if (self.modules.indexOf('Taxonomy_Core') !== -1) {
+                    cleanFolder(self.pluginSlug + '/includes/Taxonomy_Core');
+                  }
+
+                  if (self.modules.indexOf('Widget-Boilerplate') !== -1) {
+                    cleanFolder(self.pluginSlug + '/includes/Widget-Boilerplate');
+                    cleanFolder(self.pluginSlug + '/includes/Widget-Boilerplate/widget-boilerplate');
+                  }
+
+                  if (self.modules.indexOf('CMB2') !== -1) {
+                    cleanFolder(self.pluginSlug + '/admin/includes/CMB2');
+                  }
+
+                  if (self.modules.indexOf('PointerPlus') !== -1) {
+                    cleanFolder(self.pluginSlug + '/admin/includes/PointerPlus');
+                  }
+
+                  if (self.modules.indexOf('Template system (like WooCommerce)') !== -1) {
+                    cleanFolder(self.pluginSlug + '/templates');
+                  }
+
+                  if (self.modules.indexOf('WP-Contextual-Help') !== -1) {
+                    if (cleanfolder !== false) {
+                      rmdir(self.pluginSlug + +'/admin/includes/WP-Contextual-Help/assets/', function (err) {
+                      });
+                    }
+                    cleanFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help');
+                  }
+
+                  //Console.log are cool and bowtie are cool!
+                  console.log(('Inserted index.php files in all the folders').white);
+                  console.log(('All done!').white);
+                }
               }
             }
     );
@@ -568,6 +564,7 @@ WpPluginBoilerplateGenerator.prototype.setFiles = function setFiles() {
   cleanfolder = this.cleanFolder;
   //Change path of gitmodules
   this.files.gitmodules.add(new RegExp(this.pluginSlug + '/', "g"), '');
+  this.files.gitmodules.add(new RegExp('git@github.com:', "g"), 'https://github.com/');
 
   //Rename files
   fs.rename(this.pluginSlug + '/plugin-name.php', this.files.primary.file, function (err) {
@@ -710,9 +707,9 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     });
     this.files.adminClass.rm("$settings[ 1 ] = get_option( $this->plugin_slug . '-settings-second' );");
     this.files.adminClass.rm("update_option( $this->plugin_slug . '-settings-second', get_object_vars( $settings[ 1 ] ) );");
-    this.files.adminClass.rmsearch('* CMB 2 for metabox and many other cool things!', "add_filter( 'cmb2_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", 1, -2);
-    this.files.publicClass.rm("\n// Check for the CMB2 Shortcode Button");
-    this.files.publicClass.rm("\n// In bundle with the boilerplate https://github.com/jtsternberg/Shortcode_Button");
+    this.files.adminClass.rmsearch('* CMB 2 for metabox and many other cool things!', "add_filter( 'cmb2_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", 1, 0);
+    this.files.publicClass.rm("// Check for the CMB2 Shortcode Button");
+    this.files.publicClass.rm("// In bundle with the boilerplate https://github.com/jtsternberg/Shortcode_Button");
     if (this.adminPage === true) {
       this.files.adminView.rmsearch('<div id="tabs-1">', "cmb2_metabox_form( $option_fields, $this->plugin_slug . '-settings' );", -2, -2);
       this.files.adminView.rmsearch('<div id="tabs-2">', "cmb2_metabox_form( $option_fields_second, $this->plugin_slug . '-settings-second' );", -2, -2);
