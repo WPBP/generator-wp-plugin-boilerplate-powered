@@ -69,18 +69,16 @@ function cleanParsing(pathrec) {
   if (cleanfolder !== false) {
     //Remove the unuseful files
     default_file.forEach(function (element, index, array) {
-      fs.exists('./' + pathrec + '/' + element, function (exists) {
-        if (exists) {
-          fs.unlink(pathrec + '/' + element, function (err) {
+      if (fs.existsSync('./' + pathrec + '/' + element)) {
+        fs.unlink(pathrec + '/' + element, function (err) {
             if (err) {
-              console.log((err).red);
+              console.log(('Remove unuseful file error: ' + err).red);
             }
           });
           if (verbose) {
             console.log(('Removed ' + pathrec + '/' + element).italic);
           }
-        }
-      });
+      }
     });
     //Remove the unuseful directory
     default_folder.forEach(function (element, index, array) {
@@ -94,7 +92,7 @@ function cleanParsing(pathrec) {
         if (!error || isEmpty) {
           rmdir('./' + pathrec + '/' + element, function (err) {
             if (err) {
-              console.log((err).red);
+              console.log(('Remove unuseful directory error:' + err).red);
             }
             if (verbose) {
               console.log(('Removed ' + pathrec + '/' + element).italic);
@@ -147,7 +145,8 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
     fs.writeFile(self.pluginSlug + '/submodules.sh', submodulessh, 'utf8',
             function (err) {
               if (err) {
-                return console.log((err).red);
+                console.log(('Error on writing submodules.sh:' + err).red);
+                process.exit();
               } else {
                 fs.chmodSync(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', '0777');
                 console.log(('Generate git config on the fly').white);
@@ -163,25 +162,25 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 }
                 console.log(('Parsed all the files').white);
                 //Call the bash script
-                console.log(('Download submodules').white);
+                console.log(('Download submodules (wait a moment)').white);
                 var submodule = spawn(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', [],
                         {
                           cwd: process.cwd() + '/' + self.pluginSlug + '/'
                         });
 
                 if (submodule.status !== 0) {
-                  console.log((submodule.stderr).blue);
+                  console.log(('Error on submodule:' + submodule.stderr).blue);
                   process.exit();
                 } else {
                   if (self.defaultValues.git !== true) {
                     fs.unlink(self.pluginSlug + '.gitmodules', function (error) {
                       if (error) {
-                        console.log((error).red);
+                        console.log(('Error on removing .gitmodules:' + error).red);
                       }
                     });
                     rmdir(self.pluginSlug + '/.git', function (error) {
                       if (error) {
-                        console.log((error).red);
+                        console.log(('Error on removing .git:' + error).red);
                       }
                     });
                     console.log(('Remove git config generated').white);
@@ -477,7 +476,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       cleaned.author = {'name': props.author, 'email': this.authorEmail, 'url': this.authorURI, 'copyright': this.pluginCopyright};
       fs.writeFile(props.name + '.json', JSON.stringify(cleaned, null, 2), function (err) {
         if (err) {
-          console.log(err);
+          console.log('Error on save your json config file: ' + err);
         } else {
           console.log(("JSON saved to " + props.name + '.json').blue);
         }
@@ -493,15 +492,15 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
           path = 'http://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/archive/' + version + '.zip',
           zip = "";
   //Force the remove of the same plugin folder
-  if (args[2] === 'force' || args[3] === 'force') {
+  if (args[2] === 'force' || args[3] === 'force' || args[4] === 'force') {
     rmdir.sync('./' + self.pluginSlug, function (error) {
       if (error) {
-        console.log((error).red);
+        console.log(('Error on removing plugin folder' + error).red);
       }
     });
     rmdir.sync('./plugin_temp', function (error) {
       if (error) {
-        console.log((error).red);
+        console.log(('Error on removing plugin temp folder' + error).red);
       }
     });
     //Check plugin folder if exist
@@ -523,7 +522,7 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
     fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/', './' + self.pluginSlug, function () {
       rmdir('plugin_temp', function (error) {
         if (error) {
-          console.log((error).red);
+          console.log(('Error on removing plugin temp folder' + error).red);
         }
         cb();
       });
@@ -542,15 +541,15 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
               zip = new Admzip('./plugin.zip');
               console.log(('File downloaded').white);
               zip.extractAllTo('plugin_temp', true);
-              fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules', function (err) {
-                if (err) {
-                  console.log((error).red);
+              fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules', function (error) {
+                if (error) {
+                  console.log(('Error on move gitmodules:' + error).red);
                 }
               });
               fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/', './' + self.pluginSlug, function () {
                 rmdir('plugin_temp', function (error) {
                   if (error) {
-                    console.log((error).red);
+                    console.log(('Error on move plugin temp folder:' + error).red);
                   }
                   cb();
                 });
@@ -569,22 +568,22 @@ WpPluginBoilerplateGenerator.prototype.setFiles = function setFiles() {
   //Rename files
   fs.rename(this.pluginSlug + '/plugin-name.php', this.files.primary.file, function (err) {
     if (err) {
-      console.log((error).red);
+      console.log(('Error on rename plugin-name.php:' + err).red);
     }
   });
   fs.rename(this.pluginSlug + '/admin/class-plugin-name-admin.php', this.files.adminClass.file, function (err) {
     if (err) {
-      console.log((error).red);
+      console.log(('Error on rename class-plugin-name-admin.php:' + err).red);
     }
   });
   fs.rename(this.pluginSlug + '/public/class-plugin-name.php', this.files.publicClass.file, function (err) {
     if (err) {
-      console.log((error).red);
+      console.log(('Error on rename class-plugin-name.php:' + err).red);
     }
   });
   fs.rename(this.pluginSlug + '/languages/plugin-name.pot', this.pluginSlug + '/languages/' + this.pluginSlug + '.pot', function (err) {
     if (err) {
-      console.log((error).red);
+      console.log(('Error on rename plugin-name.pot:' + err).red);
     }
   });
 

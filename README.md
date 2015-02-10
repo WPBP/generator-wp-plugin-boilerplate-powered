@@ -33,6 +33,8 @@ NOTE: require git and sed!
 cd wp-content/plugins
 # Run the generator
 $ yo wp-plugin-boilerplate-powered
+# Force for remove the plugin folder
+$ yo wp-plugin-boilerplate-powered force
 # Use development version (not perfect)
 $ yo wp-plugin-boilerplate-powered dev
 # Verbose mode with verbose parameter

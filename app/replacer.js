@@ -45,7 +45,11 @@ var Replacer = module.exports = function Replacer(file, options) {
     seds.push({start: startok, end: endok});
   };
 
-
+  /*
+   * Workaround count the line of a file
+   * 
+   * @param string file
+   */
   module.getlines = function (file) {
     if (countLines === 0) {
       var wc = execSync("wc -l < " + process.cwd() + '/' + file);
@@ -135,6 +139,7 @@ var Replacer = module.exports = function Replacer(file, options) {
         }
 
         //Fallback when end event is not emitted
+        // Check the line number if is the last
         if (countLines === i) {
           if (typeof startok === 'undefined' || isNaN(startok)) {
             return console.log(('Not found start line <<' + startspace + '>> in ' + file).red);
