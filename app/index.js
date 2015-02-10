@@ -74,9 +74,9 @@ function cleanParsing(pathrec) {
       fs.exists('./' + pathrec + '/' + element, function (exists) {
         if (exists) {
           fs.unlink(pathrec + '/' + element, function (err) {
-//          if (err) {
-//            console.log((err).red);
-//          }
+            if (err) {
+              console.log((err).red);
+            }
           });
           if (verbose) {
             console.log(('Removed ' + pathrec + '/' + element).italic);
@@ -95,9 +95,9 @@ function cleanParsing(pathrec) {
         });
         if (!error || isEmpty) {
           rmdir('./' + pathrec + '/' + element, function (err) {
-//          if (err) {
-//            console.log((err).red);
-//          }
+          if (err) {
+            console.log((err).red);
+          }
             if (verbose) {
               console.log(('Removed ' + pathrec + '/' + element).italic);
             }
@@ -158,6 +158,9 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 for (key in self.files) {
                   if (self.files.hasOwnProperty(key)) {
                     self.files[key].sed();
+                    if (verbose) {
+                      console.log(('Sed executed on ' + key).italic);
+                    }
                   }
                 }
                 console.log(('Parsed all the files').white);
@@ -168,21 +171,13 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 //Call the bash script
                 console.log(('Download submodules').white);
 
-                /*submodule.stdout.on('data',
-                 function (data) {
-                 console.log((data.toString()).green);
-                 });*/
                 if (submodule.status !== 0) {
                   console.log((submodule.stderr).blue);
                 } else {
-                  console.log((submodule.stdout).green);
+                  if (submodule.stdout !== undefined) {
+                    console.log((submodule.stdout).green);
+                  }
                 }
-                /*submodule.stderr.on('data',
-                 function (data) {
-                 console.log((data.toString()).blue);
-                 });*/
-                //submodule.on('close',
-                //function (code) {
                 if (self.defaultValues.git !== true) {
                   fs.unlink(self.pluginSlug + '.gitmodules', function (error) {
                     if (error) {
@@ -233,7 +228,6 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 //Console.log are cool and bowtie are cool!
                 console.log(('Inserted index.php files in all the folders').white);
                 console.log(('All done!').white);
-                //});
               }
             }
     );

@@ -3,6 +3,7 @@
 var fs = require('fs');
 var readline = require('line-input-stream');
 var exec = require('child_process').exec;
+var execSync = require('execSync').exec;
 var args = process.argv.slice(2);
 var colors = require('colors');
 var verbose = false;
@@ -12,7 +13,8 @@ if (args[1] === 'verbose' || args[2] === 'verbose') {
 var Replacer = module.exports = function Replacer(file, options) {
   var module = {},
           searches = [],
-          seds = [];
+          seds = [],
+          countLines = 0;
   /*
    * Add string for the replace
    * 
@@ -45,16 +47,16 @@ var Replacer = module.exports = function Replacer(file, options) {
 
 
   module.getlines = function (file) {
-    exec("wc -l < " + process.cwd() + '/' + file, {cwd: process.cwd() + '/'},
-    function (err, stdout, stderr) {
-      console.log(stdout);
-      console.log(stderr);
-    });
+    if (countLines === 0) {
+      var wc = execSync("wc -l < " + process.cwd() + '/' + file);
+      if (wc.stderr !== undefined) {
+        console.log((wc.stderr).red);
+      }
+      countLines = parseInt(wc.stdout) - 1;
+    }
   };
 
   module.file = file;
-  //console.log(module.getlines(file));
-  //module.file = module.file.replace(options.pluginSlug + '/', '');
 
   //Base replacements
   module.add(/plugin-name/g, options.pluginSlug);
@@ -73,31 +75,26 @@ var Replacer = module.exports = function Replacer(file, options) {
    * 
    */
   module.replace = function () {
-    fs.exists(file, function (exists) {
-      if (exists) {
-        fs.readFile(file, 'utf8', function (err, data) {
-          module.add(/\n\n\n/g, "\n");
-          var i, total;
-          if (err) {
-            return console.log(err);
-          }
+    file = module.file;
+    var exists = fs.readFileSync(process.cwd() + '/' + file);
+    if (exists) {
+      var data = exists;
+      data = data.toString();
+      module.add(/\n\n\n/g, "\n");
+      var i, total;
 
-          total = searches.length;
-          for (i = 0; i < total; i += 1) {
-            data = data.replace(searches[i].search, searches[i].replace);
-          }
-
-          fs.writeFile(file, data, 'utf8', function (err) {
-            if (err) {
-              return console.log((err).red);
-            }
-            if (verbose) {
-              console.log(('Replace ' + file).italic);
-            }
-          });
-        });
+      total = searches.length;
+      for (i = 0; i < total; i += 1) {
+        data = data.replace(searches[i].search, searches[i].replace);
       }
-    });
+      
+      fs.writeFileSync(process.cwd() + '/' + file, data);
+      if (verbose) {
+        console.log(('Replace ' + file).italic);
+      }
+    } else {
+      console.log(('File not exist: ' + file).red);
+    }
   };
 
   /*
@@ -109,7 +106,7 @@ var Replacer = module.exports = function Replacer(file, options) {
    * @param number count_end
    */
   module.rmsearch = function (start, end, count_initial, count_end) {
-    var stream, startok, endok;
+    var stream_, startok, endok;
     var i = -1;
     var startspace = start;
     start = start.replace(/ /g, '');
@@ -117,27 +114,28 @@ var Replacer = module.exports = function Replacer(file, options) {
     if (end.length > 0) {
       end = end.replace(/ /g, '');
     }
-    fs.exists(file, function (exists) {
-      if (exists) {
-        stream = readline(fs.createReadStream(file, {flags: 'r'}));
-        stream.setDelimiter("\n");
+    var exists = fs.readFileSync(process.cwd() + '/' + file);
+    if (exists) {
+      stream_ = readline(fs.createReadStream(file, {flags: 'r'}));
+      stream_.setDelimiter("\n");
+      module.getlines(file);
 
-        //start reading the file
-        stream.on('line', function (line) {
-          i++;
-          line = line.replace(/(\r\n|\n|\r|\t)/gm, '').replace(/ /g, '');
+      //start reading the file
+      stream_.on('line', function (line) {
+        i++;
+        line = line.replace(/(\r\n|\n|\r|\t)/gm, '').replace(/ /g, '');
 
-          if (line === start) {
-            startok = i - count_initial;
-            if (!end.length) {
-              endok = i + count_end;
-            }
-          } else if (line === end && end && (i - count_end > startok)) {
-            endok = i - count_end;
+        if (line === start) {
+          startok = i - count_initial;
+          if (!end.length) {
+            endok = i + count_end;
           }
-        });
+        } else if (line === end && end && (i - count_end > startok)) {
+          endok = i - count_end;
+        }
 
-        stream.on("end", function () {
+        //Fallback when end event is not emitted
+        if (countLines === i) {
           if (typeof startok === 'undefined' || isNaN(startok)) {
             return console.log(('Not found start line <<' + startspace + '>> in ' + file).red);
           }
@@ -151,9 +149,29 @@ var Replacer = module.exports = function Replacer(file, options) {
           }
 
           module.addsed(startok, endok);
-        });
-      }
-    });
+        }
+
+      });
+
+      stream_.on("end", function () {
+        if (typeof startok === 'undefined' || isNaN(startok)) {
+          return console.log(('Not found start line <<' + startspace + '>> in ' + file).red);
+        }
+
+        if (typeof endok === 'undefined' || isNaN(endok)) {
+          return console.log(('Not found end line <<' + endspace + '>> in ' + file).red);
+        }
+
+        if (endok !== '' && startok > endok) {
+          return console.log(('Problem when parsing ' + file).red);
+        }
+
+        module.addsed(startok, endok);
+      });
+
+    } else {
+      console.log(('File not exist: ' + file).red);
+    }
   };
 
   /*
@@ -161,42 +179,37 @@ var Replacer = module.exports = function Replacer(file, options) {
    * 
    */
   module.sed = function () {
-    file = file.replace(options.pluginSlug, '');
-    fs.exists(process.cwd() + '/' + file, function (exists) {
-      if (exists) {
-        if (verbose) {
-          console.log(('Sed ' + file).italic);
-        }
-        if (seds.length !== 0) {
-          var total = seds.length;
-          var line = '';
-          var i;
+    file = module.file;
+    var exists = fs.readFileSync(process.cwd() + '/' + file);
+    if (exists) {
+      if (seds.length !== 0) {
+        var total = seds.length;
+        var line = '';
+        var i;
 
-          for (i = 0; i < total; i += 1) {
-            line += seds[i].start + ',' + seds[i].end + "d;";
+        for (i = 0; i < total; i += 1) {
+          line += seds[i].start + ',' + seds[i].end + "d;";
+        }
+        exec("sed -i '" + line + "' " + process.cwd() + '/' + file, {cwd: process.cwd() + '/'},
+        function (err, stdout, stderr) {
+          if (stderr.length > 0) {
+            console.log(("sed -i '" + line + "' " + process.cwd() + '/' + file).red);
+            return console.log(('stderr: ' + stderr).red);
           }
-
-          exec("sed -i '" + line + "' " + process.cwd() + '/' + file, {cwd: process.cwd() + '/'},
-          function (err, stdout, stderr) {
-            if (stderr.length > 0) {
-              console.log(("sed -i '" + line + "' " + process.cwd() + '/' + file).red);
-              return console.log(('stderr: ' + stderr).red);
-            }
-            if (err !== null) {
-              return console.log(('exec error: ' + err).red);
-            }
-            if (verbose) {
-              console.log(('Sed ' + file).italic);
-            }
-            module.replace();
-          });
-        } else {
+          if (err !== null) {
+            return console.log(('exec error: ' + err).red);
+          }
+          if (verbose) {
+            console.log(('Sed ' + file).italic);
+          }
           module.replace();
-        }
+        });
       } else {
-        console.log(('File not exist: ' + file).red);
+        module.replace();
       }
-    });
+    } else {
+      console.log(('File not exist: ' + file).red);
+    }
   };
 
   return module;
