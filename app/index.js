@@ -552,7 +552,11 @@ WpPluginBoilerplateGenerator.prototype.download = function download() {
               zip = new Admzip('./plugin.zip');
               console.log(('File downloaded').white);
               zip.extractAllTo('plugin_temp', true);
-              fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules');
+              fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/.gitmodules', './plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/.gitmodules', function (err) {
+                if (err) {
+                  console.log((error).red);
+                }
+              });
               fs.rename('./plugin_temp/WordPress-Plugin-Boilerplate-Powered-' + version + '/plugin-name/', './' + self.pluginSlug, function () {
                 rmdir('plugin_temp', function (error) {
                   if (error) {
@@ -572,10 +576,26 @@ WpPluginBoilerplateGenerator.prototype.setFiles = function setFiles() {
   this.files.gitmodules.add(new RegExp(this.pluginSlug + '/', "g"), '');
 
   //Rename files
-  fs.rename(this.pluginSlug + '/plugin-name.php', this.files.primary.file);
-  fs.rename(this.pluginSlug + '/admin/class-plugin-name-admin.php', this.files.adminClass.file);
-  fs.rename(this.pluginSlug + '/public/class-plugin-name.php', this.files.publicClass.file);
-  fs.rename(this.pluginSlug + '/languages/plugin-name.pot', this.pluginSlug + '/languages/' + this.pluginSlug + '.pot');
+  fs.rename(this.pluginSlug + '/plugin-name.php', this.files.primary.file, function (err) {
+    if (err) {
+      console.log((error).red);
+    }
+  });
+  fs.rename(this.pluginSlug + '/admin/class-plugin-name-admin.php', this.files.adminClass.file, function (err) {
+    if (err) {
+      console.log((error).red);
+    }
+  });
+  fs.rename(this.pluginSlug + '/public/class-plugin-name.php', this.files.publicClass.file, function (err) {
+    if (err) {
+      console.log((error).red);
+    }
+  });
+  fs.rename(this.pluginSlug + '/languages/plugin-name.pot', this.pluginSlug + '/languages/' + this.pluginSlug + '.pot', function (err) {
+    if (err) {
+      console.log((error).red);
+    }
+  });
 
   console.log(('Renamed files').white);
 };
