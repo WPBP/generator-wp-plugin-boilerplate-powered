@@ -173,7 +173,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                   process.exit();
                 } else {
                   if (self.defaultValues.git !== true) {
-                    fs.unlink(self.pluginSlug + '.gitmodules', function (error) {
+                    fs.unlink(self.pluginSlug + '/.gitmodules', function (error) {
                       if (error) {
                         console.log(('Error on removing .gitmodules:' + error).red);
                       }
