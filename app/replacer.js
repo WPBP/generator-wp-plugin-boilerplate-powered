@@ -3,7 +3,7 @@
 var fs = require('fs');
 var readline = require('line-input-stream');
 var exec = require('child_process').exec;
-var execSync = require('execSync').exec;
+var execSync = require('exec-sync');
 var args = process.argv.slice(2);
 var colors = require('colors');
 var verbose = false;
@@ -91,7 +91,7 @@ var Replacer = module.exports = function Replacer(file, options) {
       for (i = 0; i < total; i += 1) {
         data = data.replace(searches[i].search, searches[i].replace);
       }
-      
+
       fs.writeFileSync(process.cwd() + '/' + file, data);
       if (verbose) {
         console.log(('Replace ' + file).italic);
@@ -185,35 +185,39 @@ var Replacer = module.exports = function Replacer(file, options) {
    */
   module.sed = function () {
     file = module.file;
-    var exists = fs.readFileSync(process.cwd() + '/' + file);
-    if (exists) {
-      if (seds.length !== 0) {
-        var total = seds.length;
-        var line = '';
-        var i;
+    try {
+      var exists = fs.readFileSync(process.cwd() + '/' + file);
+      if (exists) {
+        if (seds.length !== 0) {
+          var total = seds.length;
+          var line = '';
+          var i;
 
-        for (i = 0; i < total; i += 1) {
-          line += seds[i].start + ',' + seds[i].end + "d;";
-        }
-        exec("sed -i '" + line + "' " + process.cwd() + '/' + file, {cwd: process.cwd() + '/'},
-        function (err, stdout, stderr) {
-          if (stderr.length > 0) {
-            console.log(("sed -i '" + line + "' " + process.cwd() + '/' + file).red);
-            return console.log(('stderr: ' + stderr).red);
+          for (i = 0; i < total; i += 1) {
+            line += seds[i].start + ',' + seds[i].end + "d;";
           }
-          if (err !== null) {
-            return console.log(('exec error: ' + err).red);
-          }
-          if (verbose) {
-            console.log(('Sed ' + file).italic);
-          }
+          exec("sed -i '" + line + "' " + process.cwd() + '/' + file, {cwd: process.cwd() + '/'},
+          function (err, stdout, stderr) {
+            if (stderr.length > 0) {
+              console.log(("sed -i '" + line + "' " + process.cwd() + '/' + file).red);
+              return console.log(('stderr: ' + stderr).red);
+            }
+            if (err !== null) {
+              return console.log(('exec error: ' + err).red);
+            }
+            if (verbose) {
+              console.log(('Sed ' + file).italic);
+            }
+            module.replace();
+          });
+        } else {
           module.replace();
-        });
+        }
       } else {
-        module.replace();
+        console.log(('File not exist: ' + file).red);
       }
-    } else {
-      console.log(('File not exist: ' + file).red);
+    } catch (err) {
+      
     }
   };
 

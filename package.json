@@ -1,6 +1,6 @@
 {
   "name" : "generator-wp-plugin-boilerplate-powered",
-  "version" : "0.1.6a",
+  "version" : "0.1.7",
   "description" : "A generator for Yeoman to customize the WP Plugin Boilerplate Powered (https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered).",
   "keywords" : [ "yeoman", "yeoman-generator", "wordpress", "wordpress-plugin", "PHP" ],
   "homepage" : "https://github.com/Mte90/generator-wp-plugin-boilerplate-powered",
@@ -29,7 +29,7 @@
     "line-input-stream" : "~1.0.1",
 	"colors" : "~0.6.2",
 	"spawn-sync": "~1.0.5",
-	"execSync": "~1.0.4"
+	"exec-sync": "~0.1.6"
   },
   "peerDependencies" : {
     "yo" : ">=1.0.0"
