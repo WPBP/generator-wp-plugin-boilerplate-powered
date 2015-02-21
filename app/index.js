@@ -887,7 +887,7 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   }
   if (this.snippet.indexOf('Custom shortcode') === -1) {
     this.files.publicClass.rm("add_shortcode( '@TODO', array( $this, 'shortcode_method_name' ) );");
-    this.files.publicClass.rmsearch('* NOTE:  Shortcode simple set of functions for creating macro codes for use', '// @TODO: Define your shortcode here', 1, -2);
+    this.files.publicClass.rmsearch('* NOTE:  Shortcode simple set of functions for creating macro codes for use', '// @TODO: Define your shortcode here', 1, -4);
   }
   if (this.snippet.indexOf('Javascript DOM-based Routing') === -1) {
     this.files.publicjs.rmsearch('* DOM-based Routing', '$(document).ready(UTIL.loadEvents);', 1, -1);
