@@ -63,7 +63,7 @@ function cleanParsing(pathrec) {
   var default_file = [
     'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json', 'production.rb', 'composer.json',
     'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json', 'Capfile', 'screenshot-1.png', 'component.json',
-    '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'pointerplus.php', '.DS_Store'
+    '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'pointerplus.php', '.DS_Store', 'widget-sample.php'
   ];
   var default_folder = ['tests', 'bin', 'deploy', 'config'];
   if (cleanfolder !== false) {
