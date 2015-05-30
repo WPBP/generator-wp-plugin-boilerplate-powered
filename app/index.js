@@ -71,13 +71,13 @@ function cleanParsing(pathrec) {
     default_file.forEach(function (element, index, array) {
       if (fs.existsSync('./' + pathrec + '/' + element)) {
         fs.unlink(pathrec + '/' + element, function (err) {
-            if (err) {
-              console.log(('Remove unuseful file error: ' + err).red);
-            }
-          });
-          if (verbose) {
-            console.log(('Removed ' + pathrec + '/' + element).italic);
+          if (err) {
+            console.log(('Remove unuseful file error: ' + err).red);
           }
+        });
+        if (verbose) {
+          console.log(('Removed ' + pathrec + '/' + element).italic);
+        }
       }
     });
     //Remove the unuseful directory
@@ -306,7 +306,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       choices: [
         {name: 'CPT_Core', checked: true},
         {name: 'Taxonomy_Core', checked: true},
-        {name: 'Widget-Boilerplate', checked: true},
+        {name: 'Widget Helper', checked: true},
         {name: 'CMB2', checked: true},
         {name: 'WP-Contextual-Help', checked: true},
         {name: 'WP-Admin-Notice', checked: true},
@@ -329,6 +329,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'Debug system (Debug Bar support)', checked: true},
         {name: 'Add body class', checked: true},
         {name: 'wp_localize_script for PHP var to JS', checked: true},
+        {name: 'CPTs on search box', checked: true},
         {name: 'Custom action', checked: true},
         {name: 'Custom filter', checked: true},
         {name: 'Custom shortcode', checked: true}
@@ -643,15 +644,15 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
       console.log(('Taxnomy_Core removed').italic);
     }
   }
-  if (this.modules.indexOf('Widget-Boilerplate') === -1) {
-    rmdir(this.pluginSlug + '/includes/Widget-Boilerplate', function (error) {
+  if (this.modules.indexOf('Widget Helper') === -1) {
+    rmdir(this.pluginSlug + '/includes/Widget-Helper', function (error) {
       if (error) {
         console.log((error).red);
       }
     });
-    this.files.primary.rmsearch(' * Load Widget boilerplate', '', 1, 3);
+    this.files.primary.rmsearch(' * Load Widgets Helper', '', 1, 3);
     if (verbose) {
-      console.log(('Removed Widget Boilerplate').italic);
+      console.log(('Removed Widgets Helper').italic);
     }
   }
 
@@ -871,9 +872,16 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   if (this.modules.indexOf('Requirements system on activation') === -1) {
     fs.unlink(this.pluginSlug + '/public/includes/requirements.php');
     fs.unlink(this.pluginSlug + '/languages/requirements.pot');
-    this.files.publicClass.rmsearch('//Requirements Detection System - read the doc in the library file', "'WP' => new WordPress_Requirement( '3.9.0' ),", -1, -2);
+    this.files.publicClass.rmsearch('//Requirements Detection System - read the doc in the library file', "'WP' => new WordPress_Requirement( '4.1.0' ),", -1, -2);
   }
   //Snippet
+  if (this.snippet.indexOf('CPTs on search box') === -1) {
+    this.files.publicClass.rmsearch('* Add support for custom CPT on the search box', 'return $query;', 1, 2);
+    this.files.publicClass.rm("add_filter( 'pre_get_posts', array( $this, 'filter_search' ) );");
+    if (verbose) {
+      console.log(('Removed CPTs on search box').italic);
+    }
+  }
   if (this.snippet.indexOf('Custom action') === -1 && this.snippet.indexOf('Custom filter') === -1 && this.snippet.indexOf('Custom shortcode') === -1) {
     this.files.publicClass.rmsearch('* Define custom functionality.', '* Refer To http://codex.wordpress.org/Plugin_API#Hooks.2C_Actions_and_Filters', 1, -2);
   }
