@@ -28,7 +28,7 @@
     "underscore.string" : "~2.3",
     "line-input-stream" : "~1.0.1",
 	"colors" : "~0.6.2",
-	"spawn-sync": "~1.0.5",
+	"spawn-sync": "1.0.4",
 	"sync-exec": "~0.5.0"
   },
   "peerDependencies" : {
