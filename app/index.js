@@ -305,6 +305,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       message: 'Which library your plugin needs?',
       choices: [
         {name: 'CPT_Core', checked: true},
+        {name: 'CPT_Columns', checked: true},
         {name: 'Taxonomy_Core', checked: true},
         {name: 'Widget Helper', checked: true},
         {name: 'CMB2', checked: true},
@@ -758,6 +759,13 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     this.files.adminClass.rmsearch('* Add pointers.', "'icon_class' => 'dashicons-welcome-learn-more',", 1, -3);
     if (verbose) {
       console.log(('Removed PointerPlus').italic);
+    }
+  }
+  if (this.modules.indexOf('CPT_Columns') === -1) {
+    fs.unlink(this.pluginSlug + '/admin/includes/CPT_Columns.php');
+    this.files.adminClass.rmsearch('* Load CPT_Columns', "'order' => \"-1\"", 1, -2);
+    if (verbose) {
+      console.log(('Removed CPT_Columns').italic);
     }
   }
 
