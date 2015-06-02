@@ -439,7 +439,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
   this.prompt(prompts, function (props) {
     this.pluginName = props.name;
     this.pluginSlug = s.slugify(props.name);
-    this.pluginClassName = s.titleize(props.name).replace(/ /g, "_");
+    this.pluginClassName = s.titleize(props.name).replace(/ /g, "_").replace(/-/g, "_");
     this.author = props.author;
     this.authorEmail = props.authorEmail;
     this.authorURI = props.authorURI;
