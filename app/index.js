@@ -733,7 +733,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     this.files.adminClass.rmsearch('* Load Wp_Contextual_Help for the help tabs', "add_action( 'init', array( $this, 'contextual_help' ) );", 1, -1);
     this.files.adminClass.rmsearch('* Filter for change the folder of Contextual Help', "$paths[] = plugin_dir_path( __FILE__ ) . '../help-docs/';", 1, -3);
     this.files.adminClass.rmsearch('* Filter for change the folder image of Contextual Help', "$paths[] = plugin_dir_path( __FILE__ ) . '../help-docs/img';", 1, -3);
-    this.files.adminClass.rmsearch('* Contextual Help, docs in /help-docs folter', "'page' => 'settings_page_' . $this->plugin_slug,", 1, -4);
+    this.files.adminClass.rmsearch('* Contextual Help, docs in /help-docs folter', "'page' => 'settings_page_' . $this->plugin_slug,", 1, -1);
     if (verbose) {
       console.log(('Removed Wp_Contextual_Help').italic);
     }
@@ -755,7 +755,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
         console.log((error).red);
       }
     });
-    this.files.adminClass.rmsearch('* Load PointerPlus for the Wp Pointer', "add_filter( 'pointerplus_list', array( $this, 'custom_initial_pointers' ), 10, 2 );", 1, -1);
+    this.files.adminClass.rmsearch('* Load PointerPlus for the Wp Pointer', "add_filter( 'pointerplus_list', array( $this, 'custom_initial_pointers' ), 10, 2 );", 1, 0);
     this.files.adminClass.rmsearch('* Add pointers.', "'icon_class' => 'dashicons-welcome-learn-more',", 1, -3);
     if (verbose) {
       console.log(('Removed PointerPlus').italic);
