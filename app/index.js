@@ -243,10 +243,10 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
       console.log(('Config loaded').yellow);
     }
   } else {
-    console.log('--------------------------');
-    console.log(('You can create the file ' + process.cwd() + '/default-values.json with default values in the parent folder! Use the default-values-example.json as a template.').bold);
-    console.log('--------------------------');
+    console.log(('This tool can create ' + process.cwd() + '/default-values.json with default values in the parent folder! The next time the tool load all the settings for a fast development :-D').bold);
+    console.log(('Add your public Plugins Free/Premium made it with WPBP on https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/wiki/Plugin-made-with-this-Boilerplate!').bold.red);
     default_file = path.join(__dirname, '../default-values-example.json');
+    console.log('--------------------------');
     is_default = true;
   }
   this.defaultValues = JSON.parse(this.readFileAsString(default_file));
