@@ -62,8 +62,8 @@ function cleanFolder(path) {
 function cleanParsing(pathrec) {
   var default_file = [
     'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json', 'production.rb', 'composer.json', '.scrutinizer.yml',
-    'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json', 'Capfile', 'screenshot-1.png', 'component.json', 
-    'phpunit.xml.dist','Dockunit.json','coverage.clover', 'CHANGELOG.md', 
+    'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json', 'Capfile', 'screenshot-1.png', 'component.json',
+    'phpunit.xml.dist', 'Dockunit.json', 'coverage.clover', 'CHANGELOG.md',
     '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'pointerplus.php', '.DS_Store', 'widget-sample.php'
   ];
   var default_folder = ['tests', 'bin', 'deploy', 'config'];
@@ -801,6 +801,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   }
   if (this.snippet.indexOf('Import/Export settings system') === -1) {
     this.files.adminClass.rmsearch("* Process a settings export from config", "wp_safe_redirect( admin_url( 'options-general.php?page=' . $this->plugin_slug ) );", 1, -3);
+    this.files.adminClass.rmsearch("//Add the export settings method", "add_action( 'admin_init', array( $this, 'settings_import' ) ); ", 1, 0);
     if (this.adminPage === true) {
       this.files.adminView.rmsearch('<div id="tabs-3" class="metabox-holder">', "<?php submit_button( __( 'Import' ), 'secondary', 'submit', false ); ?>", -2, -5);
     }
