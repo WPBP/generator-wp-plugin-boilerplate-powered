@@ -865,7 +865,7 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   }
   if (this.activateDeactivate.indexOf('Deactivate Method') === -1) {
     this.files.publicClass.rmsearch('* Fired when the plugin is deactivated.', '', 1, 32);
-    this.files.publicClass.rmsearch('* Fired for each blog when the plugin is deactivated.', '', 1, 10);
+    this.files.publicClass.rmsearch('* Fired for each blog when the plugin is deactivated.', '', 1, 2);
     if (verbose) {
       console.log(('Removed Deactive Method').italic);
     }
@@ -907,11 +907,11 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   }
   if (this.snippet.indexOf('Custom filter') === -1) {
     this.files.publicClass.rm("add_filter( '@TODO', array( $this, 'filter_method_name' ) );");
-    this.files.publicClass.rmsearch('* NOTE:  Filters are points of execution in which WordPress modifies data', '// @TODO: Define your filter hook callback here', 1, -2);
+    this.files.publicClass.rmsearch('* NOTE:  Filters are points of execution in which WordPress modifies data', '// @TODO: Define your filter hook callback here', 1, 2);
   }
   if (this.snippet.indexOf('Custom shortcode') === -1) {
     this.files.publicClass.rm("add_shortcode( '@TODO', array( $this, 'shortcode_method_name' ) );");
-    this.files.publicClass.rmsearch('* NOTE:  Shortcode simple set of functions for creating macro codes for use', '// @TODO: Define your shortcode here', 1, -4);
+    this.files.publicClass.rmsearch('* NOTE:  Shortcode simple set of functions for creating macro codes for use', '// In bundle with the boilerplate https://github.com/jtsternberg/Shortcode_Button', 1, 0);
   }
   if (this.snippet.indexOf('Javascript DOM-based Routing') === -1) {
     this.files.publicjs.rmsearch('* DOM-based Routing', '$(document).ready(UTIL.loadEvents);', 1, -1);
