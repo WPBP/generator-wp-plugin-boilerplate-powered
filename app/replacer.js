@@ -143,11 +143,11 @@ var Replacer = module.exports = function Replacer(file, options) {
         // Check the line number if is the last
         if (countLines === i) {
           if (typeof startok === 'undefined' || isNaN(startok)) {
-            return console.log(('Not found start line <<' + startspace + '>> in ' + file).red);
+            return console.log(('Not found start line: ' + startspace + ' in ' + file).yellow);
           }
 
           if (typeof endok === 'undefined' || isNaN(endok)) {
-            return console.log(('Not found end line <<' + endspace + '>> in ' + file).red);
+            return console.log(('Not found end line: ' + endspace + ' in ' + file).yellow);
           }
 
           if (endok !== '' && startok > endok) {

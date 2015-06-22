@@ -61,8 +61,9 @@ function cleanFolder(path) {
 
 function cleanParsing(pathrec) {
   var default_file = [
-    'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json', 'production.rb', 'composer.json',
-    'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json', 'Capfile', 'screenshot-1.png', 'component.json',
+    'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json', 'production.rb', 'composer.json', '.scrutinizer.yml',
+    'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json', 'Capfile', 'screenshot-1.png', 'component.json', 
+    'phpunit.xml.dist','Dockunit.json','coverage.clover', 'CHANGELOG.md', 
     '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'pointerplus.php', '.DS_Store', 'widget-sample.php'
   ];
   var default_folder = ['tests', 'bin', 'deploy', 'config'];
@@ -194,13 +195,14 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                     cleanFolder(self.pluginSlug + '/includes/Taxonomy_Core');
                   }
 
-                  if (self.modules.indexOf('Widget-Boilerplate') !== -1) {
-                    cleanFolder(self.pluginSlug + '/includes/Widget-Boilerplate');
-                    cleanFolder(self.pluginSlug + '/includes/Widget-Boilerplate/widget-boilerplate');
+                  if (self.modules.indexOf('Widget Helper') !== -1) {
+                    cleanFolder(self.pluginSlug + '/includes/Widgets-Helper/');
+                    cleanFolder(self.pluginSlug + '/includes/widgets');
                   }
 
                   if (self.modules.indexOf('CMB2') !== -1) {
                     cleanFolder(self.pluginSlug + '/admin/includes/CMB2');
+                    cleanFolder(self.pluginSlug + '/admin/includes/CMB2-Shortcode');
                   }
 
                   if (self.modules.indexOf('PointerPlus') !== -1) {
@@ -646,7 +648,12 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
     }
   }
   if (this.modules.indexOf('Widget Helper') === -1) {
-    rmdir(this.pluginSlug + '/includes/Widget-Helper', function (error) {
+    rmdir(this.pluginSlug + '/includes/Widgets-Helper', function (error) {
+      if (error) {
+        console.log((error).red);
+      }
+    });
+    rmdir(this.pluginSlug + '/includes/widgets', function (error) {
       if (error) {
         console.log((error).red);
       }
@@ -794,7 +801,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   if (this.snippet.indexOf('Import/Export settings system') === -1) {
     this.files.adminClass.rmsearch("* Process a settings export from config", "wp_safe_redirect( admin_url( 'options-general.php?page=' . $this->plugin_slug ) );", 1, -3);
     if (this.adminPage === true) {
-      this.files.adminView.rmsearch('<div id="tabs-3"', "<?php submit_button( __( 'Import' ), 'secondary', 'submit', false ); ?>", -2, -5);
+      this.files.adminView.rmsearch('<div id="tabs-3" class="metabox-holder">', "<?php submit_button( __( 'Import' ), 'secondary', 'submit', false ); ?>", -2, -5);
     }
     if (verbose) {
       console.log(('Removed Import/Export Settings').italic);
@@ -880,7 +887,7 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   if (this.modules.indexOf('Requirements system on activation') === -1) {
     fs.unlink(this.pluginSlug + '/public/includes/requirements.php');
     fs.unlink(this.pluginSlug + '/languages/requirements.pot');
-    this.files.publicClass.rmsearch('//Requirements Detection System - read the doc in the library file', "'WP' => new WordPress_Requirement( '4.1.0' ),", -1, -2);
+    this.files.publicClass.rmsearch('//Requirements Detection System - read the doc/example in the library file', "'WP' => new WordPress_Requirement( '4.1.0' ),", -1, -2);
   }
   //Snippet
   if (this.snippet.indexOf('CPTs on search box') === -1) {
