@@ -686,7 +686,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
   }
   if (this.modules.indexOf('Language function support (WPML/Ceceppa Multilingua/Polylang)') === -1) {
     fs.unlink(this.pluginSlug + '/includes/language.php');
-    this.files.primary.rmsearch(' * Load Language wrapper function for WPML/Ceceppa Multilingua/Polylang', '', 1, 3);
+    this.files.primary.rmsearch(' * Load Language wrapper function for WPML/Ceceppa Multilingua/Polylang', '', 1, 1);
     if (verbose) {
       console.log(('Removed Language function').italic);
     }
@@ -715,12 +715,13 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     });
     this.files.adminClass.rm("$settings[ 1 ] = get_option( $this->plugin_slug . '-settings-second' );");
     this.files.adminClass.rm("update_option( $this->plugin_slug . '-settings-second', get_object_vars( $settings[ 1 ] ) );");
-    this.files.adminClass.rmsearch('* CMB 2 for metabox and many other cool things!', "add_filter( 'cmb2_meta_boxes', array( $this, 'cmb_demo_metaboxes' ) );", 1, 0);
+    this.files.adminClass.rmsearch('* CMB 2 for metabox and many other cool things!', "require_once( plugin_dir_path( __FILE__ ) . '/includes/CMB2-Shortcode/shortcode-button.php' );", 1, 0);
+    this.files.adminClass.rmsearch('* NOTE:     Your metabox on Demo CPT', "'type' => 'text_small'", 1, 4);
     this.files.publicClass.rm("// Check for the CMB2 Shortcode Button");
     this.files.publicClass.rm("// In bundle with the boilerplate https://github.com/jtsternberg/Shortcode_Button");
     if (this.adminPage === true) {
-      this.files.adminView.rmsearch('<div id="tabs-1">', "cmb2_metabox_form( $option_fields, $this->plugin_slug . '-settings' );", -2, -2);
-      this.files.adminView.rmsearch('<div id="tabs-2">', "cmb2_metabox_form( $option_fields_second, $this->plugin_slug . '-settings-second' );", -2, -2);
+      this.files.adminView.rmsearch('<div id="tabs-1" class="wrap">', "cmb2_metabox_form( $this->plugin_slug . '_options', $this->plugin_slug . '-settings' );", -2, -2);
+      this.files.adminView.rmsearch('<div id="tabs-2" class="wrap">', "cmb2_metabox_form( $this->plugin_slug . '_options-second', $this->plugin_slug . '-settings-second' );", -2, -2);
     }
     if (verbose) {
       console.log(('Removed CMB2').italic);
@@ -770,7 +771,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   }
   if (this.modules.indexOf('CPT_Columns') === -1) {
     fs.unlink(this.pluginSlug + '/admin/includes/CPT_Columns.php');
-    this.files.adminClass.rmsearch('* Load CPT_Columns', "'order' => \"-1\"", 1, -2);
+    this.files.adminClass.rmsearch('* Load CPT_Columns', "'order' => \"-1\"", 1, 1);
     if (verbose) {
       console.log(('Removed CPT_Columns').italic);
     }
@@ -784,7 +785,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   } else {
     if (this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1) {
       this.files.adminClass.rmsearch('// Load admin style in dashboard for the At glance widget', "add_filter( 'dashboard_glance_items', array( $this, 'cpt_dashboard_support' ), 10, 1 );", 1, -1);
-      this.files.adminClass.rmsearch('* Add the counter of your CPTs in At Glance widget in the dashboard<br>', 'return $current_key;', 1, 5);
+      this.files.adminClass.rmsearch('* Add the counter of your CPTs in At Glance widget in the dashboard<br>', 'return $items;', 1, 1);
       this.files.adminCss.rmsearch('#dashboard_right_now a.demo-count:before {', '', 0, 3);
     }
   }
@@ -887,7 +888,7 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   if (this.modules.indexOf('Requirements system on activation') === -1) {
     fs.unlink(this.pluginSlug + '/public/includes/requirements.php');
     fs.unlink(this.pluginSlug + '/languages/requirements.pot');
-    this.files.publicClass.rmsearch('//Requirements Detection System - read the doc/example in the library file', "'WP' => new WordPress_Requirement( '4.1.0' ),", -1, -2);
+    this.files.publicClass.rmsearch('//Requirements Detection System - read the doc/example in the library file', "'WP' => new WordPress_Requirement( '4.1.0' )", -1, -2);
   }
   //Snippet
   if (this.snippet.indexOf('CPTs on search box') === -1) {
