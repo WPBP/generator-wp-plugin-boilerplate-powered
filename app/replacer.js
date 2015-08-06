@@ -76,6 +76,7 @@ var Replacer = module.exports = function Replacer(file, options) {
   module.add(/Your Name or Company Name/g, options.pluginCopyright);
   module.add(new RegExp('http://example.com', 'g'), options.authorURI);
   module.add(/pn_/g, options.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '_');
+  module.add(/Pn_/g, options.pluginName.match(/\b(\w)/g).join('') + '_');
   module.add(/pn-/g, options.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '-');
 
   /*
@@ -221,7 +222,7 @@ var Replacer = module.exports = function Replacer(file, options) {
         console.log(('File not exist: ' + file).red);
       }
     } catch (err) {
-      
+
     }
   };
 

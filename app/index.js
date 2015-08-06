@@ -474,12 +474,13 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       readme: new Replacer(this.pluginSlug + '/README.txt', this),
       gitmodules: new Replacer(this.pluginSlug + '/.gitmodules', this),
       template: new Replacer(this.pluginSlug + '/includes/template.php', this),
+      loadtextdomain: new Replacer(this.pluginSlug + '/includes/load_textdomain.php', this),
       publicjs: new Replacer(this.pluginSlug + '/public/assets/js/public.js', this),
       debug: new Replacer(this.pluginSlug + '/admin/includes/debug.php', this),
       requirements: new Replacer(this.pluginSlug + '/public/includes/requirements.php', this),
       language: new Replacer(this.pluginSlug + '/includes/language.php', this),
       fakepage: new Replacer(this.pluginSlug + '/includes/fake-page.php', this),
-      widgetsample: new Replacer(this.pluginSlug + '/public/includes/widget/sample.php', this)
+      widgetsample: new Replacer(this.pluginSlug + '/includes/widget/sample.php', this)
     };
 
     if (props.saveSettings === true) {
@@ -791,6 +792,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   if (this.adminPage === false) {
     this.files.adminClass.rm("\n// Add an action link pointing to the options page.\n$plugin_basename = plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_slug . '.php' );\nadd_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );");
     this.files.adminClass.rm("\n\n// Load admin style sheet and JavaScript.\nadd_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );\nadd_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );\n\n// Add the options page and menu item.\nadd_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );");
+    //@TODO
     this.files.adminClass.rm("\n/**\n * Register and enqueue admin-specific style sheet.\n *\n * @since     1.0.0\n *\n * @return    null    Return early if no settings page is registered.\n */\npublic function enqueue_admin_styles() {\n\nif ( ! isset( $this->plugin_screen_hook_suffix ) ) {\nreturn;\n}\n\n$screen = get_current_screen();\nif ( $this->plugin_screen_hook_suffix == $screen->id ) {\nwp_enqueue_style( $this->plugin_slug .'-admin-styles', plugins_url( 'assets/css/admin.css', __FILE__ ), array(), MyNewPlugin::VERSION );\n}\n\n}\n\n/**\n * Register and enqueue admin-specific JavaScript.\n *\n * @since     1.0.0\n *\n * @return    null    Return early if no settings page is registered.\n */\npublic function enqueue_admin_scripts() {\n\nif ( ! isset( $this->plugin_screen_hook_suffix ) ) {\nreturn;\n}\n\n$screen = get_current_screen();\nif ( $this->plugin_screen_hook_suffix == $screen->id ) {\nwp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'assets/js/admin.js', __FILE__ ), array( 'jquery' ), MyNewPlugin::VERSION );\n}\n\n}\n\n/**\n * Register the administration menu for this plugin into the WordPress Dashboard menu.\n *\n * @since    1.0.0\n */\npublic function add_plugin_admin_menu() {\n\n/*\n * Add a settings page for this plugin to the Settings menu.\n *\n * NOTE:  Alternative menu locations are available via WordPress administration menu functions.\n *\n *        Administration Menus: http://codex.wordpress.org/Administration_Menus\n *\n * @TODO:\n *\n * - Change 'Page Title' to the title of your plugin admin page\n * - Change 'Menu Text' to the text for menu item for the plugin settings page\n * - Change 'manage_options' to the capability you see fit\n *   For reference: http://codex.wordpress.org/Roles_and_Capabilities\n */\n$this->plugin_screen_hook_suffix = add_options_page(\n__( 'Page Title', $this->plugin_slug ),\n__( 'Menu Text', $this->plugin_slug ),\n'manage_options',\n$this->plugin_slug,\narray( $this, 'display_plugin_admin_page' )\n);\n\n}\n\n/**\n * Render the settings page for this plugin.\n *\n * @since    1.0.0\n */\npublic function display_plugin_admin_page() {\ninclude_once( 'views/admin.php' );\n}\n\n/**\n * Add settings action link to the plugins page.\n *\n * @since    1.0.0\n */\npublic function add_action_links( $links ) {\n\nreturn array_merge(\narray(\n'settings' => '<a href=\"' . admin_url( 'options-general.php?page=' . $this->plugin_slug ) . '\">' . __( 'Settings', $this->plugin_slug ) . '</a>'\n),\n$links\n);\n\n}");
   } else {
     if (this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1) {

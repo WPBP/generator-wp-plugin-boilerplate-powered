@@ -1,7 +1,7 @@
 # generator-wp-plugin-boilerplate-powered
 
 A generator for [Yeoman](http://yeoman.io) to customize the [WP Plugin Boilerplate Powered](https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered).  
-Release of the boilerplate supported: **1.1.2**
+Release of the boilerplate supported: **1.1.4**
 
 ## Getting Started
 
