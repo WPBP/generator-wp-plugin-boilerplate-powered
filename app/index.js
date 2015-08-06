@@ -69,9 +69,6 @@ function cleanParsing(pathrec) {
   ];
   if (removeGit === true) {
     default_file.push('.git');
-    if (verbose) {
-      console.log(('Added to list files removeable .git').italic);
-    }
   }
   var default_folder = ['tests', 'bin', 'deploy', 'config'];
   if (cleanfolder !== false) {
@@ -707,8 +704,8 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
 WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() {
   this.files.adminClass.rm(" * @TODO: Rename this class to a proper name for your plugin.\n *\n");
   this.files.adminClass.rm("*\n * Call $plugin_slug from public plugin class.\n *\n * @TODO:\n *\n * - Rename \"" + this.pluginClassName + "\" to the name of your initial plugin class\n *\n */\n");
-  this.files.adminClass.rmsearch('* Register and enqueue admin-specific style sheet.', '* - Rename "Plugin_Name" to the name your plugin', -2, -1);
-  this.files.adminClass.rmsearch('* Register and enqueue admin-specific JavaScript.', '* - Rename "Plugin_Name" to the name your plugin', -2, -1);
+  this.files.adminClass.rmsearch('* Register and enqueue admin-specific JavaScript.', "public function enqueue_admin_scripts() {", -2, 6);
+  this.files.adminClass.rmsearch('* Register and enqueue admin-specific style sheet.', "public function enqueue_admin_styles() {", -2, 6);
   if (verbose) {
     console.log(('Added info marker in admin-class*.php').italic);
   }
