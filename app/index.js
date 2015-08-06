@@ -63,7 +63,7 @@ function cleanParsing(pathrec) {
   var default_file = [
     'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json', 'production.rb', 'composer.json', '.scrutinizer.yml',
     'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json', 'Capfile', 'screenshot-1.png', 'component.json',
-    'phpunit.xml.dist', 'Dockunit.json', 'coverage.clover', 'CHANGELOG.md',
+    'phpunit.xml.dist', 'Dockunit.json', 'coverage.clover', 'CHANGELOG.md', 'Test.php', 'screenshot1.jpg', 'production.rb',
     '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'pointerplus.php', '.DS_Store', 'widget-sample.php'
   ];
   var default_folder = ['tests', 'bin', 'deploy', 'config'];
@@ -469,7 +469,8 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       debug: new Replacer(this.pluginSlug + '/admin/includes/debug.php', this),
       requirements: new Replacer(this.pluginSlug + '/public/includes/requirements.php', this),
       language: new Replacer(this.pluginSlug + '/includes/language.php', this),
-      fakepage: new Replacer(this.pluginSlug + '/includes/fake-page.php', this)
+      fakepage: new Replacer(this.pluginSlug + '/includes/fake-page.php', this),
+      widgetsample: new Replacer(this.pluginSlug + '/public/includes/widget/sample.php', this)
     };
 
     if (props.saveSettings === true) {
