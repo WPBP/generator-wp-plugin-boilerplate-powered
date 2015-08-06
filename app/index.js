@@ -1,5 +1,5 @@
 'use strict';
-
+/*jslint node: true */
 var util = require('util');
 var path = require('path');
 var yeoman = require('yeoman-generator');
@@ -14,9 +14,10 @@ var colors = require('colors');
 var Replacer = require('./replacer');
 var cleanfolder = false;
 var args = process.argv.slice(2);
-var version = '1.1.2';
+var version = '1.1.4';
 var is_default = false;
 var verbose = false;
+var removeGit = false;
 if (args[1] === 'dev') {
   version = 'master';
 }
@@ -66,6 +67,12 @@ function cleanParsing(pathrec) {
     'phpunit.xml.dist', 'Dockunit.json', 'coverage.clover', 'CHANGELOG.md', 'Test.php', 'screenshot1.jpg', 'production.rb',
     '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'pointerplus.php', '.DS_Store', 'widget-sample.php'
   ];
+  if (removeGit === true) {
+    default_file.push('.git');
+    if (verbose) {
+      console.log(('Added to list files removeable .git').italic);
+    }
+  }
   var default_folder = ['tests', 'bin', 'deploy', 'config'];
   if (cleanfolder !== false) {
     //Remove the unuseful files
@@ -184,6 +191,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                         console.log(('Error on removing .git:' + error).red);
                       }
                     });
+
                     console.log(('Remove git config generated').white);
                   }
                   //Clean all the folders!!
@@ -430,6 +438,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
     }
     if (this.defaultValues.git !== '') {
       prompts[11].default = this.defaultValues.git;
+      removeGit = true;
     }
     if (this.defaultValues.cleanFolder !== '') {
       prompts[12].default = this.defaultValues.cleanFolder;
