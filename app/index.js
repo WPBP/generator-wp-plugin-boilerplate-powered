@@ -797,12 +797,17 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     this.files.adminClass.rmsearch('// Load admin style sheet and JavaScript.', "add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );", 0, 0);
     this.files.adminClass.rmsearch('// Add an action link pointing to the options page.', "add_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );", 0, 0);
     this.files.adminClass.rmsearch('* Register the administration menu for this plugin into the WordPress Dashboard menu.', "public function add_action_links( $links ) {", 1, -7);
-    //@TODO
-  } else {
-    if (this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1) {
-      this.files.adminClass.rmsearch('// Load admin style in dashboard for the At glance widget', "add_filter( 'dashboard_glance_items', array( $this, 'cpt_dashboard_support' ), 10, 1 );", 1, -1);
-      this.files.adminClass.rmsearch('* Add the counter of your CPTs in At Glance widget in the dashboard<br>', 'return $items;', 1, 1);
-      this.files.adminCss.rmsearch('#dashboard_right_now a.demo-count:before {', '', 0, 3);
+    if (verbose) {
+      console.log(('Removed code of admin page').italic);
+    }
+  }
+  
+  if (this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1) {
+    this.files.adminClass.rmsearch('// Load admin style in dashboard for the At glance widget', "add_filter( 'dashboard_glance_items', array( $this, 'cpt_dashboard_support' ), 10, 1 );", 1, -1);
+    this.files.adminClass.rmsearch('* Add the counter of your CPTs in At Glance widget in the dashboard<br>', 'return $items;', 1, 0);
+    this.files.adminCss.rmsearch('#dashboard_right_now a.demo-count:before {', '', 0, 3);
+    if (verbose) {
+      console.log(('Removed code of SUpport in Dashboard').italic);
     }
   }
   if (verbose) {
@@ -810,7 +815,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   }
   if (this.snippet.indexOf('Bubble notification on pending CPT') === -1) {
     this.files.adminClass.rmsearch('//Add bubble notification for cpt pending', "add_action( 'admin_menu', array( $this, 'pending_cpt_bubble' ), 999 );", 1, -1);
-    this.files.adminClass.rmsearch("* Bubble Notification for pending cpt<br>", "return $current_key;", 1, -5);
+    this.files.adminClass.rmsearch("* Bubble Notification for pending cpt<br>", "return $current_key;", 1, -4);
     if (verbose) {
       console.log(('Removed Bubble Notification').italic);
     }
@@ -844,7 +849,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   }
   if (this.snippet.indexOf('Custom filter') === -1) {
     this.files.adminClass.rm("add_filter( '@TODO', array( $this, 'filter_method_name' ) );\n");
-    this.files.adminClass.rmsearch('* NOTE:     Filters are points of execution in which WordPress modifies data', '// @TODO: Define your filter hook callback here', 1, -2);
+    this.files.adminClass.rmsearch('* NOTE:     Filters are points of execution in which WordPress modifies data', '// @TODO: Define your filter hook callback here', 1, -1);
     if (verbose) {
       console.log(('Removed Custom Filter').italic);
     }
@@ -906,10 +911,13 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
     fs.unlink(this.pluginSlug + '/public/includes/requirements.php');
     fs.unlink(this.pluginSlug + '/languages/requirements.pot');
     this.files.publicClass.rmsearch('//Requirements Detection System - read the doc/example in the library file', "'WP' => new WordPress_Requirement( '4.1.0' )", -1, -2);
+    if (verbose) {
+      console.log(('Removed Requirements Detection System').italic);
+    }
   }
   //Snippet
   if (this.snippet.indexOf('CPTs on search box') === -1) {
-    this.files.publicClass.rmsearch('* Add support for custom CPT on the search box', 'return $query;', 1, 2);
+    this.files.publicClass.rmsearch('* Add support for custom CPT on the search box', 'return $query;', 1, -2);
     this.files.publicClass.rm("add_filter( 'pre_get_posts', array( $this, 'filter_search' ) );");
     if (verbose) {
       console.log(('Removed CPTs on search box').italic);
@@ -924,22 +932,22 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   }
   if (this.snippet.indexOf('Custom filter') === -1) {
     this.files.publicClass.rm("add_filter( '@TODO', array( $this, 'filter_method_name' ) );");
-    this.files.publicClass.rmsearch('* NOTE:  Filters are points of execution in which WordPress modifies data', '// @TODO: Define your filter hook callback here', 1, 2);
+    this.files.publicClass.rmsearch('* NOTE:  Filters are points of execution in which WordPress modifies data', '// @TODO: Define your filter hook callback here', 1, -1);
   }
   if (this.snippet.indexOf('Custom shortcode') === -1) {
     this.files.publicClass.rm("add_shortcode( '@TODO', array( $this, 'shortcode_method_name' ) );");
-    this.files.publicClass.rmsearch('* NOTE:  Shortcode simple set of functions for creating macro codes for use', '// In bundle with the boilerplate https://github.com/jtsternberg/Shortcode_Button', 1, 0);
+    this.files.publicClass.rmsearch('* NOTE:  Shortcode simple set of functions for creating macro codes for use', '// In bundle with the boilerplate https://github.com/jtsternberg/Shortcode_Button', 1, -1);
   }
   if (this.snippet.indexOf('Javascript DOM-based Routing') === -1) {
     this.files.publicjs.rmsearch('* DOM-based Routing', '$(document).ready(UTIL.loadEvents);', 1, -1);
   }
   if (this.snippet.indexOf('Capability system') === -1) {
     this.files.publicClass.rmsearch('* Array of capabilities by roles', '* Initialize the plugin by setting localization and loading public scripts', 1, 2);
-    this.files.publicClass.rmsearch('// @TODO: Define activation functionality here', '* Fired for each blog when the plugin is deactivated.', 2, 5);
+    this.files.publicClass.rmsearch('// @TODO: Define activation functionality here', '* Fired for each blog when the plugin is deactivated.', 0, 5);
     this.files.publicClass.rm("'edit_others_posts' => 'edit_other_demo',");
   }
   if (this.snippet.indexOf('Add body class') === -1) {
-    this.files.publicClass.rmsearch('* Add class in the body on the frontend', 'return $classes;', 1, -2);
+    this.files.publicClass.rmsearch('* Add class in the body on the frontend', 'return $classes;', 1, -1);
     this.files.publicClass.rm("add_filter( 'body_class', array( $this, 'add_pn_class' ), 10, 3 );".replace(/pn_/g, this.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '_'));
   }
   if (this.snippet.indexOf('wp_localize_script for PHP var to JS') === -1) {
