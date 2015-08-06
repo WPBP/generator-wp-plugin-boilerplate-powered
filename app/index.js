@@ -666,7 +666,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
         console.log((error).red);
       }
     });
-    this.files.primary.rmsearch(' * Load Widgets Helper', '', 1, 3);
+    this.files.primary.rmsearch(' * Load Widgets Helper', '', 1, 4);
     if (verbose) {
       console.log(('Removed Widgets Helper').italic);
     }
@@ -721,12 +721,18 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
         console.log((error).red);
       }
     });
+    rmdir(this.pluginSlug + '/admin/includes/CMB2-grid', function (error) {
+      if (error) {
+        console.log((error).red);
+      }
+    });
     this.files.adminClass.rm("$settings[ 1 ] = get_option( $this->plugin_slug . '-settings-second' );");
     this.files.adminClass.rm("update_option( $this->plugin_slug . '-settings-second', get_object_vars( $settings[ 1 ] ) );");
-    this.files.adminClass.rmsearch('* CMB 2 for metabox and many other cool things!', "require_once( plugin_dir_path( __FILE__ ) . '/includes/CMB2-Shortcode/shortcode-button.php' );", 1, 0);
-    this.files.adminClass.rmsearch('* NOTE:     Your metabox on Demo CPT', "'type' => 'text_small'", 1, 4);
-    this.files.publicClass.rm("// Check for the CMB2 Shortcode Button");
-    this.files.publicClass.rm("// In bundle with the boilerplate https://github.com/jtsternberg/Shortcode_Button");
+    this.files.adminClass.rmsearch('* CMB 2 for metabox and many other cool things!', "require_once( plugin_dir_path( __FILE__ ) . '/includes/CMB2-grid/Cmb2GridPlugin.php' );", 1, 0);
+    this.files.adminClass.rm('// Add the options page and menu item.');
+    this.files.adminClass.rm("add_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );");
+    this.files.adminClass.rmsearch('* Add metabox', "add_action( 'cmb2_init', array( $this, 'cmb_demo_metaboxes' ) );", 2, 0);
+    this.files.adminClass.rmsearch('* NOTE:     Your metabox on Demo CPT', "$row->addColumns(array($field1, $field2));", 1, -1);
     if (this.adminPage === true) {
       this.files.adminView.rmsearch('<div id="tabs-1" class="wrap">', "cmb2_metabox_form( $this->plugin_slug . '_options', $this->plugin_slug . '-settings' );", -2, -2);
       this.files.adminView.rmsearch('<div id="tabs-2" class="wrap">', "cmb2_metabox_form( $this->plugin_slug . '_options-second', $this->plugin_slug . '-settings-second' );", -2, -2);
@@ -760,7 +766,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
         console.log((error).red);
       }
     });
-    this.files.adminClass.rmsearch('* Load Wp_Admin_Notice for the notices in the backend', "new WP_Admin_Notice( __( 'Error Messages' ), 'error' );", 1, -1);
+    this.files.adminClass.rmsearch('* Load Wp_Admin_Notice for the notices in the backend', "new WP_Admin_Notice( __( 'Error Messages' ), 'error' );", 1, 0);
     if (verbose) {
       console.log(('Removed WP-Admin-Notice').italic);
     }
@@ -788,9 +794,10 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   //Snippet
   if (this.adminPage === false) {
     this.files.adminClass.rm("\n// Add an action link pointing to the options page.\n$plugin_basename = plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_slug . '.php' );\nadd_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );");
-    this.files.adminClass.rm("\n\n// Load admin style sheet and JavaScript.\nadd_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );\nadd_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );\n\n// Add the options page and menu item.\nadd_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );");
+    this.files.adminClass.rmsearch('// Load admin style sheet and JavaScript.', "add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );", 0, 0);
+    this.files.adminClass.rmsearch('// Add an action link pointing to the options page.', "add_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );", 0, 0);
+    this.files.adminClass.rmsearch('* Register the administration menu for this plugin into the WordPress Dashboard menu.', "public function add_action_links( $links ) {", 1, -7);
     //@TODO
-    this.files.adminClass.rm("\n/**\n * Register and enqueue admin-specific style sheet.\n *\n * @since     1.0.0\n *\n * @return    null    Return early if no settings page is registered.\n */\npublic function enqueue_admin_styles() {\n\nif ( ! isset( $this->plugin_screen_hook_suffix ) ) {\nreturn;\n}\n\n$screen = get_current_screen();\nif ( $this->plugin_screen_hook_suffix == $screen->id ) {\nwp_enqueue_style( $this->plugin_slug .'-admin-styles', plugins_url( 'assets/css/admin.css', __FILE__ ), array(), MyNewPlugin::VERSION );\n}\n\n}\n\n/**\n * Register and enqueue admin-specific JavaScript.\n *\n * @since     1.0.0\n *\n * @return    null    Return early if no settings page is registered.\n */\npublic function enqueue_admin_scripts() {\n\nif ( ! isset( $this->plugin_screen_hook_suffix ) ) {\nreturn;\n}\n\n$screen = get_current_screen();\nif ( $this->plugin_screen_hook_suffix == $screen->id ) {\nwp_enqueue_script( $this->plugin_slug . '-admin-script', plugins_url( 'assets/js/admin.js', __FILE__ ), array( 'jquery' ), MyNewPlugin::VERSION );\n}\n\n}\n\n/**\n * Register the administration menu for this plugin into the WordPress Dashboard menu.\n *\n * @since    1.0.0\n */\npublic function add_plugin_admin_menu() {\n\n/*\n * Add a settings page for this plugin to the Settings menu.\n *\n * NOTE:  Alternative menu locations are available via WordPress administration menu functions.\n *\n *        Administration Menus: http://codex.wordpress.org/Administration_Menus\n *\n * @TODO:\n *\n * - Change 'Page Title' to the title of your plugin admin page\n * - Change 'Menu Text' to the text for menu item for the plugin settings page\n * - Change 'manage_options' to the capability you see fit\n *   For reference: http://codex.wordpress.org/Roles_and_Capabilities\n */\n$this->plugin_screen_hook_suffix = add_options_page(\n__( 'Page Title', $this->plugin_slug ),\n__( 'Menu Text', $this->plugin_slug ),\n'manage_options',\n$this->plugin_slug,\narray( $this, 'display_plugin_admin_page' )\n);\n\n}\n\n/**\n * Render the settings page for this plugin.\n *\n * @since    1.0.0\n */\npublic function display_plugin_admin_page() {\ninclude_once( 'views/admin.php' );\n}\n\n/**\n * Add settings action link to the plugins page.\n *\n * @since    1.0.0\n */\npublic function add_action_links( $links ) {\n\nreturn array_merge(\narray(\n'settings' => '<a href=\"' . admin_url( 'options-general.php?page=' . $this->plugin_slug ) . '\">' . __( 'Settings', $this->plugin_slug ) . '</a>'\n),\n$links\n);\n\n}");
   } else {
     if (this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1) {
       this.files.adminClass.rmsearch('// Load admin style in dashboard for the At glance widget', "add_filter( 'dashboard_glance_items', array( $this, 'cpt_dashboard_support' ), 10, 1 );", 1, -1);
