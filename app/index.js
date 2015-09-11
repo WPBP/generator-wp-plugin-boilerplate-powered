@@ -43,7 +43,7 @@ var isUnixHiddenPath = function (path) {
  */
 function cleanFolder(path, excluded) {
   // Provide default value for excluded files
-  if (excluded == undefined) {
+  if (excluded === undefined) {
     excluded = [];
   }
   cleanParsing(path, excluded);
