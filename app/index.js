@@ -43,7 +43,7 @@ var isUnixHiddenPath = function (path) {
  */
 function cleanFolder(path, excluded) {
   // Provide default value for excluded files
-  if (excluded == null) {
+  if (excluded == undefined) {
     excluded = [];
   }
   cleanParsing(path, excluded);
@@ -59,7 +59,7 @@ function cleanFolder(path, excluded) {
         if (verbose) {
           console.log(('Parsing ' + pathrec).italic);
         }
-        cleanParsing(path);
+        cleanParsing(path, excluded);
         cleanFolder(pathrec, excluded);
       }
     }
@@ -68,7 +68,7 @@ function cleanFolder(path, excluded) {
 
 function cleanParsing(pathrec, excluded) {
   // Provide default value for excluded files
-  if (excluded === null) {
+  if (excluded === undefined) {
     excluded = [];
   }
   var default_file = [
@@ -79,12 +79,11 @@ function cleanParsing(pathrec, excluded) {
   ];
 
   // Remove excluded files from default files
-  if (excluded.length) {
+  if (!!excluded && excluded.length) {
     excluded.forEach(function (excluded_file) {
-      var index = 0;
-      if (index === default_file.indexOf(excluded_file)) {
-        default_file.splice(index, 1);
-      }
+      default_file = default_file.filter(function (element) {
+        return excluded.indexOf(element) === -1; // remove element if inside excluded array
+      });
     });
   }
 
@@ -227,7 +226,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                   }
 
                   if (self.modules.indexOf('CMB2') !== -1) {
-                    cleanFolder(self.pluginSlug + '/admin/includes/CMB2', ['readme.txt']);
+                    cleanFolder(self.pluginSlug + '/admin/includes/CMB2', ['readme.txt', 'README.txt']);
                     cleanFolder(self.pluginSlug + '/admin/includes/CMB2-Shortcode');
                   }
 
