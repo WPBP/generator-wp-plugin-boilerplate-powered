@@ -38,9 +38,14 @@ var isUnixHiddenPath = function (path) {
  * Remove the unuseful file and folder, insert the index.php in the folders
  * 
  * @param string path
+ * @param {array} excluded - List of files excluded from clean operation
  */
-function cleanFolder(path) {
-  cleanParsing(path);
+function cleanFolder(path, excluded) {
+  // Provide default value for excluded files
+  if (excluded == null) {
+    excluded = [];
+  }
+  cleanParsing(path, excluded);
   //Recursive scanning for the subfolder
   var list = fs.readdirSync(path);
   list.forEach(function (file) {
@@ -54,19 +59,34 @@ function cleanFolder(path) {
           console.log(('Parsing ' + pathrec).italic);
         }
         cleanParsing(path);
-        cleanFolder(pathrec);
+        cleanFolder(pathrec, excluded);
       }
     }
   });
 }
 
-function cleanParsing(pathrec) {
+function cleanParsing(pathrec, excluded) {
+  // Provide default value for excluded files
+  if (excluded == null) {
+    excluded = [];
+  }
   var default_file = [
     'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json', 'production.rb', 'composer.json', '.scrutinizer.yml',
     'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json', 'Capfile', 'screenshot-1.png', 'component.json',
     'phpunit.xml.dist', 'Dockunit.json', 'coverage.clover', 'CHANGELOG.md', 'Test.php', 'screenshot1.jpg', 'production.rb',
     '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'pointerplus.php', '.DS_Store', 'widget-sample.php'
   ];
+
+  // Remove excluded files from default files
+  if (excluded.length) {
+    excluded.forEach(function(excluded_file) {
+      var index = 0;
+      if (index = default_file.indexOf(excluded_file)) {
+        default_file.splice(index, 1);
+      }
+    });
+  }
+
   if (removeGit === true) {
     default_file.push('.git');
   }
@@ -206,7 +226,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                   }
 
                   if (self.modules.indexOf('CMB2') !== -1) {
-                    cleanFolder(self.pluginSlug + '/admin/includes/CMB2');
+                    cleanFolder(self.pluginSlug + '/admin/includes/CMB2', ['readme.txt']);
                     cleanFolder(self.pluginSlug + '/admin/includes/CMB2-Shortcode');
                   }
 
@@ -223,7 +243,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                       rmdir(self.pluginSlug + +'/admin/includes/WP-Contextual-Help/assets/', function (err) {
                       });
                     }
-                    cleanFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help');
+                    cleanFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help', ['readme.txt']);
                   }
 
                   //Console.log are cool and bowtie are cool!
@@ -252,6 +272,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
   } else {
     console.log(('This tool can create ' + process.cwd() + '/default-values.json with default values in the parent folder! The next time the tool load all the settings for a fast development :-D').bold);
     console.log(('Add your public Plugins Free/Premium made it with WPBP on https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/wiki/Plugin-made-with-this-Boilerplate!').bold.red);
+    console.log(('Mac OS X ready !!!').bold.red);
     default_file = path.join(__dirname, '../default-values-example.json');
     console.log('--------------------------');
     is_default = true;
