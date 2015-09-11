@@ -6,6 +6,8 @@ var exec = require('child_process').exec;
 var execSync = require('sync-exec');
 var args = process.argv.slice(2);
 var colors = require('colors');
+var os = require('os');
+var path = require('path')
 var verbose = false;
 if (args[1] === 'verbose' || args[2] === 'verbose') {
   verbose = true;
@@ -201,10 +203,15 @@ var Replacer = module.exports = function Replacer(file, options) {
           for (i = 0; i < total; i += 1) {
             line += seds[i].start + ',' + seds[i].end + "d;";
           }
-          exec("sed -i '" + line + "' " + process.cwd() + '/' + file, {cwd: process.cwd() + '/'},
+          var sedcmd = "sed -i '" + line + "' " + process.cwd() + '/' + file;
+          //Detect OSX for a compatible sed command
+          if(os.platform() === 'darwin') {
+            sedcmd = "sed -i '" + path.extname(file) + "' '" + line + "' " + process.cwd() + '/' + file;
+          } 
+          exec(sedcmd, {cwd: process.cwd() + '/'},
           function (err, stdout, stderr) {
             if (stderr.length > 0) {
-              console.log(("sed -i '" + line + "' " + process.cwd() + '/' + file).red);
+              console.log((sedcmd).red);
               return console.log(('stderr: ' + stderr).red);
             }
             if (err !== null) {
