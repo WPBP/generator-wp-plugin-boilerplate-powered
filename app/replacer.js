@@ -7,7 +7,7 @@ var execSync = require('sync-exec');
 var args = process.argv.slice(2);
 var colors = require('colors');
 var os = require('os');
-var path = require('path')
+var path = require('path');
 var verbose = false;
 if (args[1] === 'verbose' || args[2] === 'verbose') {
   verbose = true;

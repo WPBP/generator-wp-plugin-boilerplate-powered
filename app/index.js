@@ -18,6 +18,7 @@ var version = '1.1.4';
 var is_default = false;
 var verbose = false;
 var removeGit = false;
+var os = require('os');
 if (args[1] === 'dev') {
   version = 'master';
 }
@@ -67,7 +68,7 @@ function cleanFolder(path, excluded) {
 
 function cleanParsing(pathrec, excluded) {
   // Provide default value for excluded files
-  if (excluded == null) {
+  if (excluded === null) {
     excluded = [];
   }
   var default_file = [
@@ -79,9 +80,9 @@ function cleanParsing(pathrec, excluded) {
 
   // Remove excluded files from default files
   if (excluded.length) {
-    excluded.forEach(function(excluded_file) {
+    excluded.forEach(function (excluded_file) {
       var index = 0;
-      if (index = default_file.indexOf(excluded_file)) {
+      if (index === default_file.indexOf(excluded_file)) {
         default_file.splice(index, 1);
       }
     });
@@ -272,7 +273,12 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
   } else {
     console.log(('This tool can create ' + process.cwd() + '/default-values.json with default values in the parent folder! The next time the tool load all the settings for a fast development :-D').bold);
     console.log(('Add your public Plugins Free/Premium made it with WPBP on https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/wiki/Plugin-made-with-this-Boilerplate!').bold.red);
-    console.log(('Mac OS X ready !!!').bold.red);
+    if (/^win/.test(os.platform())) {
+      console.log(('Not supported on Windows!').bold.red);
+      exit();
+    } else {
+      console.log(('Supported Unix systems like Linux or Mac OSX!!!').bold.red);
+    }
     default_file = path.join(__dirname, '../default-values-example.json');
     console.log('--------------------------');
     is_default = true;
@@ -822,7 +828,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
       console.log(('Removed code of admin page').italic);
     }
   }
-  
+
   if (this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1) {
     this.files.adminClass.rmsearch('// Load admin style in dashboard for the At glance widget', "add_filter( 'dashboard_glance_items', array( $this, 'cpt_dashboard_support' ), 10, 1 );", 1, -1);
     this.files.adminClass.rmsearch('* Add the counter of your CPTs in At Glance widget in the dashboard<br>', 'return $items;', 1, 0);
