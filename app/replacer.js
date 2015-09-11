@@ -1,5 +1,6 @@
 'use strict';
 
+var os = require('os');
 var fs = require('fs');
 var readline = require('line-input-stream');
 var exec = require('child_process').exec;
@@ -197,14 +198,25 @@ var Replacer = module.exports = function Replacer(file, options) {
           var total = seds.length;
           var line = '';
           var i;
+          var platform = os.platform();
+          var sed_cmd; // sed command beginning
 
           for (i = 0; i < total; i += 1) {
             line += seds[i].start + ',' + seds[i].end + "d;";
           }
-          exec("sed -i '" + line + "' " + process.cwd() + '/' + file, {cwd: process.cwd() + '/'},
+          if (platform == 'darwin') {
+            // if it is Mac OS (modified sed)
+            sed_cmd = "sed -i ''";
+          }
+          else {
+            // other systems "linux", "win32", "sunos"
+            sed_cmd = "sed -i";
+          }
+
+          exec(sed_cmd + " '" + line + "' " + process.cwd() + '/' + file, {cwd: process.cwd() + '/'},
           function (err, stdout, stderr) {
             if (stderr.length > 0) {
-              console.log(("sed -i '" + line + "' " + process.cwd() + '/' + file).red);
+              console.log((sed_cmd + " '" + line + "' " + process.cwd() + '/' + file).red);
               return console.log(('stderr: ' + stderr).red);
             }
             if (err !== null) {
