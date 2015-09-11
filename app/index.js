@@ -277,7 +277,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
       console.log(('Not supported on Windows!').bold.red);
       exit();
     } else {
-      console.log(('Supported Unix systems like Linux or Mac OSX!!!').bold.red);
+      console.log(('Unix systems like Linux or Mac OSX are supported!').bold.red);
     }
     default_file = path.join(__dirname, '../default-values-example.json');
     console.log('--------------------------');
