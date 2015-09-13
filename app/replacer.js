@@ -206,7 +206,7 @@ var Replacer = module.exports = function Replacer(file, options) {
           var sedcmd = "sed -i '" + line + "' " + process.cwd() + '/' + file;
           //Detect OSX for a compatible sed command
           if(os.platform() === 'darwin') {
-            sedcmd = "sed -i '" + path.extname(file) + "' '" + line + "' " + process.cwd() + '/' + file;
+            sedcmd = "sed -i '" + path.extname(file) + "' '" + line + "' " + process.cwd() + '/' + file.substr( 0, file.lastIndexOf( "." ) );
           } 
           exec(sedcmd, {cwd: process.cwd() + '/'},
           function (err, stdout, stderr) {
