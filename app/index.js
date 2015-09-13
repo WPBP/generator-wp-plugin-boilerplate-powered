@@ -633,7 +633,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
   this.files.primary.add(/Version:( {11})1\.0\.0/g, 'Version:           ' + this.pluginVersion);
   this.files.primary.add(/Author:( {12})@TODO/g, 'Author:            ' + this.author);
   this.files.primary.add(/Author URI:( {8})@TODO/g, 'Author URI:        ' + this.authorURI);
-  this.files.primary.rm(" * @TODO:\n *\n * - replace `class-" + this.pluginSlug + ".php` with the name of the plugin's class file\n");
+  this.files.primary.rm("/*\n * @TODO:\n *\n * - replace `class-" + this.pluginSlug + ".php` with the name of the plugin's class file\n *\n */");
   this.files.primary.rm(" * @TODO:\n *\n * - replace `class-" + this.pluginSlug + "-admin.php` with the name of the plugin's admin file\n");
   this.files.primary.rm(" *\n * @TODO:\n *\n * - replace " + this.pluginClassName + " with the name of the class defined in\n *   `class-" + this.pluginSlug + ".php`\n");
   this.files.primary.rm("/*\n * @TODO:\n *\n * - replace " + this.pluginClassName + " with the name of the class defined in\n *   `class-" + this.pluginSlug + ".php`\n */");
@@ -701,7 +701,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
   //Function
   if (this.modules.indexOf('Fake Page Class') === -1) {
     fs.unlink(this.pluginSlug + '/includes/fake-page.php');
-    this.files.primary.rmsearch(' * Load Fake Page class', "'post content' => 'This is the fake page content'", 1, -3);
+    this.files.primary.rmsearch(' * Load Fake Page class', "", 1, 11);
     if (verbose) {
       console.log(('Removed Fake Class').italic);
     }
