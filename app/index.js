@@ -14,7 +14,7 @@ var colors = require('colors');
 var Replacer = require('./replacer');
 var cleanfolder = false;
 var args = process.argv.slice(2);
-var version = '1.1.4';
+var version = '1.1.5';
 var is_default = false;
 var verbose = false;
 var removeGit = false;
@@ -500,6 +500,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       loadtextdomain: new Replacer(this.pluginSlug + '/includes/load_textdomain.php', this),
       publicjs: new Replacer(this.pluginSlug + '/public/assets/js/public.js', this),
       debug: new Replacer(this.pluginSlug + '/admin/includes/debug.php', this),
+      impexp: new Replacer(this.pluginSlug + '/admin/includes/impexp.php', this),
       requirements: new Replacer(this.pluginSlug + '/public/includes/requirements.php', this),
       language: new Replacer(this.pluginSlug + '/includes/language.php', this),
       fakepage: new Replacer(this.pluginSlug + '/includes/fake-page.php', this),
@@ -847,8 +848,8 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     }
   }
   if (this.snippet.indexOf('Import/Export settings system') === -1) {
-    this.files.adminClass.rmsearch("* Process a settings export from config", "wp_safe_redirect( admin_url( 'options-general.php?page=' . $this->plugin_slug ) );", 1, -3);
-    this.files.adminClass.rmsearch("//Add the export settings method", "add_action( 'admin_init', array( $this, 'settings_import' ) ); ", 1, 0);
+    fs.unlink(this.pluginSlug + '/admin/includes/impexp.php');
+    this.files.adminClass.rmsearch("* Import Export settings", "require_once( plugin_dir_path( __FILE__ ) . 'includes/impexp.php' );", 1, -1);
     if (this.adminPage === true) {
       this.files.adminView.rmsearch('<div id="tabs-3" class="metabox-holder">', "<?php submit_button( __( 'Import' ), 'secondary', 'submit', false ); ?>", -2, -5);
     }
