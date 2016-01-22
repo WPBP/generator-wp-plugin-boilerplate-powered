@@ -725,10 +725,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
 };
 
 WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() {
-  this.files.adminClass.rm(" * @TODO: Rename this class to a proper name for your plugin.\n *\n");
-  this.files.adminClass.rm("*\n * Call $plugin_slug from public plugin class.\n *\n * @TODO:\n *\n * - Rename \"" + this.pluginClassName + "\" to the name of your initial plugin class\n *\n */\n");
-  this.files.adminClass.rmsearch('* Register and enqueue admin-specific JavaScript.', "public function enqueue_admin_scripts() {", -2, 6);
-  this.files.adminClass.rmsearch('* Register and enqueue admin-specific style sheet.', "public function enqueue_admin_styles() {", -2, 6);
+  this.files.adminClass.looplines(this.loadLines.admin.todo);
   if (verbose) {
     console.log(('Added info marker in admin-class*.php').italic);
   }
@@ -739,7 +736,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
         console.log((error).red);
       }
     });
-    rmdir(this.pluginSlug + '/admin/includes/CMB2-Shortcode', function (error) {
+    rmdir(this.pluginSlug + '/admin/includes/CMB2-Google-Maps', function (error) {
       if (error) {
         console.log((error).red);
       }
@@ -749,16 +746,10 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
         console.log((error).red);
       }
     });
-    this.files.adminClass.rm("$settings[ 1 ] = get_option( $this->plugin_slug . '-settings-second' );");
-    this.files.adminClass.rm("update_option( $this->plugin_slug . '-settings-second', get_object_vars( $settings[ 1 ] ) );");
-    this.files.adminClass.rmsearch('* CMB 2 for metabox and many other cool things!', "require_once( plugin_dir_path( __FILE__ ) . '/includes/CMB2-grid/Cmb2GridPlugin.php' );", 1, 0);
-    this.files.adminClass.rm('// Add the options page and menu item.');
-    this.files.adminClass.rm("add_action( 'admin_menu', array( $this, 'add_plugin_admin_menu' ) );");
-    this.files.adminClass.rmsearch('* Add metabox', "add_action( 'cmb2_init', array( $this, 'cmb_demo_metaboxes' ) );", 2, 0);
-    this.files.adminClass.rmsearch('* NOTE:     Your metabox on Demo CPT', "$row->addColumns(array($field1, $field2));", 1, -1);
+    this.files.impexp.looplines(this.loadLines.impexp.cmb);
+    this.files.adminClass.looplines(this.loadLines.admin.cmb);
     if (this.adminPage === true) {
-      this.files.adminView.rmsearch('<div id="tabs-1" class="wrap">', "cmb2_metabox_form( $this->plugin_slug . '_options', $this->plugin_slug . '-settings' );", -2, -2);
-      this.files.adminView.rmsearch('<div id="tabs-2" class="wrap">', "cmb2_metabox_form( $this->plugin_slug . '_options-second', $this->plugin_slug . '-settings-second' );", -2, -2);
+      this.files.adminView.looplines(this.loadLines.adminview.cmb);
     }
     if (verbose) {
       console.log(('Removed CMB2').italic);
