@@ -29,7 +29,8 @@
     "line-input-stream" : "~1.0.1",
 	"colors" : "~0.6.2",
 	"spawn-sync": "1.0.4",
-	"sync-exec": "~0.5.0"
+	"sync-exec": "~0.5.0",
+	"try-thread-sleep": "1.0.0"
   },
   "peerDependencies" : {
     "yo" : ">=1.0.0"
