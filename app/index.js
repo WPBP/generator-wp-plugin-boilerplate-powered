@@ -635,24 +635,24 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
   this.files.primary.add(/Version:( {11})1\.0\.0/g, 'Version:           ' + this.pluginVersion);
   this.files.primary.add(/Author:( {12})@TODO/g, 'Author:            ' + this.author);
   this.files.primary.add(/Author URI:( {8})@TODO/g, 'Author URI:        ' + this.authorURI);
-  this.files.primary.looplines(this.loadLines.primarytodo);
+  this.files.primary.looplines(this.loadLines.primary.todo);
   if (verbose) {
     console.log(('Added info marker replace on plugin.php').italic);
   }
   //Activate/deactivate
   if (this.activateDeactivate.indexOf('Activate Method') === -1 && this.activateDeactivate.indexOf('Deactivate Method') === -1) {
-    this.files.primary.rm("\n/*\n * Register hooks that are fired when the plugin is activated or deactivated.\n * When the plugin is deleted, the uninstall.php file is loaded.\n */\nregister_activation_hook( __FILE__, array( '" + this.pluginClassName + "', 'activate' ) );\nregister_deactivation_hook( __FILE__, array( '" + this.pluginClassName + "', 'deactivate' ) );\n");
+    this.files.primary.looplines(this.loadLines.primary.actdeact);
   }
   if (this.activateDeactivate.indexOf('Activate Method') === -1) {
-    this.files.primary.rm("\nregister_activation_hook( __FILE__, array( '" + this.pluginClassName + "', 'activate' ) );");
+    this.files.primary.looplines(this.loadLines.primary.act);
   }
   if (this.activateDeactivate.indexOf('Deactivate Method') === -1) {
-    this.files.primary.rm("\nregister_deactivation_hook( __FILE__, array( '" + this.pluginClassName + "', 'deactivate' ) );");
+    this.files.primary.looplines(this.loadLines.primary.deact);
   }
 
   //Repo
   if (this.modules.indexOf('CPT_Core') === -1 && this.modules.indexOf('Taxonomy_Core') === -1) {
-    this.files.primary.rm("\n/*\n * Load library for simple and fast creation of Taxonomy and Custom Post Type\n *\n */");
+    this.files.primary.looplines(this.loadLines.primary.cptcomment);
   }
   if (this.modules.indexOf('CPT_Core') === -1) {
     rmdir(this.pluginSlug + '/includes/CPT_Core', function (error) {
@@ -660,7 +660,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
         console.log((error).red);
       }
     });
-    this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/CPT_Core/CPT_Core.php' );");
+    this.files.primary.looplines(this.loadLines.primary.cptcore);
     this.files.primary.rm("and Custom Post Type");
     if (verbose) {
       console.log(('CPT_Core removed').italic);
@@ -672,7 +672,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
         console.log((error).red);
       }
     });
-    this.files.primary.rm("require_once( plugin_dir_path( __FILE__ ) . 'includes/Taxonomy_Core/Taxonomy_Core.php' );");
+    this.files.primary.looplines(this.loadLines.primary.taxcore);
     this.files.primary.rm("Taxonomy and");
     if (verbose) {
       console.log(('Taxnomy_Core removed').italic);
@@ -689,7 +689,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
         console.log((error).red);
       }
     });
-    this.files.primary.rmsearch(' * Load Widgets Helper', '', 1, 4);
+    this.files.primary.looplines(this.loadLines.primary.widget);
     if (verbose) {
       console.log(('Removed Widgets Helper').italic);
     }
@@ -698,7 +698,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
   //Function
   if (this.modules.indexOf('Fake Page Class') === -1) {
     fs.unlink(this.pluginSlug + '/includes/fake-page.php');
-    this.files.primary.rmsearch(' * Load Fake Page class', "", 1, 11);
+    this.files.primary.looplines(this.loadLines.primary.fakepage);
     if (verbose) {
       console.log(('Removed Fake Class').italic);
     }
@@ -710,16 +710,16 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
         console.log((error).red);
       }
     });
-    this.files.primary.rmsearch(' * Load template system', '', 1, 3);
+    this.files.primary.looplines(this.loadLines.primary.template);
     if (verbose) {
       console.log(('Removed Template System').italic);
     }
   }
   if (this.modules.indexOf('Language function support (WPML/Ceceppa Multilingua/Polylang)') === -1) {
     fs.unlink(this.pluginSlug + '/includes/language.php');
-    this.files.primary.rmsearch(' * Load Language wrapper function for WPML/Ceceppa Multilingua/Polylang', '', 1, 1);
+    this.files.primary.looplines(this.loadLines.primary.language);
     if (verbose) {
-      console.log(('Removed Language function').italic);
+      console.log(('Removed Language functions').italic);
     }
   }
 };
