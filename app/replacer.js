@@ -44,7 +44,11 @@ var Replacer = module.exports = function Replacer(file, options) {
    * @param number _end
    */
   module.addsed = function (startok, endok) {
-    seds.push({start: startok, end: endok});
+    if (endok) {
+      seds.push({start: startok, end: endok});
+    } else {
+      seds.push({start: startok});
+    }
   };
 
   /*
@@ -116,79 +120,93 @@ var Replacer = module.exports = function Replacer(file, options) {
    * @param number count_initial
    * @param number count_end
    */
-  module.rmsearch = function (start, end, count_initial, count_end) {
-    var stream_, startok, endok;
-    var i = -1;
-    var startspace = start;
-    start = start.replace(/ /g, '');
-    var endspace = end;
-    if (end.length > 0) {
-      end = end.replace(/ /g, '');
-    }
-    var exists = fs.readFileSync(process.cwd() + '/' + file);
-    if (exists) {
-      stream_ = readline(fs.createReadStream(file, {flags: 'r'}));
-      stream_.setDelimiter("\n");
-      module.getlines(file);
+  module.rmsearch = function (start, end, count_initial, count_end) {/*
+   var stream_, startok, endok;
+   var i = -1;
+   var startspace = start;
+   start = start.replace(/ /g, '');
+   var endspace = end;
+   if (end.length > 0) {
+   end = end.replace(/ /g, '');
+   }
+   var exists = fs.readFileSync(process.cwd() + '/' + file);
+   if (exists) {
+   stream_ = readline(fs.createReadStream(file, {flags: 'r'}));
+   stream_.setDelimiter("\n");
+   module.getlines(file);
+   
+   //start reading the file
+   stream_.on('line', function (line) {
+   i++;
+   line = line.replace(/(\r\n|\n|\r|\t)/gm, '').replace(/ /g, '');
+   
+   if (line === start) {
+   startok = i - count_initial;
+   if (!end.length) {
+   endok = i + count_end;
+   }
+   } else if (line === end && end && (i - count_end > startok)) {
+   endok = i - count_end;
+   }
+   
+   //Fallback when end event is not emitted
+   // Check the line number if is the last
+   if (countLines === i) {
+   if (typeof startok === 'undefined' || isNaN(startok)) {
+   return console.log(('Not found start line: ' + startspace + ' in ' + file).yellow);
+   }
+   
+   if (typeof endok === 'undefined' || isNaN(endok)) {
+   return console.log(('Not found end line: ' + endspace + ' in ' + file).yellow);
+   }
+   
+   if (endok !== '' && startok > endok) {
+   return console.log(('Problem when parsing ' + file).red);
+   }
+   
+   module.addsed(startok, endok);
+   }
+   
+   });
+   
+   stream_.on("end", function () {
+   if (typeof startok === 'undefined' || isNaN(startok)) {
+   return console.log(('Not found start line <<' + startspace + '>> in ' + file).red);
+   }
+   
+   if (typeof endok === 'undefined' || isNaN(endok)) {
+   return console.log(('Not found end line <<' + endspace + '>> in ' + file).red);
+   }
+   
+   if (endok !== '' && startok > endok) {
+   return console.log(('Problem when parsing ' + file).red);
+   }
+   
+   module.addsed(startok, endok);
+   });
+   
+   } else {
+   console.log(('File not exist: ' + file).red);
+   }*/
+  };
 
-      //start reading the file
-      stream_.on('line', function (line) {
-        i++;
-        line = line.replace(/(\r\n|\n|\r|\t)/gm, '').replace(/ /g, '');
-
-        if (line === start) {
-          startok = i - count_initial;
-          if (!end.length) {
-            endok = i + count_end;
-          }
-        } else if (line === end && end && (i - count_end > startok)) {
-          endok = i - count_end;
-        }
-
-        //Fallback when end event is not emitted
-        // Check the line number if is the last
-        if (countLines === i) {
-          if (typeof startok === 'undefined' || isNaN(startok)) {
-            return console.log(('Not found start line: ' + startspace + ' in ' + file).yellow);
-          }
-
-          if (typeof endok === 'undefined' || isNaN(endok)) {
-            return console.log(('Not found end line: ' + endspace + ' in ' + file).yellow);
-          }
-
-          if (endok !== '' && startok > endok) {
-            return console.log(('Problem when parsing ' + file).red);
-          }
-
-          module.addsed(startok, endok);
-        }
-
-      });
-
-      stream_.on("end", function () {
-        if (typeof startok === 'undefined' || isNaN(startok)) {
-          return console.log(('Not found start line <<' + startspace + '>> in ' + file).red);
-        }
-
-        if (typeof endok === 'undefined' || isNaN(endok)) {
-          return console.log(('Not found end line <<' + endspace + '>> in ' + file).red);
-        }
-
-        if (endok !== '' && startok > endok) {
-          return console.log(('Problem when parsing ' + file).red);
-        }
-
-        module.addsed(startok, endok);
-      });
-
-    } else {
-      console.log(('File not exist: ' + file).red);
-    }
+  /*
+   * Add in sed blocks of rows
+   * 
+   * @param array block
+   */
+  module.looplines = function (block) {
+    block.forEach(function (element, index, array) {
+      if (1 in element) {
+        module.addsed(element[0], element[1]);
+      } else {
+        module.addsed(element[0]);
+      }
+    });
   };
 
   /*
    * Call sed command and replace method
-   * 
    */
   module.sed = function () {
     file = module.file;
@@ -201,27 +219,31 @@ var Replacer = module.exports = function Replacer(file, options) {
           var i;
 
           for (i = 0; i < total; i += 1) {
-            line += seds[i].start + ',' + seds[i].end + "d;";
+            if (typeof seds[i].end !== "undefined") {
+              line += seds[i].start + ',' + seds[i].end + "d;";
+            } else {
+              line += seds[i].start + "d;";
+            }
           }
           var sedcmd = "sed -i '" + line + "' " + process.cwd() + '/' + file;
           //Detect OSX for a compatible sed command
-          if(os.platform() === 'darwin') {
-            sedcmd = "sed -i '" + path.extname(file) + "' '" + line + "' " + process.cwd() + '/' + file.substr( 0, file.lastIndexOf( "." ) );
-          } 
+          if (os.platform() === 'darwin') {
+            sedcmd = "sed -i '" + path.extname(file) + "' '" + line + "' " + process.cwd() + '/' + file.substr(0, file.lastIndexOf("."));
+          }
           exec(sedcmd, {cwd: process.cwd() + '/'},
-          function (err, stdout, stderr) {
-            if (stderr.length > 0) {
-              console.log((sedcmd).red);
-              return console.log(('stderr: ' + stderr).red);
-            }
-            if (err !== null) {
-              return console.log(('exec error: ' + err).red);
-            }
-            if (verbose) {
-              console.log(('Sed ' + file).italic);
-            }
-            module.replace();
-          });
+                  function (err, stdout, stderr) {
+                    if (stderr.length > 0) {
+                      console.log((sedcmd).red);
+                      return console.log(('stderr: ' + stderr).red);
+                    }
+                    if (err !== null) {
+                      return console.log(('exec error: ' + err).red);
+                    }
+                    if (verbose) {
+                      console.log(('Sed ' + file).italic);
+                    }
+                    module.replace();
+                  });
         } else {
           module.replace();
         }

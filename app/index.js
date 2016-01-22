@@ -8,13 +8,13 @@ var request = require('request');
 var Admzip = require('adm-zip');
 var rmdir = require('rimraf');
 var s = require('underscore.string');
-var sys = require('sys');
+var sys = require('util');
 var spawn = require('child_process').spawnSync || require('spawn-sync');
 var colors = require('colors');
 var Replacer = require('./replacer');
 var cleanfolder = false;
 var args = process.argv.slice(2);
-var version = '1.1.5';
+var version = '1.1.7';
 var is_default = false;
 var verbose = false;
 var removeGit = false;
@@ -283,6 +283,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
     is_default = true;
   }
   this.defaultValues = JSON.parse(this.readFileAsString(default_file));
+  this.loadLines = JSON.parse(fs.readFileSync(__dirname + '/match.json', "utf8")).list[0];
 };
 
 util.inherits(WpPluginBoilerplateGenerator, yeoman.generators.Base);
@@ -634,12 +635,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
   this.files.primary.add(/Version:( {11})1\.0\.0/g, 'Version:           ' + this.pluginVersion);
   this.files.primary.add(/Author:( {12})@TODO/g, 'Author:            ' + this.author);
   this.files.primary.add(/Author URI:( {8})@TODO/g, 'Author URI:        ' + this.authorURI);
-  this.files.primary.rm("/*\n * @TODO:\n *\n * - replace `class-" + this.pluginSlug + ".php` with the name of the plugin's class file\n *\n */");
-  this.files.primary.rm(" * @TODO:\n *\n * - replace `class-" + this.pluginSlug + "-admin.php` with the name of the plugin's admin file\n");
-  this.files.primary.rm(" *\n * @TODO:\n *\n * - replace " + this.pluginClassName + " with the name of the class defined in\n *   `class-" + this.pluginSlug + ".php`\n");
-  this.files.primary.rm("/*\n * @TODO:\n *\n * - replace " + this.pluginClassName + " with the name of the class defined in\n *   `class-" + this.pluginSlug + ".php`\n */");
-  this.files.primary.rm(" * - replace " + this.pluginClassName + "_Admin with the name of the class defined in\n *   `class-" + this.pluginSlug + "-admin.php`\n");
-  this.files.primary.rm(" * @TODO:\n *\n * - replace `class-plugin-admin.php` with the name of the plugin's admin file\n * - replace " + this.pluginClassName + "Admin with the name of the class defined in\n *   `class-" + this.pluginSlug + "-admin.php`\n *\n");
+  this.files.primary.looplines(this.loadLines.primarytodo);
   if (verbose) {
     console.log(('Added info marker replace on plugin.php').italic);
   }
