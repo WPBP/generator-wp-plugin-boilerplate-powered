@@ -227,7 +227,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
 
                   if (self.modules.indexOf('CMB2') !== -1) {
                     cleanFolder(self.pluginSlug + '/admin/includes/CMB2', ['readme.txt', 'README.txt']);
-                    cleanFolder(self.pluginSlug + '/admin/includes/CMB2-Shortcode');
+                    cleanFolder(self.pluginSlug + '/admin/includes/CMB2-Google-Maps');
                   }
 
                   if (self.modules.indexOf('PointerPlus') !== -1) {
@@ -837,6 +837,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   }
   if (this.snippet.indexOf('Debug system (Debug Bar support)') === -1) {
     fs.unlink(this.pluginSlug + '/admin/includes/debug.php');
+    fs.unlink(this.pluginSlug + '/admin/includes/PN_Debug_Panel.php');
     this.files.adminClass.looplines(this.loadLines.admin.debug);
     if (verbose) {
       console.log(('Removed Debug system').italic);
@@ -897,58 +898,47 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
 
   //Function
   if (this.modules.indexOf('Template system (like WooCommerce)') === -1) {
-    this.files.publicClass.rm('//Override the template hierarchy for load /templates/content-demo.php');
-    this.files.publicClass.rm("add_filter( 'template_include', array( $this, 'load_content_demo' ) );");
-    this.files.publicClass.rmsearch('* Example for override the template system on the frontend', 'return $original_template;', 1, -3);
+    this.files.publicClass.looplines(this.loadLines.public.template);
   }
   if (this.modules.indexOf('Requirements system on activation') === -1) {
     fs.unlink(this.pluginSlug + '/public/includes/requirements.php');
     fs.unlink(this.pluginSlug + '/languages/requirements.pot');
-    this.files.publicClass.rmsearch('//Requirements Detection System - read the doc/example in the library file', "'WP' => new WordPress_Requirement( '4.1.0' )", -1, -2);
+    this.files.publicClass.looplines(this.loadLines.public.requirement);
     if (verbose) {
       console.log(('Removed Requirements Detection System').italic);
     }
   }
   //Snippet
   if (this.snippet.indexOf('CPTs on search box') === -1) {
-    this.files.publicClass.rmsearch('* Add support for custom CPT on the search box', 'return $query;', 1, -2);
-    this.files.publicClass.rm("add_filter( 'pre_get_posts', array( $this, 'filter_search' ) );");
+    this.files.publicClass.looplines(this.loadLines.public.cptsearch);
     if (verbose) {
       console.log(('Removed CPTs on search box').italic);
     }
   }
   if (this.snippet.indexOf('Custom action') === -1 && this.snippet.indexOf('Custom filter') === -1 && this.snippet.indexOf('Custom shortcode') === -1) {
-    this.files.publicClass.rmsearch('* Define custom functionality.', '* Refer To http://codex.wordpress.org/Plugin_API#Hooks.2C_Actions_and_Filters', 1, -2);
+    this.files.publicClass.looplines(this.loadLines.public.customfunc);
   }
   if (this.snippet.indexOf('Custom action') === -1) {
-    this.files.publicClass.rm("add_action( '@TODO', array( $this, 'action_method_name' ) );");
-    this.files.publicClass.rmsearch('* NOTE:  Actions are points in the execution of a page or process', '// @TODO: Define your action hook callback here', 1, -2);
+    this.files.publicClass.looplines(this.loadLines.public.customact);
   }
   if (this.snippet.indexOf('Custom filter') === -1) {
-    this.files.publicClass.rm("add_filter( '@TODO', array( $this, 'filter_method_name' ) );");
-    this.files.publicClass.rmsearch('* NOTE:  Filters are points of execution in which WordPress modifies data', '// @TODO: Define your filter hook callback here', 1, -1);
+    this.files.publicClass.looplines(this.loadLines.public.customflt);
   }
   if (this.snippet.indexOf('Custom shortcode') === -1) {
-    this.files.publicClass.rm("add_shortcode( '@TODO', array( $this, 'shortcode_method_name' ) );");
-    this.files.publicClass.rmsearch('* NOTE:  Shortcode simple set of functions for creating macro codes for use', '// In bundle with the boilerplate https://github.com/jtsternberg/Shortcode_Button', 1, -1);
+    this.files.publicClass.looplines(this.loadLines.public.customsc);
   }
   if (this.snippet.indexOf('Javascript DOM-based Routing') === -1) {
-    this.files.publicjs.rmsearch('* DOM-based Routing', '$(document).ready(UTIL.loadEvents);', 1, -1);
+    this.files.publicjs.looplines(this.loadLines.publicjs.routing);
   }
   if (this.snippet.indexOf('Capability system') === -1) {
-    this.files.publicClass.rmsearch('* Array of capabilities by roles', '* Initialize the plugin by setting localization and loading public scripts', 1, 2);
-    this.files.publicClass.rmsearch('// @TODO: Define activation functionality here', '* Fired for each blog when the plugin is deactivated.', 0, 5);
-    this.files.publicClass.rm("'edit_others_posts' => 'edit_other_demo',");
+    this.files.publicClass.looplines(this.loadLines.public.cap);
   }
   if (this.snippet.indexOf('Add body class') === -1) {
-    this.files.publicClass.rmsearch('* Add class in the body on the frontend', 'return $classes;', 1, -1);
-    this.files.publicClass.rm("add_filter( 'body_class', array( $this, 'add_pn_class' ), 10, 3 );".replace(/pn_/g, this.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '_'));
+    this.files.publicClass.looplines(this.loadLines.public.body);
   }
   if (this.snippet.indexOf('wp_localize_script for PHP var to JS') === -1) {
-    this.files.publicClass.rm("add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_js_vars' ) );");
-    this.files.publicClass.rmsearch('* Print the PHP var in the HTML of the frontend for access by JavaScript', "'alert' => __( 'Hey! You have clicked the button!', $this->get_plugin_slug() )", 1, -4);
-    this.files.publicjs.rm('// Write in console log the PHP value passed in enqueue_js_vars in public/class-' + this.pluginSlug + '.php' + "\n");
-    this.files.publicjs.rm('console.log( tp_js_vars.alert );' + "\n");
+    this.files.publicClass.looplines(this.loadLines.public.localize);
+    this.files.publicjs.looplines(this.loadLines.publicjs.localize);
   }
 };
 
@@ -961,10 +951,7 @@ WpPluginBoilerplateGenerator.prototype.setUninstall = function setUninstall() {
     fs.unlink(this.files.uninstall.file);
     delete this.files.uninstall;
   } else if (this.snippet.indexOf('Capability system') === -1) {
+    this.files.uninstall.looplines(this.loadLines.uninstall.cap);
     this.files.uninstall.add('global $wpdb, $wp_roles;', 'global $wpdb;');
-    this.files.uninstall.rmsearch('$plugin_roles = array(', 'if ( is_multisite() ) {', -1, 0);
-    this.files.uninstall.rmsearch("switch_to_blog( $blog[ 'blog_id' ] );", 'restore_current_blog();', -19, 0);
-    this.files.uninstall.rmsearch('} else {', '$wp_roles->remove_cap( $cap );', -19, -4);
   }
 };
-
