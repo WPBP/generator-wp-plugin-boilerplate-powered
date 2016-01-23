@@ -227,6 +227,13 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
 
                   if (self.modules.indexOf('CMB2') !== -1) {
                     cleanFolder(self.pluginSlug + '/admin/includes/CMB2', ['readme.txt', 'README.txt']);
+                  }
+
+                  if (self.modules.indexOf('CMB2-Grid') !== -1) {
+                    cleanFolder(self.pluginSlug + '/admin/includes/CMB2-grid');
+                  }
+
+                  if (self.modules.indexOf('CMB2-Google-Maps') !== -1) {
                     cleanFolder(self.pluginSlug + '/admin/includes/CMB2-Google-Maps');
                   }
 
@@ -343,9 +350,12 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'Taxonomy_Core', checked: true},
         {name: 'Widget Helper', checked: true},
         {name: 'CMB2', checked: true},
+        {name: 'CMB2-Grid', checked: true},
+        {name: 'CMB2-Google-Maps', checked: true},
         {name: 'WP-Contextual-Help', checked: true},
         {name: 'WP-Admin-Notice', checked: true},
         {name: 'PointerPlus', checked: true},
+        {name: 'CronPlus', checked: true},
         {name: 'Fake Page Class', checked: true},
         {name: 'Template system (like WooCommerce)', checked: true},
         {name: 'Language function support (WPML/Ceceppa Multilingua/Polylang)', checked: true},
@@ -357,6 +367,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       message: 'Which snippet your plugin needs?',
       choices: [
         {name: 'Support Dashboard At Glance Widget for CPT', checked: true},
+        {name: 'Support Dashboard Activity Widget for CPT', checked: true},
         {name: 'Javascript DOM-based Routing', checked: true},
         {name: 'Bubble notification on pending CPT', checked: true},
         {name: 'Import/Export settings system', checked: true},
@@ -755,6 +766,28 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
       console.log(('Removed CMB2').italic);
     }
   }
+  if (this.modules.indexOf('CMB2-Google_maps') === -1) {
+    this.files.adminClass.looplines(this.loadLines.admin.cmbgmaps);
+    rmdir(this.pluginSlug + '/admin/includes/CMB2-Google-Maps', function (error) {
+      if (error) {
+        console.log((error).red);
+      }
+    });
+    if (verbose) {
+      console.log(('Removed CMB2-Google-Maps').italic);
+    }
+  }
+  if (this.modules.indexOf('CMB2-Grid') === -1) {
+    this.files.adminClass.looplines(this.loadLines.admin.cmbgrid);
+    rmdir(this.pluginSlug + '/admin/includes/CMB2-grid', function (error) {
+      if (error) {
+        console.log((error).red);
+      }
+    });
+    if (verbose) {
+      console.log(('Removed CMB2-Grid').italic);
+    }
+  }
   if (this.modules.indexOf('WP-Contextual-Help') === -1) {
     rmdir(this.pluginSlug + '/admin/includes/WP-Contextual-Help', function (error) {
       if (error) {
@@ -793,6 +826,17 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
       console.log(('Removed PointerPlus').italic);
     }
   }
+   if (this.modules.indexOf('CronPlus') === -1) {
+    rmdir(this.pluginSlug + '/admin/includes/CronPlus', function (error) {
+      if (error) {
+        console.log((error).red);
+      }
+    });
+    this.files.adminClass.looplines(this.loadLines.admin.cron);
+    if (verbose) {
+      console.log(('Removed CronPlus').italic);
+    }
+  }
   if (this.modules.indexOf('CPT_Columns') === -1) {
     fs.unlink(this.pluginSlug + '/admin/includes/CPT_Columns.php');
     this.files.adminClass.looplines(this.loadLines.admin.columns);
@@ -808,12 +852,17 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
       console.log(('Removed code of admin page').italic);
     }
   }
-
   if (this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1) {
     this.files.adminClass.looplines(this.loadLines.admin.glance);
     this.files.adminCss.looplines(this.loadLines.admincss.glance);
     if (verbose) {
-      console.log(('Removed code of SUpport in Dashboard').italic);
+      console.log(('Removed code of At Glance Support in Dashboard').italic);
+    }
+  }
+  if (this.snippet.indexOf('Support Dashboard Activity Widget for CPT') === -1) {
+    this.files.adminClass.looplines(this.loadLines.admin.activity);
+    if (verbose) {
+      console.log(('Removed code of Activity Support in Dashboard').italic);
     }
   }
   if (verbose) {
@@ -829,7 +878,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     fs.unlink(this.pluginSlug + '/admin/includes/impexp.php');
     this.files.adminClass.looplines(this.loadLines.admin.impexp);
     if (this.adminPage === true) {
-    this.files.adminView.looplines(this.loadLines.adminview.impexp);
+      this.files.adminView.looplines(this.loadLines.adminview.impexp);
     }
     if (verbose) {
       console.log(('Removed Import/Export Settings').italic);
@@ -861,7 +910,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
 };
 
 WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass() {
-    this.files.publicClass.looplines(this.loadLines.public.todo);
+  this.files.publicClass.looplines(this.loadLines.public.todo);
 
   //Assets - JS/CSS
   if (this.publicResources.length === 0) {
@@ -899,6 +948,11 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   //Function
   if (this.modules.indexOf('Template system (like WooCommerce)') === -1) {
     this.files.publicClass.looplines(this.loadLines.public.template);
+    rmdir(this.pluginSlug + '/templates', function (error) {
+      if (error) {
+        console.log((error).red);
+      }
+    });
   }
   if (this.modules.indexOf('Requirements system on activation') === -1) {
     fs.unlink(this.pluginSlug + '/public/includes/requirements.php');
