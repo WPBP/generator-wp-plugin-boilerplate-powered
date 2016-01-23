@@ -356,10 +356,12 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'WP-Admin-Notice', checked: true},
         {name: 'PointerPlus', checked: true},
         {name: 'CronPlus', checked: true},
+        {name: 'WP Background Processing', checked: false},
         {name: 'Fake Page Class', checked: true},
         {name: 'Template system (like WooCommerce)', checked: true},
         {name: 'Language function support (WPML/Ceceppa Multilingua/Polylang)', checked: true},
-        {name: 'Requirements system on activation', checked: true}
+        {name: 'Requirements system on activation', checked: true},
+        {name: 'Freemius SDK', checked: false}
       ]
     }, {
       type: 'checkbox',
@@ -703,6 +705,27 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
     this.files.primary.looplines(this.loadLines.primary.widget);
     if (verbose) {
       console.log(('Removed Widgets Helper').italic);
+    }
+  }
+  if (this.modules.indexOf('Freemius SDK') === -1) {
+    rmdir(this.pluginSlug + '/includes/freemius', function (error) {
+      if (error) {
+        console.log((error).red);
+      }
+    });
+    this.files.primary.looplines(this.loadLines.primary.freemius);
+    if (verbose) {
+      console.log(('Removed Freemius SDK').italic);
+    }
+  }
+  if (this.modules.indexOf('WP Background Processing') === -1) {
+    rmdir(this.pluginSlug + '/includes/wp-background-processing', function (error) {
+      if (error) {
+        console.log((error).red);
+      }
+    });
+    if (verbose) {
+      console.log(('Removed WP Background processing').italic);
     }
   }
 
