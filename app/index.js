@@ -491,7 +491,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       primary: new Replacer(this.pluginSlug + '/' + this.pluginSlug + '.php', this),
       publicClass: new Replacer(this.pluginSlug + '/public/class-' + this.pluginSlug + '.php', this),
       adminClass: new Replacer(this.pluginSlug + '/admin/class-' + this.pluginSlug + '-admin.php', this),
-      adminCss: new Replacer(this.pluginSlug + '/admin/assets/css/admin.css', this),
+      adminCss: new Replacer(this.pluginSlug + '/admin/assets/sass/admin.scss', this),
       publicView: new Replacer(this.pluginSlug + '/public/views/public.php', this),
       adminView: new Replacer(this.pluginSlug + '/admin/views/admin.php', this),
       uninstall: new Replacer(this.pluginSlug + '/uninstall.php', this),
@@ -766,10 +766,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
         console.log((error).red);
       }
     });
-    this.files.adminClass.rmsearch('* Load Wp_Contextual_Help for the help tabs', "add_action( 'init', array( $this, 'contextual_help' ) );", 1, -1);
-    this.files.adminClass.rmsearch('* Filter for change the folder of Contextual Help', "$paths[] = plugin_dir_path( __FILE__ ) . '../help-docs/';", 1, -3);
-    this.files.adminClass.rmsearch('* Filter for change the folder image of Contextual Help', "$paths[] = plugin_dir_path( __FILE__ ) . '../help-docs/img';", 1, -3);
-    this.files.adminClass.rmsearch('* Contextual Help, docs in /help-docs folter', "'page' => 'settings_page_' . $this->plugin_slug,", 1, -1);
+    this.files.adminClass.looplines(this.loadLines.admin.contextual);
     if (verbose) {
       console.log(('Removed Wp_Contextual_Help').italic);
     }
@@ -780,7 +777,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
         console.log((error).red);
       }
     });
-    this.files.adminClass.rmsearch('* Load Wp_Admin_Notice for the notices in the backend', "new WP_Admin_Notice( __( 'Error Messages' ), 'error' );", 1, 0);
+    this.files.adminClass.looplines(this.loadLines.admin.notice);
     if (verbose) {
       console.log(('Removed WP-Admin-Notice').italic);
     }
@@ -791,15 +788,14 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
         console.log((error).red);
       }
     });
-    this.files.adminClass.rmsearch('* Load PointerPlus for the Wp Pointer', "add_filter( 'pointerplus_list', array( $this, 'custom_initial_pointers' ), 10, 2 );", 1, 0);
-    this.files.adminClass.rmsearch('* Add pointers.', "'icon_class' => 'dashicons-welcome-learn-more',", 1, -3);
+    this.files.adminClass.looplines(this.loadLines.admin.pointers);
     if (verbose) {
       console.log(('Removed PointerPlus').italic);
     }
   }
   if (this.modules.indexOf('CPT_Columns') === -1) {
     fs.unlink(this.pluginSlug + '/admin/includes/CPT_Columns.php');
-    this.files.adminClass.rmsearch('* Load CPT_Columns', "'order' => \"-1\"", 1, 1);
+    this.files.adminClass.looplines(this.loadLines.admin.columns);
     if (verbose) {
       console.log(('Removed CPT_Columns').italic);
     }
@@ -807,19 +803,15 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
 
   //Snippet
   if (this.adminPage === false) {
-    this.files.adminClass.rm("\n// Add an action link pointing to the options page.\n$plugin_basename = plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_slug . '.php' );\nadd_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );");
-    this.files.adminClass.rmsearch('// Load admin style sheet and JavaScript.', "add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );", 0, 0);
-    this.files.adminClass.rmsearch('// Add an action link pointing to the options page.', "add_filter( 'plugin_action_links_' . $plugin_basename, array( $this, 'add_action_links' ) );", 0, 0);
-    this.files.adminClass.rmsearch('* Register the administration menu for this plugin into the WordPress Dashboard menu.', "public function add_action_links( $links ) {", 1, -7);
+    this.files.adminClass.looplines(this.loadLines.admin.remove);
     if (verbose) {
       console.log(('Removed code of admin page').italic);
     }
   }
 
   if (this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1) {
-    this.files.adminClass.rmsearch('// Load admin style in dashboard for the At glance widget', "add_filter( 'dashboard_glance_items', array( $this, 'cpt_dashboard_support' ), 10, 1 );", 1, -1);
-    this.files.adminClass.rmsearch('* Add the counter of your CPTs in At Glance widget in the dashboard<br>', 'return $items;', 1, 0);
-    this.files.adminCss.rmsearch('#dashboard_right_now a.demo-count:before {', '', 0, 3);
+    this.files.adminClass.looplines(this.loadLines.admin.glance);
+    this.files.adminCss.looplines(this.loadLines.admincss.glance);
     if (verbose) {
       console.log(('Removed code of SUpport in Dashboard').italic);
     }
@@ -828,17 +820,16 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     console.log(('Cleaning in admin-class*.php').italic);
   }
   if (this.snippet.indexOf('Bubble notification on pending CPT') === -1) {
-    this.files.adminClass.rmsearch('//Add bubble notification for cpt pending', "add_action( 'admin_menu', array( $this, 'pending_cpt_bubble' ), 999 );", 1, -1);
-    this.files.adminClass.rmsearch("* Bubble Notification for pending cpt<br>", "return $current_key;", 1, -4);
+    this.files.adminClass.looplines(this.loadLines.admin.bubble);
     if (verbose) {
       console.log(('Removed Bubble Notification').italic);
     }
   }
   if (this.snippet.indexOf('Import/Export settings system') === -1) {
     fs.unlink(this.pluginSlug + '/admin/includes/impexp.php');
-    this.files.adminClass.rmsearch("* Import Export settings", "require_once( plugin_dir_path( __FILE__ ) . 'includes/impexp.php' );", 1, -1);
+    this.files.adminClass.looplines(this.loadLines.admin.impexp);
     if (this.adminPage === true) {
-      this.files.adminView.rmsearch('<div id="tabs-3" class="metabox-holder">', "<?php submit_button( __( 'Import' ), 'secondary', 'submit', false ); ?>", -2, -5);
+    this.files.adminView.looplines(this.loadLines.adminview.impexp);
     }
     if (verbose) {
       console.log(('Removed Import/Export Settings').italic);
@@ -846,24 +837,22 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   }
   if (this.snippet.indexOf('Debug system (Debug Bar support)') === -1) {
     fs.unlink(this.pluginSlug + '/admin/includes/debug.php');
-    this.files.adminClass.rmsearch("* Debug mode", "$debug->log( __( 'Plugin Loaded', $this->plugin_slug ) );", 1, -1);
+    this.files.adminClass.looplines(this.loadLines.admin.debug);
     if (verbose) {
       console.log(('Removed Debug system').italic);
     }
   }
   if (this.snippet.indexOf('Custom action') === -1 && this.snippet.indexOf('Custom filter') === -1 && this.snippet.indexOf('Custom shortcode') === -1) {
-    this.files.adminClass.rmsearch('* Define custom functionality.', '* http://codex.wordpress.org/Plugin_API#Hooks.2C_Actions_and_Filters', 1, -2);
+    this.files.adminClass.looplines(this.loadLines.admin.custom);
   }
   if (this.snippet.indexOf('Custom action') === -1) {
-    this.files.adminClass.rm("add_action( '@TODO', array( $this, 'action_method_name' ) );\n");
-    this.files.adminClass.rmsearch('* NOTE:     Actions are points in the execution of a page or process', '// @TODO: Define your action hook callback here', 1, -2);
+    this.files.adminClass.looplines(this.loadLines.admin.customact);
     if (verbose) {
       console.log(('Removed Custom Action').italic);
     }
   }
   if (this.snippet.indexOf('Custom filter') === -1) {
-    this.files.adminClass.rm("add_filter( '@TODO', array( $this, 'filter_method_name' ) );\n");
-    this.files.adminClass.rmsearch('* NOTE:     Filters are points of execution in which WordPress modifies data', '// @TODO: Define your filter hook callback here', 1, -1);
+    this.files.adminClass.looplines(this.loadLines.admin.customflt);
     if (verbose) {
       console.log(('Removed Custom Filter').italic);
     }
@@ -871,37 +860,28 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
 };
 
 WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass() {
-  this.files.publicClass.rm("* @TODO: Rename this class to a proper name for your plugin.\n *\n ");
-  this.files.publicClass.rm('* @TODO - Rename "' + this.pluginName + '" to the name of your plugin');
-  this.files.publicClass.rm('* @TODO - Rename "' + this.pluginSlug + '" to the name of your plugin' + "\n     ");
+    this.files.publicClass.looplines(this.loadLines.public.todo);
 
   //Assets - JS/CSS
   if (this.publicResources.length === 0) {
-    this.files.publicClass.rm("\n\n// Load public-facing style sheet and JavaScript.");
+    this.files.publicClass.looplines(this.loadLines.public.jscss);
   }
   if (this.publicResources.indexOf('JS') === -1) {
-    this.files.publicClass.rm("\nadd_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );");
-    this.files.publicClass.rm("\n\n/**\n * Register and enqueues public-facing JavaScript files.\n *\n * @since    " + this.pluginVersion + "\n */\npublic function enqueue_scripts() {\nwp_enqueue_script( $this->plugin_slug . '-plugin-script', plugins_url( 'assets/js/public.js', __FILE__ ), array( 'jquery' ), self::VERSION );\n}");
+    this.files.publicClass.looplines(this.loadLines.public.js);
   }
   if (this.publicResources.indexOf('CSS') === -1) {
-    this.files.publicClass.rm("\nadd_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );");
-    this.files.publicClass.rm("\n\n/**\n * Register and enqueue public-facing style sheet.\n *\n * @since    " + this.pluginVersion + "\n */\npublic function enqueue_styles() {\nwp_enqueue_style( $this->plugin_slug . '-plugin-styles', plugins_url( 'assets/css/public.css', __FILE__ ), array(), self::VERSION );\n}");
+    this.files.publicClass.looplines(this.loadLines.public.css);
   }
 
   //Activate/deactivate
   if (this.activateDeactivate.indexOf('Activate Method') === -1) {
-    this.files.publicClass.rmsearch('// Activate plugin when new blog is added', "add_action( 'wpmu_new_blog', array( $this, 'activate_new_site' ) );", 1, 1);
-    this.files.publicClass.rmsearch('* Fired when the plugin is activated.', '', 1, 32);
-    this.files.publicClass.rmsearch('* Fired when a new site is activated with a WPMU environment.', '', 1, 16);
-    this.files.publicClass.rmsearch('* Get all blog ids of blogs in the current network that are:', 'return $wpdb->get_col( $sql );', 1, -2);
-    this.files.publicClass.rmsearch("* Fired for each blog when the plugin is activated.", '', 1, 33);
+    this.files.publicClass.looplines(this.loadLines.public.act);
     if (verbose) {
       console.log(('Removed Activate Method').italic);
     }
   }
   if (this.activateDeactivate.indexOf('Deactivate Method') === -1) {
-    this.files.publicClass.rmsearch('* Fired when the plugin is deactivated.', '', 1, 32);
-    this.files.publicClass.rmsearch('* Fired for each blog when the plugin is deactivated.', '', 1, 2);
+    this.files.publicClass.looplines(this.loadLines.public.deact);
     if (verbose) {
       console.log(('Removed Deactive Method').italic);
     }
@@ -909,10 +889,10 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
 
   //Repo
   if (this.modules.indexOf('CPT_Core') === -1) {
-    this.files.publicClass.rmsearch('// Create Custom Post Type https://github.com/jtsternberg/CPT_Core/blob/master/README.md', "'map_meta_cap' => true", 0, -3);
+    this.files.publicClass.looplines(this.loadLines.public.cptcore);
   }
   if (this.modules.indexOf('Taxonomy_Core') === -1) {
-    this.files.publicClass.rmsearch('// Create Custom Taxonomy https://github.com/jtsternberg/Taxonomy_Core/blob/master/README.md', "), array( 'demo' )", 0, -2);
+    this.files.publicClass.looplines(this.loadLines.public.taxcore);
   }
 
   //Function
