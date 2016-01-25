@@ -57,7 +57,7 @@ function cleanFolder(path, excluded) {
       var stat = fs.statSync(pathrec);
       if (stat && stat.isDirectory()) {
         if (verbose) {
-          console.log(('Parsing ' + pathrec).italic);
+          console.log(('  Parsing ' + pathrec).italic);
         }
         cleanParsing(path, excluded);
         cleanFolder(pathrec, excluded);
@@ -182,7 +182,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                   if (self.files.hasOwnProperty(key)) {
                     self.files[key].sed();
                     if (verbose) {
-                      console.log(('Sed executed on ' + key).italic);
+                      console.log(('  Sed executed on ' + key).italic);
                     }
                   }
                 }
@@ -230,16 +230,16 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                     cleanFolder(self.pluginSlug + '/includes/freemius');
                   }
 
-                  if (self.modules.indexOf('CMB2') !== -1) {
-                    cleanFolder(self.pluginSlug + '/admin/includes/CMB2', ['readme.txt', 'README.txt']);
-                  }
-
                   if (self.modules.indexOf('CMB2-Grid') !== -1) {
                     cleanFolder(self.pluginSlug + '/admin/includes/CMB2-grid');
                   }
 
                   if (self.modules.indexOf('CMB2-Google-Maps') !== -1) {
                     cleanFolder(self.pluginSlug + '/admin/includes/CMB2-Google-Maps');
+                  }
+
+                  if (self.modules.indexOf('CMB2') !== -1) {
+                    cleanFolder(self.pluginSlug + '/admin/includes/CMB2', ['readme.txt', 'README.txt']);
                   }
 
                   if (self.modules.indexOf('PointerPlus') !== -1) {
@@ -287,6 +287,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
     }
   } else {
     console.log(('This tool can create ' + process.cwd() + '/default-values.json with default values in the parent folder! The next time the tool load all the settings for a fast development :-D').bold);
+    console.log(('Don\'t forget to check the wiki of the boilerplate: https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/wiki').bold);
     console.log(('Add your public Plugins Free/Premium made it with WPBP on https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/wiki/Plugin-made-with-this-Boilerplate!').bold.red);
     if (/^win/.test(os.platform())) {
       console.log(('Not supported on Windows!').bold.red);
@@ -525,7 +526,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       adminView: new Replacer(this.pluginSlug + '/admin/views/admin.php', this),
       uninstall: new Replacer(this.pluginSlug + '/uninstall.php', this),
       readme: new Replacer(this.pluginSlug + '/README.txt', this),
-      grunt: new Replacer(this.pluginSlug + '/Gruntfile.js', this),
+      gruntfile: new Replacer(this.pluginSlug + '/Gruntfile.js', this),
       package: new Replacer(this.pluginSlug + '/package.json', this),
       gitmodules: new Replacer(this.pluginSlug + '/.gitmodules', this),
       template: new Replacer(this.pluginSlug + '/includes/template.php', this),
@@ -674,7 +675,7 @@ WpPluginBoilerplateGenerator.prototype.setFiles = function setFiles() {
     this.files.gruntfile.looplines(this.loadLines.gruntfile.coffee);
     this.files.package.looplines(this.loadLines.package.coffee);
     if (verbose) {
-      console.log(('Coffeescript files and stuff removed').italic);
+      console.log(('Removed Coffeescript files and stuff').italic);
     }
   }
 };
@@ -712,7 +713,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
     this.files.primary.looplines(this.loadLines.primary.cptcore);
     this.files.primary.rm("and Custom Post Type");
     if (verbose) {
-      console.log(('CPT_Core removed').italic);
+      console.log(('Removed CPT_Core').italic);
     }
   }
   if (this.modules.indexOf('Taxonomy_Core') === -1) {
@@ -724,7 +725,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
     this.files.primary.looplines(this.loadLines.primary.taxcore);
     this.files.primary.rm("Taxonomy and");
     if (verbose) {
-      console.log(('Taxnomy_Core removed').italic);
+      console.log(('Removed Taxonomy_Core ').italic);
     }
   }
   if (this.modules.indexOf('Widget Helper') === -1) {
@@ -825,7 +826,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
       console.log(('Removed CMB2').italic);
     }
   }
-  if (this.modules.indexOf('CMB2-Google_maps') === -1) {
+  if (this.modules.indexOf('CMB2-Google-Maps') === -1) {
     this.files.adminClass.looplines(this.loadLines.admin.cmbgmaps);
     rmdir(this.pluginSlug + '/admin/includes/CMB2-Google-Maps', function (error) {
       if (error) {

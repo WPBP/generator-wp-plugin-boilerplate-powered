@@ -105,7 +105,7 @@ var Replacer = module.exports = function Replacer(file, options) {
 
       fs.writeFileSync(process.cwd() + '/' + file, data);
       if (verbose) {
-        console.log(('Replace ' + file).italic);
+        console.log(('  Replace ' + file).italic);
       }
     } else {
       console.log(('File not exist: ' + file).red);
@@ -142,9 +142,9 @@ var Replacer = module.exports = function Replacer(file, options) {
 
           for (i = 0; i < total; i += 1) {
             if (typeof seds[i].end !== "undefined") {
-              line += seds[i].start + ',' + seds[i].end + "d;";
+              line += seds[i].start + ',' + seds[i].end + 'd;';
             } else {
-              line += seds[i].start + "d;";
+              line += seds[i].start + 'd;';
             }
           }
           var sedcmd = "sed -i '" + line + "' " + process.cwd() + '/' + file;
@@ -162,9 +162,25 @@ var Replacer = module.exports = function Replacer(file, options) {
                       return console.log(('exec error: ' + err).red);
                     }
                     if (verbose) {
-                      console.log(('Sed ' + file).italic);
+                      console.log(('  Sed ' + file).italic);
                     }
                     module.replace();
+                    //Remove double empty lines
+                    var sedcmd = "sed -i '/^$/N;/^\\n$/D' " + file;
+                    //Detect OSX for a compatible sed command
+                    if (os.platform() === 'darwin') {
+                      sedcmd = "sed -i '" + path.extname(file) + "' '/^$/N;/^\\n$/D' " + process.cwd() + '/' + file.substr(0, file.lastIndexOf("."));
+                    }
+                    exec(sedcmd, {cwd: process.cwd() + '/'},
+                            function (err, stdout, stderr) {
+                              if (stderr.length > 0) {
+                                console.log((sedcmd).red);
+                                return console.log(('stderr: ' + stderr).red);
+                              }
+                              if (err !== null) {
+                                return console.log(('exec error: ' + err).red);
+                              }
+                            });
                   });
         } else {
           module.replace();
