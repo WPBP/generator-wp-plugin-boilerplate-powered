@@ -142,6 +142,14 @@ function cleanParsing(pathrec, excluded) {
   });
 }
 
+function deleteFolder(path) {
+  rmdir(path, function (error) {
+    if (error) {
+      console.log((error).red);
+    }
+  });
+}
+
 var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplateGenerator(args, options, config) {
   var self = this,
           default_file;
@@ -204,11 +212,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                         console.log(('Error on removing .gitmodules:' + error).red);
                       }
                     });
-                    rmdir(self.pluginSlug + '/.git', function (error) {
-                      if (error) {
-                        console.log(('Error on removing .git:' + error).red);
-                      }
-                    });
+                    deleteFolder(self.pluginSlug + '/.git');
 
                     console.log(('Remove git config generated').white);
                   }
@@ -225,7 +229,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                     cleanFolder(self.pluginSlug + '/includes/Widgets-Helper/');
                     cleanFolder(self.pluginSlug + '/includes/widgets');
                   }
-                  
+
                   if (self.modules.indexOf('Freemius SDK') !== -1) {
                     cleanFolder(self.pluginSlug + '/includes/freemius');
                   }
@@ -245,7 +249,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                   if (self.modules.indexOf('PointerPlus') !== -1) {
                     cleanFolder(self.pluginSlug + '/admin/includes/PointerPlus');
                   }
-                  
+
                   if (self.modules.indexOf('CronPlus') !== -1) {
                     cleanFolder(self.pluginSlug + '/admin/includes/CronPlus');
                   }
@@ -256,8 +260,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
 
                   if (self.modules.indexOf('WP-Contextual-Help') !== -1) {
                     if (cleanfolder !== false) {
-                      rmdir(self.pluginSlug + +'/admin/includes/WP-Contextual-Help/assets/', function (err) {
-                      });
+                      deleteFolder(self.pluginSlug + +'/admin/includes/WP-Contextual-Help/assets/');
                     }
                     cleanFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help', ['readme.txt']);
                   }
@@ -662,16 +665,8 @@ WpPluginBoilerplateGenerator.prototype.setFiles = function setFiles() {
   console.log(('Renamed files').white);
 
   if (this.coffeescript !== true) {
-    rmdir(this.pluginSlug + '/admin/assets/coffee/', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
-    rmdir(this.pluginSlug + '/public/assets/coffee/', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
+    deleteFolder(this.pluginSlug + '/admin/assets/coffee/');
+    deleteFolder(this.pluginSlug + '/public/assets/coffee/');
     this.files.gruntfile.looplines(this.loadLines.gruntfile.coffee);
     this.files.package.looplines(this.loadLines.package.coffee);
     if (verbose) {
@@ -705,11 +700,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
     this.files.primary.looplines(this.loadLines.primary.cptcomment);
   }
   if (this.modules.indexOf('CPT_Core') === -1) {
-    rmdir(this.pluginSlug + '/includes/CPT_Core', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
+    deleteFolder(this.pluginSlug + '/includes/CPT_Core');
     this.files.primary.looplines(this.loadLines.primary.cptcore);
     this.files.primary.rm("and Custom Post Type");
     if (verbose) {
@@ -717,11 +708,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
     }
   }
   if (this.modules.indexOf('Taxonomy_Core') === -1) {
-    rmdir(this.pluginSlug + '/includes/Taxonomy_Core', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
+    deleteFolder(this.pluginSlug + '/includes/Taxonomy_Core');
     this.files.primary.looplines(this.loadLines.primary.taxcore);
     this.files.primary.rm("Taxonomy and");
     if (verbose) {
@@ -729,38 +716,22 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
     }
   }
   if (this.modules.indexOf('Widget Helper') === -1) {
-    rmdir(this.pluginSlug + '/includes/Widgets-Helper', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
-    rmdir(this.pluginSlug + '/includes/widgets', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
+    deleteFolder(this.pluginSlug + '/includes/Widgets-Helper');
+    deleteFolder(this.pluginSlug + '/includes/widgets');
     this.files.primary.looplines(this.loadLines.primary.widget);
     if (verbose) {
       console.log(('Removed Widgets Helper').italic);
     }
   }
   if (this.modules.indexOf('Freemius SDK') === -1) {
-    rmdir(this.pluginSlug + '/includes/freemius', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
+    deleteFolder(this.pluginSlug + '/includes/freemius');
     this.files.primary.looplines(this.loadLines.primary.freemius);
     if (verbose) {
       console.log(('Removed Freemius SDK').italic);
     }
   }
   if (this.modules.indexOf('WP Background Processing') === -1) {
-    rmdir(this.pluginSlug + '/includes/wp-background-processing', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
+    deleteFolder(this.pluginSlug + '/includes/wp-background-processing');
     if (verbose) {
       console.log(('Removed WP Background processing').italic);
     }
@@ -776,11 +747,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
   }
   if (this.modules.indexOf('Template system (like WooCommerce)') === -1) {
     fs.unlink(this.pluginSlug + '/includes/template.php');
-    rmdir(this.pluginSlug + '/templates', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
+    deleteFolder(this.pluginSlug + '/templates');
     this.files.primary.looplines(this.loadLines.primary.template);
     if (verbose) {
       console.log(('Removed Template System').italic);
@@ -802,21 +769,9 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   }
   //Repo
   if (this.modules.indexOf('CMB2') === -1) {
-    rmdir(this.pluginSlug + '/admin/includes/CMB2', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
-    rmdir(this.pluginSlug + '/admin/includes/CMB2-Google-Maps', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
-    rmdir(this.pluginSlug + '/admin/includes/CMB2-grid', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
+    deleteFolder(this.pluginSlug + '/admin/includes/CMB2');
+    deleteFolder(this.pluginSlug + '/admin/includes/CMB2-Google-Maps');
+    deleteFolder(this.pluginSlug + '/admin/includes/CMB2-grid');
     this.files.impexp.looplines(this.loadLines.impexp.cmb);
     this.files.adminClass.looplines(this.loadLines.admin.cmb);
     if (this.adminPage === true) {
@@ -828,70 +783,42 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   }
   if (this.modules.indexOf('CMB2-Google-Maps') === -1) {
     this.files.adminClass.looplines(this.loadLines.admin.cmbgmaps);
-    rmdir(this.pluginSlug + '/admin/includes/CMB2-Google-Maps', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
+    deleteFolder(this.pluginSlug + '/admin/includes/CMB2-Google-Maps');
     if (verbose) {
       console.log(('Removed CMB2-Google-Maps').italic);
     }
   }
   if (this.modules.indexOf('CMB2-Grid') === -1) {
     this.files.adminClass.looplines(this.loadLines.admin.cmbgrid);
-    rmdir(this.pluginSlug + '/admin/includes/CMB2-grid', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
+    deleteFolder(this.pluginSlug + '/admin/includes/CMB2-grid');
     if (verbose) {
       console.log(('Removed CMB2-Grid').italic);
     }
   }
   if (this.modules.indexOf('WP-Contextual-Help') === -1) {
-    rmdir(this.pluginSlug + '/admin/includes/WP-Contextual-Help', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
-    rmdir(this.pluginSlug + '/help-docs', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
+    deleteFolder(this.pluginSlug + '/admin/includes/WP-Contextual-Help');
+    deleteFolder(this.pluginSlug + '/help-docs');
     this.files.adminClass.looplines(this.loadLines.admin.contextual);
     if (verbose) {
       console.log(('Removed Wp_Contextual_Help').italic);
     }
   }
   if (this.modules.indexOf('WP-Admin-Notice') === -1) {
-    rmdir(this.pluginSlug + '/admin/includes/WP-Admin-Notice', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
+    deleteFolder(this.pluginSlug + '/admin/includes/WP-Admin-Notice');
     this.files.adminClass.looplines(this.loadLines.admin.notice);
     if (verbose) {
       console.log(('Removed WP-Admin-Notice').italic);
     }
   }
   if (this.modules.indexOf('PointerPlus') === -1) {
-    rmdir(this.pluginSlug + '/admin/includes/PointerPlus', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
+    deleteFolder(this.pluginSlug + '/admin/includes/PointerPlus');
     this.files.adminClass.looplines(this.loadLines.admin.pointers);
     if (verbose) {
       console.log(('Removed PointerPlus').italic);
     }
   }
   if (this.modules.indexOf('CronPlus') === -1) {
-    rmdir(this.pluginSlug + '/admin/includes/CronPlus', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
+    deleteFolder(this.pluginSlug + '/admin/includes/CronPlus');
     this.files.adminClass.looplines(this.loadLines.admin.cron);
     if (verbose) {
       console.log(('Removed CronPlus').italic);
@@ -909,7 +836,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   if (this.adminPage === false) {
     this.files.adminClass.looplines(this.loadLines.admin.remove);
     if (verbose) {
-      console.log(('Removed code of admin page').italic);
+      console.log(('Removed code of Admin page').italic);
     }
   }
   if (this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1) {
@@ -1008,11 +935,7 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   //Function
   if (this.modules.indexOf('Template system (like WooCommerce)') === -1) {
     this.files.publicClass.looplines(this.loadLines.public.template);
-    rmdir(this.pluginSlug + '/templates', function (error) {
-      if (error) {
-        console.log((error).red);
-      }
-    });
+    deleteFolder(this.pluginSlug + '/templates');
   }
   if (this.modules.indexOf('Requirements system on activation') === -1) {
     fs.unlink(this.pluginSlug + '/public/includes/requirements.php');
