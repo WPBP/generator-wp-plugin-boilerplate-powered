@@ -76,7 +76,7 @@ function cleanParsing(pathrec, excluded) {
     'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json', 'Capfile', 'screenshot-1.png', 'component.json',
     'phpunit.xml.dist', 'Dockunit.json', 'coverage.clover', 'CHANGELOG.md', 'Test.php', 'screenshot1.jpg', 'production.rb',
     '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'pointerplus.php', '.DS_Store', 'widget-sample.php',
-    'cronplus.php'
+    'cronplus.php', '.gitignore', 'converage.clover', 'phpunit.xml.dist'
   ];
 
   // Remove excluded files from default files
@@ -214,7 +214,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                     });
                     deleteFolder(self.pluginSlug + '/.git');
 
-                    console.log(('Remove git config generated').white);
+                    console.log(('Removed git configs generated').white);
                   }
                   //Clean all the folders!!
                   if (self.modules.indexOf('CPT_Core') !== -1) {
@@ -252,6 +252,10 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
 
                   if (self.modules.indexOf('CronPlus') !== -1) {
                     cleanFolder(self.pluginSlug + '/admin/includes/CronPlus');
+                  }
+
+                  if (self.modules.indexOf('WP Background Processing') !== -1) {
+                    cleanFolder(self.pluginSlug + '/wp-background-processing');
                   }
 
                   if (self.modules.indexOf('Template system (like WooCommerce)') !== -1) {
@@ -294,7 +298,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
     console.log(('Add your public Plugins Free/Premium made it with WPBP on https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/wiki/Plugin-made-with-this-Boilerplate!').bold.red);
     if (/^win/.test(os.platform())) {
       console.log(('Not supported on Windows!').bold.red);
-      exit();
+      process.exit(1);
     } else {
       console.log(('Unix systems like Linux or Mac OSX are supported!').bold.red);
     }
