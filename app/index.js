@@ -75,7 +75,8 @@ function cleanParsing(pathrec, excluded) {
     'CONTRIBUTING.md', 'readme.md', 'phpunit.xml', 'packages.json', 'package.json', 'production.rb', 'composer.json', '.scrutinizer.yml',
     'Gruntfile.js', 'README.md', 'example-functions.php', 'bower.json', 'Capfile', 'screenshot-1.png', 'component.json',
     'phpunit.xml.dist', 'Dockunit.json', 'coverage.clover', 'CHANGELOG.md', 'Test.php', 'screenshot1.jpg', 'production.rb',
-    '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'pointerplus.php', '.DS_Store', 'widget-sample.php'
+    '.travis.yml', '.bowerrc', '.gitignore', 'README.txt', 'readme.txt', 'release.sh', 'pointerplus.php', '.DS_Store', 'widget-sample.php',
+    'cronplus.php'
   ];
 
   // Remove excluded files from default files
@@ -224,6 +225,10 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                     cleanFolder(self.pluginSlug + '/includes/Widgets-Helper/');
                     cleanFolder(self.pluginSlug + '/includes/widgets');
                   }
+                  
+                  if (self.modules.indexOf('Freemius SDK') !== -1) {
+                    cleanFolder(self.pluginSlug + '/includes/freemius');
+                  }
 
                   if (self.modules.indexOf('CMB2') !== -1) {
                     cleanFolder(self.pluginSlug + '/admin/includes/CMB2', ['readme.txt', 'README.txt']);
@@ -239,6 +244,10 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
 
                   if (self.modules.indexOf('PointerPlus') !== -1) {
                     cleanFolder(self.pluginSlug + '/admin/includes/PointerPlus');
+                  }
+                  
+                  if (self.modules.indexOf('CronPlus') !== -1) {
+                    cleanFolder(self.pluginSlug + '/admin/includes/CronPlus');
                   }
 
                   if (self.modules.indexOf('Template system (like WooCommerce)') !== -1) {
