@@ -1,11 +1,9 @@
 'use strict';
-
+/*jslint node: true */
 var fs = require('fs');
-var readline = require('line-input-stream');
 var exec = require('child_process').exec;
 var execSync = require('sync-exec');
 var args = process.argv.slice(2);
-var colors = require('colors');
 var os = require('os');
 var path = require('path');
 var verbose = false;

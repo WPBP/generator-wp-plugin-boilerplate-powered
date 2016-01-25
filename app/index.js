@@ -8,10 +8,10 @@ var request = require('request');
 var Admzip = require('adm-zip');
 var rmdir = require('rimraf');
 var s = require('underscore.string');
-var sys = require('util');
 var spawn = require('child_process').spawnSync || require('spawn-sync');
-var colors = require('colors');
 var Replacer = require('./replacer');
+require('colors');
+
 var cleanfolder = false;
 var args = process.argv.slice(2);
 var version = '1.1.7';
@@ -36,7 +36,7 @@ var isUnixHiddenPath = function (path) {
 };
 
 /*
- * Remove the unuseful file and folder, insert the index.php in the folders
+ * Remove in loop the unuseful file and folder, insert the index.php in the folders
  * 
  * @param string path
  * @param {array} excluded - List of files excluded from clean operation
@@ -66,6 +66,12 @@ function cleanFolder(path, excluded) {
   });
 }
 
+/*
+ * Remove the unuseful file and folder, insert the index.php in the folders
+ * 
+ * @param string pathrec
+ * @param {array} excluded - List of files excluded from clean operation
+ */
 function cleanParsing(pathrec, excluded) {
   // Provide default value for excluded files
   if (excluded === undefined) {
@@ -142,6 +148,11 @@ function cleanParsing(pathrec, excluded) {
   });
 }
 
+/*
+ * Delete folders
+ * 
+ * @param string path
+ */
 function deleteFolder(path) {
   rmdir(path, function (error) {
     if (error) {
@@ -264,7 +275,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
 
                   if (self.modules.indexOf('WP-Contextual-Help') !== -1) {
                     if (cleanfolder !== false) {
-                      deleteFolder(self.pluginSlug + +'/admin/includes/WP-Contextual-Help/assets/');
+                      deleteFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help/assets/');
                     }
                     cleanFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help', ['readme.txt']);
                   }
@@ -418,6 +429,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
     }];
 
   if (is_default === false) {
+    var defaultvalues;
     if (this.defaultValues.name !== '') {
       if (fs.existsSync('./' + s.slugify(this.defaultValues.name)) && this.defaultValues.name !== undefined) {
         console.log(('Warning folder ' + s.slugify(this.defaultValues.name) + ' already exist, change the name of the plugin!').red);
@@ -433,7 +445,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
           prompts[6].choices[index].checked = false;
         });
       } else {
-        var defaultvalues = this.defaultValues.publicResources;
+        defaultvalues = this.defaultValues.publicResources;
         prompts[6].choices.forEach(function (element, index, array) {
           prompts[6].choices[index].checked = false;
           defaultvalues.forEach(function (element_z, index_z, array_z) {
@@ -450,7 +462,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
           prompts[7].choices[index].checked = false;
         });
       } else {
-        var defaultvalues = this.defaultValues.activateDeactivate;
+        defaultvalues = this.defaultValues.activateDeactivate;
         prompts[7].choices.forEach(function (element, index, array) {
           prompts[7].choices[index].checked = false;
           defaultvalues.forEach(function (element_z, index_z, array_z) {
@@ -469,7 +481,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         prompts[9].choices[index].checked = false;
       });
     } else {
-      var defaultvalues = this.defaultValues.modules;
+      defaultvalues = this.defaultValues.modules;
       prompts[9].choices.forEach(function (element, index, array) {
         prompts[9].choices[index].checked = false;
         defaultvalues.forEach(function (element_z, index_z, array_z) {
@@ -484,7 +496,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         prompts[10].choices[index].checked = false;
       });
     } else {
-      var defaultvalues = this.defaultValues.snippet;
+      defaultvalues = this.defaultValues.snippet;
       prompts[10].choices.forEach(function (element, index, array) {
         prompts[10].choices[index].checked = false;
         defaultvalues.forEach(function (element_z, index_z, array_z) {
@@ -549,9 +561,9 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
 
     if (props.saveSettings === true) {
       var cleaned = props;
-      delete cleaned['authorEmail'];
-      delete cleaned['authorEmail'];
-      delete cleaned['copyright'];
+      delete cleaned.authorEmail;
+      delete cleaned.authorEmail;
+      delete cleaned.copyright;
       cleaned.author = {'name': props.author, 'email': this.authorEmail, 'url': this.authorURI, 'copyright': this.pluginCopyright};
       fs.writeFile(props.name + '.json', JSON.stringify(cleaned, null, 2), function (err) {
         if (err) {
