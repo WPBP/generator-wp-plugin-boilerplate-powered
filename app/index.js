@@ -392,6 +392,10 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       message: 'Do you want clean the folders?'
     }, {
       type: 'confirm',
+      name: 'coffeescript',
+      message: 'Do you need CoffeeScript?'
+    }, {
+      type: 'confirm',
       name: 'saveSettings',
       message: 'Do you want save the configuration for reuse it?'
     }];
@@ -480,8 +484,11 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
     if (this.defaultValues.cleanFolder !== '') {
       prompts[12].default = this.defaultValues.cleanFolder;
     }
+    if (this.defaultValues.coffeescript !== '') {
+      prompts[13].default = this.defaultValues.coffeescript;
+    }
     if (this.defaultValues.saveSettings !== '') {
-      prompts[13].default = this.defaultValues.saveSettings;
+      prompts[14].default = this.defaultValues.saveSettings;
     }
   }
   this.prompt(prompts, function (props) {
@@ -509,6 +516,8 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       adminView: new Replacer(this.pluginSlug + '/admin/views/admin.php', this),
       uninstall: new Replacer(this.pluginSlug + '/uninstall.php', this),
       readme: new Replacer(this.pluginSlug + '/README.txt', this),
+      grunt: new Replacer(this.pluginSlug + '/Gruntfile.js', this),
+      package: new Replacer(this.pluginSlug + '/package.json', this),
       gitmodules: new Replacer(this.pluginSlug + '/.gitmodules', this),
       template: new Replacer(this.pluginSlug + '/includes/template.php', this),
       loadtextdomain: new Replacer(this.pluginSlug + '/includes/load_textdomain.php', this),
@@ -641,6 +650,24 @@ WpPluginBoilerplateGenerator.prototype.setFiles = function setFiles() {
   });
 
   console.log(('Renamed files').white);
+
+  if (this.coffeescript !== true) {
+    rmdir(this.pluginSlug + '/admin/assets/coffee/', function (error) {
+      if (error) {
+        console.log((error).red);
+      }
+    });
+    rmdir(this.pluginSlug + '/public/assets/coffee/', function (error) {
+      if (error) {
+        console.log((error).red);
+      }
+    });
+    this.files.gruntfile.looplines(this.loadLines.gruntfile.coffee);
+    this.files.package.looplines(this.loadLines.package.coffee);
+    if (verbose) {
+      console.log(('Coffeescript files and stuff removed').italic);
+    }
+  }
 };
 
 WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
@@ -849,7 +876,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
       console.log(('Removed PointerPlus').italic);
     }
   }
-   if (this.modules.indexOf('CronPlus') === -1) {
+  if (this.modules.indexOf('CronPlus') === -1) {
     rmdir(this.pluginSlug + '/admin/includes/CronPlus', function (error) {
       if (error) {
         console.log((error).red);
@@ -901,7 +928,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     fs.unlink(this.pluginSlug + '/admin/includes/impexp.php');
     this.files.adminClass.looplines(this.loadLines.admin.impexp);
     if (this.adminPage === true) {
-      this.files.adminView.looplines(this.loadLines.adminview.impexp);
+      this.files.grunfile.looplines(this.loadLines.adminview.impexp);
     }
     if (verbose) {
       console.log(('Removed Import/Export Settings').italic);
