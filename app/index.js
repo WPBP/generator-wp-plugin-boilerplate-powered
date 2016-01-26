@@ -684,7 +684,8 @@ WpPluginBoilerplateGenerator.prototype.setFiles = function setFiles() {
     deleteFolder(this.pluginSlug + '/admin/assets/coffee/');
     deleteFolder(this.pluginSlug + '/public/assets/coffee/');
     this.files.gruntfile.looplines(this.loadLines.gruntfile.coffee);
-    this.files.package.looplines(this.loadLines.package.coffee);
+    this.files.package.looplines(this.loadLines.package.coffee);    
+    this.files.package.add('"grunt-contrib-compass": "*",', '"grunt-contrib-compass": "*"');
     if (verbose) {
       console.log(('Removed Coffeescript files and stuff').italic);
     }
