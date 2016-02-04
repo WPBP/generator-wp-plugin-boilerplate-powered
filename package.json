@@ -1,6 +1,6 @@
 {
   "name" : "generator-wp-plugin-boilerplate-powered",
-  "version" : "0.2.1",
+  "version" : "0.2.2",
   "description" : "A generator for Yeoman to customize the WP Plugin Boilerplate Powered (https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered).",
   "keywords" : [ "yeoman", "yeoman-generator", "wordpress", "wordpress-plugin", "PHP" ],
   "homepage" : "https://github.com/Mte90/generator-wp-plugin-boilerplate-powered",
@@ -17,26 +17,20 @@
     "type" : "git",
     "url" : "git://github.com/Mte90/generator-wp-plugin-boilerplate-powered.git"
   },
-  "scripts" : {
-    "test" : "mocha"
-  },
   "dependencies" : {
-    "yeoman-generator" : "~0.14.0",
+    "yeoman-generator" : "~0.20.0",
     "request" : "~2.29.0",
     "adm-zip" : "~0.4.3",
     "rimraf" : "~2.1",
     "underscore.string" : "~2.3",
-	"colors" : "~0.6.2",
-	"spawn-sync": "1.0.4",
-	"sync-exec": "~0.5.0",
-	"try-thread-sleep": "1.0.0"
-  },
-  "peerDependencies" : {
-    "yo" : ">=1.0.0"
+    "colors" : "~0.6.2",
+    "spawn-sync": "1.0.4",
+    "sync-exec": "~0.5.0",
+    "try-thread-sleep": "1.0.0"
   },
   "engines" : {
-    "node" : ">=0.8.0",
-    "npm" : ">=1.2.10"
+    "node" : ">=0.12.0",
+    "npm" : ">=2.0"
   },
   "licenses": [
     {
