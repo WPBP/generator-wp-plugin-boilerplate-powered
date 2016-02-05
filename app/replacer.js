@@ -76,6 +76,7 @@ var Replacer = module.exports = function Replacer(file, options) {
   module.add(/$plugin_name = 'Plugin Name';/g, '$plugin_name = ' + options.pluginName + '\';');
   module.add(/Plugin Name:( {7})@TODO/g, 'Plugin Name:       ' + options.pluginName);
   module.add(/Your Name <email@example\.com>/g, options.author + ' <' + options.authorEmail + '>');
+  module.add(/danielemte90@alice\.it/g, options.authorEmail);
   module.add(/1\.0\.0/g, options.pluginVersion);
   module.add(/Your Name or Company Name/g, options.pluginCopyright);
   module.add(new RegExp('http://example.com', 'g'), options.authorURI);

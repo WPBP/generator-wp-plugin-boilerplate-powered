@@ -408,7 +408,8 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'CPTs on search box', checked: true},
         {name: 'Custom action', checked: true},
         {name: 'Custom filter', checked: true},
-        {name: 'Custom shortcode', checked: true}
+        {name: 'Custom shortcode', checked: true},
+        {name: 'Donate link in plugins list', checked: false}
       ]
     }, {
       type: 'confirm',
@@ -882,7 +883,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     fs.unlink(this.pluginSlug + '/admin/includes/impexp.php');
     this.files.adminClass.looplines(this.loadLines.admin.impexp);
     if (this.adminPage === true) {
-      this.files.grunfile.looplines(this.loadLines.adminview.impexp);
+      this.files.gruntfile.looplines(this.loadLines.adminview.impexp);
     }
     if (verbose) {
       console.log(('Removed Import/Export Settings').italic);
@@ -911,6 +912,13 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
       console.log(('Removed Custom Filter').italic);
     }
   }
+  if (this.snippet.indexOf('Donate link in plugins list') === -1) {
+    this.files.adminClass.looplines(this.loadLines.admin.donate);
+    if (verbose) {
+      console.log(('Removed Donate link in plugins list').italic);
+    }
+  }
+  
 };
 
 WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass() {
