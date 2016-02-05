@@ -794,6 +794,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     this.files.adminClass.looplines(this.loadLines.admin.cmb);
     if (this.adminPage === true) {
       this.files.adminView.looplines(this.loadLines.adminview.cmb);
+      this.files.adminClass.looplines(this.loadLines.admin.adminPage);
     }
     if (verbose) {
       console.log(('Removed CMB2').italic);
@@ -808,6 +809,8 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   }
   if (this.modules.indexOf('CMB2-Grid') === -1) {
     this.files.adminClass.looplines(this.loadLines.admin.cmbgrid);
+    this.files.adminClass.add('$field1 = ', '');
+    this.files.adminClass.add('$field2 = ', '');
     deleteFolder(this.pluginSlug + '/admin/includes/CMB2-grid');
     if (verbose) {
       console.log(('Removed CMB2-Grid').italic);
