@@ -685,7 +685,7 @@ WpPluginBoilerplateGenerator.prototype.setFiles = function setFiles() {
     deleteFolder(this.pluginSlug + '/admin/assets/coffee/');
     deleteFolder(this.pluginSlug + '/public/assets/coffee/');
     this.files.gruntfile.looplines(this.loadLines.gruntfile.coffee);
-    this.files.package.looplines(this.loadLines.package.coffee);    
+    this.files.package.looplines(this.loadLines.package.coffee);
     this.files.package.add('"grunt-contrib-compass": "*",', '"grunt-contrib-compass": "*"');
     if (verbose) {
       console.log(('Removed Coffeescript files and stuff').italic);
@@ -921,7 +921,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
       console.log(('Removed Donate link in plugins list').italic);
     }
   }
-  
+
 };
 
 WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass() {
@@ -930,12 +930,16 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   //Assets - JS/CSS
   if (this.publicResources.length === 0) {
     this.files.publicClass.looplines(this.loadLines.public.jscss);
+    deleteFolder(this.pluginSlug + '/public/assets/');
   }
   if (this.publicResources.indexOf('JS') === -1) {
     this.files.publicClass.looplines(this.loadLines.public.js);
+    deleteFolder(this.pluginSlug + '/public/assets/js');
   }
   if (this.publicResources.indexOf('CSS') === -1) {
     this.files.publicClass.looplines(this.loadLines.public.css);
+    deleteFolder(this.pluginSlug + '/public/assets/css');
+    deleteFolder(this.pluginSlug + '/public/assets/sass');
   }
 
   //Activate/deactivate
