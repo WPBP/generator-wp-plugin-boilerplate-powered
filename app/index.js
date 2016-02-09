@@ -3,6 +3,7 @@
 var util = require('util');
 var path = require('path');
 var yeoman = require('yeoman-generator');
+var yosay = require('yosay');
 var fs = require('fs');
 var request = require('request');
 var Admzip = require('adm-zip');
@@ -165,7 +166,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
   var self = this,
           default_file;
 
-  yeoman.generators.Base.apply(this, arguments);
+  yeoman.Base.apply(this, arguments);
 
   this.on('end', function () {
     //Generate the bash script for download the git submodules
@@ -290,8 +291,6 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
 
   });
 
-  //Yeoman greet the user.
-  console.log(this.yeoman);
   //Check the default file for the default values, I have already said default?
   if (fs.existsSync(__dirname + '/../default-values.json')) {
     default_file = path.join(__dirname, '../default-values.json');
@@ -304,7 +303,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
       console.log(('Config loaded').yellow);
     }
   } else {
-    console.log(('This tool can create ' + process.cwd() + '/default-values.json with default values in the parent folder! The next time the tool load all the settings for a fast development :-D').bold);
+    console.log(yosay(('This tool can create ' + process.cwd() + '/default-values.json with default values in the parent folder! The next time the tool load all the settings for a fast development').bold));
     console.log(('Don\'t forget to check the wiki of the boilerplate: https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/wiki').bold);
     console.log(('Add your public Plugins Free/Premium made it with WPBP on https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered/wiki/Plugin-made-with-this-Boilerplate!').bold.red);
     if (/^win/.test(os.platform())) {
@@ -317,11 +316,11 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
     console.log('--------------------------');
     is_default = true;
   }
-  this.defaultValues = JSON.parse(this.readFileAsString(default_file));
+  this.defaultValues = JSON.parse(require("html-wiring").readFileAsString(default_file));
   this.loadLines = JSON.parse(fs.readFileSync(__dirname + '/match.json', "utf8")).list[0];
 };
 
-util.inherits(WpPluginBoilerplateGenerator, yeoman.generators.Base);
+util.inherits(WpPluginBoilerplateGenerator, yeoman.Base);
 
 WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
   var cb = this.async(),
