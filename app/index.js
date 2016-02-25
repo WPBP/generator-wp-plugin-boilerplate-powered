@@ -832,7 +832,8 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   }
   if (this.modules.indexOf('WP-Contextual-Help') === -1) {
     deleteFolder(this.pluginSlug + '/admin/includes/WP-Contextual-Help');
-    deleteFolder(this.pluginSlug + '/help-docs');
+    deleteFolder(this.pluginSlug + '/admin/includes/help-docs');
+    fs.unlink(this.files.contextualhelp.file);
     this.files.adminClass.looplines(this.loadLines.admin.contextual);
     if (verbose) {
       console.log(('Removed Wp_Contextual_Help').italic);
@@ -847,6 +848,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   }
   if (this.modules.indexOf('PointerPlus') === -1) {
     deleteFolder(this.pluginSlug + '/admin/includes/PointerPlus');
+    fs.unlink(this.files.pointers.file);
     this.files.adminClass.looplines(this.loadLines.admin.pointers);
     if (verbose) {
       console.log(('Removed PointerPlus').italic);
