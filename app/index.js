@@ -806,25 +806,25 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     deleteFolder(this.pluginSlug + '/admin/includes/CMB2-grid');
     this.files.impexp.looplines(this.loadLines.impexp.cmb);
     this.files.adminClass.looplines(this.loadLines.admin.cmb);
+    fs.unlink(this.files.cmb.file);
     if (this.adminPage === true) {
       this.files.adminView.looplines(this.loadLines.adminview.cmb);
-      this.files.adminClass.looplines(this.loadLines.admin.adminPage);
     }
     if (verbose) {
       console.log(('Removed CMB2').italic);
     }
   }
   if (this.modules.indexOf('CMB2-Google-Maps') === -1) {
-    this.files.adminClass.looplines(this.loadLines.admin.cmbgmaps);
+    this.files.cmb.looplines(this.loadLines.cmb.cmbgmaps);
     deleteFolder(this.pluginSlug + '/admin/includes/CMB2-Google-Maps');
     if (verbose) {
       console.log(('Removed CMB2-Google-Maps').italic);
     }
   }
   if (this.modules.indexOf('CMB2-Grid') === -1) {
-    this.files.adminClass.looplines(this.loadLines.admin.cmbgrid);
-    this.files.adminClass.add('$field1 = ', '');
-    this.files.adminClass.add('$field2 = ', '');
+    this.files.cmb.looplines(this.loadLines.cmb.cmbgrid);
+    this.files.cmb.add('$field1 = ', '');
+    this.files.cmb.add('$field2 = ', '');
     deleteFolder(this.pluginSlug + '/admin/includes/CMB2-grid');
     if (verbose) {
       console.log(('Removed CMB2-Grid').italic);
