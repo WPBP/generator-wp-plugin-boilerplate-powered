@@ -16,7 +16,7 @@ require('colors');
 
 var cleanfolder = false;
 var args = process.argv.slice(2);
-var version = '1.1.7';
+var version = '1.2.0';
 var is_default = false;
 var verbose = false;
 var removeGit = false;
@@ -411,7 +411,8 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'Custom action', checked: true},
         {name: 'Custom filter', checked: true},
         {name: 'Custom shortcode', checked: true},
-        {name: 'Donate link in plugins list', checked: false}
+        {name: 'Donate link in plugins list', checked: false},
+        {name: 'Transient Example', checked: false}
       ]
     }, {
       type: 'confirm',
@@ -425,6 +426,10 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       type: 'confirm',
       name: 'coffeescript',
       message: 'Do you need CoffeeScript?'
+    }, {
+      type: 'confirm',
+      name: 'unittest',
+      message: 'Do you need Unit Test?'
     }, {
       type: 'confirm',
       name: 'saveSettings',
@@ -1025,4 +1030,12 @@ WpPluginBoilerplateGenerator.prototype.setUninstall = function setUninstall() {
     this.files.uninstall.looplines(this.loadLines.uninstall.cap);
     this.files.uninstall.add('global $wpdb, $wp_roles;', 'global $wpdb;');
   }
+};
+
+WpPluginBoilerplateGenerator.prototype.setUnitTest = function setUnitTest() {
+  if (this.unittest !== true) {
+    deleteFolder(this.pluginSlug + '/bin');
+    deleteFolder(this.pluginSlug + '/test');
+    fs.unlink(this.pluginSlug + '.travis.yml');
+  } 
 };
