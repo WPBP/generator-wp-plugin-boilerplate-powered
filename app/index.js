@@ -524,8 +524,11 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
     if (this.defaultValues.coffeescript !== '') {
       prompts[13].default = this.defaultValues.coffeescript;
     }
+    if (this.defaultValues.unittest !== '') {
+      prompts[14].default = this.defaultValues.unittest;
+    }
     if (this.defaultValues.saveSettings !== '') {
-      prompts[14].default = this.defaultValues.saveSettings;
+      prompts[15].default = this.defaultValues.saveSettings;
     }
   }
   this.prompt(prompts, function (props) {
@@ -876,24 +879,30 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
       console.log(('Removed code of Admin page').italic);
     }
   }
+  if (verbose) {
+    console.log(('Cleaning in admin-class*.php').italic);
+  }
   if (this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1) {
-    this.files.adminClass.looplines(this.loadLines.admin.glance);
+    this.files.extras.looplines(this.loadLines.extras.glance);
     this.files.adminCss.looplines(this.loadLines.admincss.glance);
     if (verbose) {
       console.log(('Removed code of At Glance Support in Dashboard').italic);
     }
   }
   if (this.snippet.indexOf('Support Dashboard Activity Widget for CPT') === -1) {
-    this.files.adminClass.looplines(this.loadLines.admin.activity);
+    this.files.extras.looplines(this.loadLines.extras.activity);
     if (verbose) {
       console.log(('Removed code of Activity Support in Dashboard').italic);
     }
   }
-  if (verbose) {
-    console.log(('Cleaning in admin-class*.php').italic);
+  if (this.snippet.indexOf('Transient Example') === -1) {
+    this.files.extras.looplines(this.loadLines.extras.transient);
+    if (verbose) {
+      console.log(('Removed code of Transient Example').italic);
+    }
   }
   if (this.snippet.indexOf('Bubble notification on pending CPT') === -1) {
-    this.files.adminClass.looplines(this.loadLines.admin.bubble);
+    this.files.extras.looplines(this.loadLines.extras.bubble);
     if (verbose) {
       console.log(('Removed Bubble Notification').italic);
     }
