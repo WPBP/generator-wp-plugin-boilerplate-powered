@@ -1012,6 +1012,7 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   }
   if (this.snippet.indexOf('Capability system') === -1) {
     this.files.publicClass.looplines(this.loadLines.public.cap);
+    this.files.actdeact.looplines(this.loadLines.actdeact.cap);
   }
   if (this.snippet.indexOf('Add body class') === -1) {
     this.files.publicClass.looplines(this.loadLines.public.body);
