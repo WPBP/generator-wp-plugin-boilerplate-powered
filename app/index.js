@@ -560,8 +560,14 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       loadtextdomain: new Replacer(this.pluginSlug + '/includes/load_textdomain.php', this),
       publicjs: new Replacer(this.pluginSlug + '/public/assets/js/public.js', this),
       debug: new Replacer(this.pluginSlug + '/admin/includes/debug.php', this),
-      impexp: new Replacer(this.pluginSlug + '/admin/includes/impexp.php', this),
+      impexp: new Replacer(this.pluginSlug + '/admin/includes/PN_ImpExp.php', this),
+      cmb: new Replacer(this.pluginSlug + '/admin/includes/PN_CMB.php', this),
+      contextualhelp: new Replacer(this.pluginSlug + '/admin/includes/PN_ContextualHelp.php', this),
+      debugpanel: new Replacer(this.pluginSlug + '/admin/includes/PN_Debug_Panel.php', this),
+      extras: new Replacer(this.pluginSlug + '/admin/includes/PN_Extras.php', this),
+      pointers: new Replacer(this.pluginSlug + '/admin/includes/PN_Pointers.php', this),
       requirements: new Replacer(this.pluginSlug + '/public/includes/requirements.php', this),
+      actdeact: new Replacer(this.pluginSlug + '/public/includes/PN_ActDeact.php', this),
       language: new Replacer(this.pluginSlug + '/includes/language.php', this),
       fakepage: new Replacer(this.pluginSlug + '/includes/fake-page.php', this),
       widgetsample: new Replacer(this.pluginSlug + '/includes/widget/sample.php', this)
@@ -711,13 +717,14 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
   }
   //Activate/deactivate
   if (this.activateDeactivate.indexOf('Activate Method') === -1 && this.activateDeactivate.indexOf('Deactivate Method') === -1) {
-    this.files.primary.looplines(this.loadLines.primary.actdeact);
+    this.files.actdeact.looplines(this.loadLines.primary.actdeact);
+    fs.unlink(this.files.actdeact.file);
   }
   if (this.activateDeactivate.indexOf('Activate Method') === -1) {
-    this.files.primary.looplines(this.loadLines.primary.act);
+    this.files.actdeact.looplines(this.loadLines.actdeact.act);
   }
   if (this.activateDeactivate.indexOf('Deactivate Method') === -1) {
-    this.files.primary.looplines(this.loadLines.primary.deact);
+    this.files.actdeact.looplines(this.loadLines.actdeact.deact);
   }
 
   //Repo
@@ -949,20 +956,6 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
     deleteFolder(this.pluginSlug + '/public/assets/sass');
   }
 
-  //Activate/deactivate
-  if (this.activateDeactivate.indexOf('Activate Method') === -1) {
-    this.files.publicClass.looplines(this.loadLines.public.act);
-    if (verbose) {
-      console.log(('Removed Activate Method').italic);
-    }
-  }
-  if (this.activateDeactivate.indexOf('Deactivate Method') === -1) {
-    this.files.publicClass.looplines(this.loadLines.public.deact);
-    if (verbose) {
-      console.log(('Removed Deactive Method').italic);
-    }
-  }
-
   //Repo
   if (this.modules.indexOf('CPT_Core') === -1) {
     this.files.publicClass.looplines(this.loadLines.public.cptcore);
@@ -979,7 +972,7 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   if (this.modules.indexOf('Requirements system on activation') === -1) {
     fs.unlink(this.pluginSlug + '/public/includes/requirements.php');
     fs.unlink(this.pluginSlug + '/languages/requirements.pot');
-    this.files.publicClass.looplines(this.loadLines.public.requirement);
+    this.files.actdeact.looplines(this.loadLines.actdeact.requirement);
     if (verbose) {
       console.log(('Removed Requirements Detection System').italic);
     }
