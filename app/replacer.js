@@ -2,6 +2,7 @@
 /*jslint node: true */
 var fs = require('fs');
 var exec = require('child_process').exec;
+var spawn = require('child_process').spawn;
 var execSync = require('sync-exec');
 var args = process.argv.slice(2);
 var os = require('os');
@@ -149,7 +150,12 @@ var Replacer = module.exports = function Replacer(file, options) {
           var sedcmd = "sed -i '" + line + "' " + process.cwd() + '/' + file;
           //Detect OSX for a compatible sed command
           if (os.platform() === 'darwin') {
-            sedcmd = "sed -i '" + path.extname(file) + "' '" + line + "' " + process.cwd() + '/' + file.substr(0, file.lastIndexOf("."));
+            var gsed = execSync('which gsed');
+            if (gsed.stdout !== '') {
+              sedcmd = 'g' + sedcmd;
+            } else {
+              sedcmd = "sed -i '" + path.extname(file) + "' '" + line + "' " + process.cwd() + '/' + file.substr(0, file.lastIndexOf("."));
+            }
           }
           exec(sedcmd, {cwd: process.cwd() + '/'},
                   function (err, stdout, stderr) {
@@ -168,7 +174,11 @@ var Replacer = module.exports = function Replacer(file, options) {
                     var sedcmd = "sed -i '/^$/N;/^\\n$/D' " + file;
                     //Detect OSX for a compatible sed command
                     if (os.platform() === 'darwin') {
-                      sedcmd = "sed -i '" + path.extname(file) + "' '/^$/N;/^\\n$/D' " + process.cwd() + '/' + file.substr(0, file.lastIndexOf("."));
+                      if (gsed.stdout !== '') {
+                        sedcmd = 'g' + sedcmd;
+                      } else {
+                        sedcmd = "sed -i '" + path.extname(file) + "' '/^$/N;/^\\n$/D' " + process.cwd() + '/' + file.substr(0, file.lastIndexOf("."));
+                      }
                     }
                     exec(sedcmd, {cwd: process.cwd() + '/'},
                             function (err, stdout, stderr) {

@@ -9,6 +9,7 @@ var request = require('request');
 var Admzip = require('adm-zip');
 var rmdir = require('rimraf');
 var s = require('underscore.string');
+var os = require('os');
 var spawn = require('child_process').spawnSync || require('spawn-sync');
 var Replacer = require('./replacer');
 require('colors');
@@ -309,8 +310,10 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
     if (/^win/.test(os.platform())) {
       console.log(('Not supported on Windows!').bold.red);
       process.exit(1);
-    } else {
-      console.log(('Unix systems like Linux or Mac OSX are supported!').bold.red);
+    } else if (os.platform() === 'darwin') {
+        console.log(('Mac OSX have 2 type of sed commands!').bold.red);
+        console.log(('brew install gnu-sed - Is the command to install a GNU version of sed compatible with Linux.').bold.red);
+        console.log(('That generator search first for gsed and after the native sed but sometimes the native version have problems.').bold.red);
     }
     default_file = path.join(__dirname, '../default-values-example.json');
     console.log('--------------------------');
