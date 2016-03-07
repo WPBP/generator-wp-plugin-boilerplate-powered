@@ -192,7 +192,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
     fs.writeFile(self.pluginSlug + '/submodules.sh', submodulessh, 'utf8',
             function (err) {
               if (err) {
-                console.log(('Error on writing submodules.sh:' + err).red);
+                console.log(('Error on writing submodules.sh: ' + err).red);
                 process.exit();
               } else {
                 fs.chmodSync(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', '0777');
@@ -216,13 +216,13 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                         });
 
                 if (submodule.status !== 0) {
-                  console.log(('Error on submodule:' + submodule.stderr).blue);
+                  console.log(('Error on submodule: ' + submodule.stderr).blue);
                   process.exit();
                 } else {
                   if (self.defaultValues.git !== true) {
                     fs.unlink(self.pluginSlug + '/.gitmodules', function (error) {
                       if (error) {
-                        console.log(('Error on removing .gitmodules:' + error).red);
+                        console.log(('Error on removing .gitmodules: ' + error).red);
                       }
                     });
                     deleteFolder(self.pluginSlug + '/.git');
@@ -737,6 +737,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
   if (this.modules.indexOf('CPT_Core') === -1) {
     deleteFolder(this.pluginSlug + '/includes/CPT_Core');
     this.files.primary.looplines(this.loadLines.primary.cptcore);
+    this.files.gitmodules.looplines(this.loadLines.gitmodules.cptcore);
     this.files.primary.rm("and Custom Post Type");
     if (verbose) {
       console.log(('Removed CPT_Core').italic);
@@ -745,6 +746,7 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
   if (this.modules.indexOf('Taxonomy_Core') === -1) {
     deleteFolder(this.pluginSlug + '/includes/Taxonomy_Core');
     this.files.primary.looplines(this.loadLines.primary.taxcore);
+    this.files.gitmodules.looplines(this.loadLines.gitmodules.taxcore);
     this.files.primary.rm("Taxonomy and");
     if (verbose) {
       console.log(('Removed Taxonomy_Core ').italic);
@@ -761,12 +763,14 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
   if (this.modules.indexOf('Freemius SDK') === -1) {
     deleteFolder(this.pluginSlug + '/includes/freemius');
     this.files.primary.looplines(this.loadLines.primary.freemius);
+    this.files.gitmodules.looplines(this.loadLines.gitmodules.freemius);
     if (verbose) {
       console.log(('Removed Freemius SDK').italic);
     }
   }
   if (this.modules.indexOf('WP Background Processing') === -1) {
     deleteFolder(this.pluginSlug + '/includes/wp-background-processing');
+    this.files.gitmodules.looplines(this.loadLines.gitmodules.backgroundproc);
     if (verbose) {
       console.log(('Removed WP Background processing').italic);
     }
@@ -809,6 +813,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     deleteFolder(this.pluginSlug + '/admin/includes/CMB2-grid');
     this.files.impexp.looplines(this.loadLines.impexp.cmb);
     this.files.adminClass.looplines(this.loadLines.admin.cmb);
+    this.files.gitmodules.looplines(this.loadLines.gitmodules.cmb2);
     fs.unlink(this.files.cmb.file);
     if (this.adminPage === true) {
       this.files.adminView.looplines(this.loadLines.adminview.cmb);
@@ -820,6 +825,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   if (this.modules.indexOf('CMB2-Google-Maps') === -1) {
     this.files.cmb.looplines(this.loadLines.cmb.cmbgmaps);
     deleteFolder(this.pluginSlug + '/admin/includes/CMB2-Google-Maps');
+    this.files.gitmodules.looplines(this.loadLines.gitmodules.cmb2gmaps);
     if (verbose) {
       console.log(('Removed CMB2-Google-Maps').italic);
     }
@@ -829,6 +835,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     this.files.cmb.add('$field1 = ', '');
     this.files.cmb.add('$field2 = ', '');
     deleteFolder(this.pluginSlug + '/admin/includes/CMB2-grid');
+    this.files.gitmodules.looplines(this.loadLines.gitmodules.cmb2grid);
     if (verbose) {
       console.log(('Removed CMB2-Grid').italic);
     }
@@ -838,6 +845,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     deleteFolder(this.pluginSlug + '/admin/includes/help-docs');
     fs.unlink(this.files.contextualhelp.file);
     this.files.adminClass.looplines(this.loadLines.admin.contextual);
+    this.files.gitmodules.looplines(this.loadLines.gitmodules.contextual);
     if (verbose) {
       console.log(('Removed Wp_Contextual_Help').italic);
     }
@@ -845,6 +853,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   if (this.modules.indexOf('WP-Admin-Notice') === -1) {
     deleteFolder(this.pluginSlug + '/admin/includes/WP-Admin-Notice');
     this.files.adminClass.looplines(this.loadLines.admin.notice);
+    this.files.gitmodules.looplines(this.loadLines.gitmodules.adminnotice);
     if (verbose) {
       console.log(('Removed WP-Admin-Notice').italic);
     }
@@ -853,6 +862,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     deleteFolder(this.pluginSlug + '/admin/includes/PointerPlus');
     fs.unlink(this.files.pointers.file);
     this.files.adminClass.looplines(this.loadLines.admin.pointers);
+    this.files.gitmodules.looplines(this.loadLines.gitmodules.pointerplus);
     if (verbose) {
       console.log(('Removed PointerPlus').italic);
     }
@@ -860,6 +870,7 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   if (this.modules.indexOf('CronPlus') === -1) {
     deleteFolder(this.pluginSlug + '/admin/includes/CronPlus');
     this.files.adminClass.looplines(this.loadLines.admin.cron);
+    this.files.gitmodules.looplines(this.loadLines.gitmodules.cronplus);
     if (verbose) {
       console.log(('Removed CronPlus').italic);
     }
@@ -1040,7 +1051,8 @@ WpPluginBoilerplateGenerator.prototype.setUninstall = function setUninstall() {
 WpPluginBoilerplateGenerator.prototype.setUnitTest = function setUnitTest() {
   if (this.unittest !== true) {
     deleteFolder(this.pluginSlug + '/bin');
-    deleteFolder(this.pluginSlug + '/test');
-    fs.unlink(this.pluginSlug + '.travis.yml');
+    deleteFolder(this.pluginSlug + '/tests');
+    fs.unlink(this.pluginSlug + '/.travis.yml');
+    fs.unlink(this.pluginSlug + '/phpunit.xml.dist');
   } 
 };
