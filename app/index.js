@@ -173,7 +173,6 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
     //Generate the bash script for download the git submodules
     //Initialize git and clean the submodules not required
     var submodulessh = ['#!/bin/sh',
-      'set -e',
       'git init',
       "git config -f .gitmodules --get-regexp '^submodule..*.path$' |",
       'while read path_key path',
@@ -184,10 +183,10 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
       '       if [ -d "$path" ]; then',
       '         rm -r $path',
       '         echo "Add $url in $path"',
-      '         git submodule add -f $url $path >> /dev/null',
+      '         git submodule add -f $url $path',
       '       fi',
       '   done',
-    //  'rm $0'
+              //  'rm $0'
     ].join('\n');
     fs.writeFile(self.pluginSlug + '/submodules.sh', submodulessh, 'utf8',
             function (err) {
@@ -209,84 +208,79 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 }
                 console.log(('Parsed all the files').white);
                 //Call the bash script
+                self.files['gitmodules'].replace();
                 console.log(('Download submodules (wait a moment)').white);
                 var submodule = spawn(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', [],
                         {
                           cwd: process.cwd() + '/' + self.pluginSlug + '/',
-                          encoding : 'utf8'
+                          encoding: 'utf8'
                         });
-                console.log((submodule.stdout.toString()).white)
-                if (submodule.stderr.length > 0) {
-                  console.log(('Error on submodule: ' + submodule.stderr).blue);
-                  process.exit();
-                } else {
-                  if (self.defaultValues.git !== true) {
-                    fs.unlink(self.pluginSlug + '/.gitmodules', function (error) {
-                      if (error) {
-                        console.log(('Error on removing .gitmodules: ' + error).red);
-                      }
-                    });
-                    deleteFolder(self.pluginSlug + '/.git');
-
-                    console.log(('Removed git configs generated').white);
-                  }
-                  //Clean all the folders!!
-                  if (self.modules.indexOf('CPT_Core') !== -1) {
-                    cleanFolder(self.pluginSlug + '/includes/CPT_Core');
-                  }
-
-                  if (self.modules.indexOf('Taxonomy_Core') !== -1) {
-                    cleanFolder(self.pluginSlug + '/includes/Taxonomy_Core');
-                  }
-
-                  if (self.modules.indexOf('Widget Helper') !== -1) {
-                    cleanFolder(self.pluginSlug + '/includes/Widgets-Helper/');
-                    cleanFolder(self.pluginSlug + '/includes/widgets');
-                  }
-
-                  if (self.modules.indexOf('Freemius SDK') !== -1) {
-                    cleanFolder(self.pluginSlug + '/includes/freemius');
-                  }
-
-                  if (self.modules.indexOf('CMB2-Grid') !== -1) {
-                    cleanFolder(self.pluginSlug + '/admin/includes/CMB2-grid');
-                  }
-
-                  if (self.modules.indexOf('CMB2-Google-Maps') !== -1) {
-                    cleanFolder(self.pluginSlug + '/admin/includes/CMB2-Google-Maps');
-                  }
-
-                  if (self.modules.indexOf('CMB2') !== -1) {
-                    cleanFolder(self.pluginSlug + '/admin/includes/CMB2', ['readme.txt', 'README.txt']);
-                  }
-
-                  if (self.modules.indexOf('PointerPlus') !== -1) {
-                    cleanFolder(self.pluginSlug + '/admin/includes/PointerPlus');
-                  }
-
-                  if (self.modules.indexOf('CronPlus') !== -1) {
-                    cleanFolder(self.pluginSlug + '/admin/includes/CronPlus');
-                  }
-
-                  if (self.modules.indexOf('WP Background Processing') !== -1) {
-                    cleanFolder(self.pluginSlug + '/wp-background-processing');
-                  }
-
-                  if (self.modules.indexOf('Template system (like WooCommerce)') !== -1) {
-                    cleanFolder(self.pluginSlug + '/templates');
-                  }
-
-                  if (self.modules.indexOf('WP-Contextual-Help') !== -1) {
-                    if (cleanfolder !== false) {
-                      deleteFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help/assets/');
+                console.log((submodule.stdout.toString()).white);
+                if (self.defaultValues.git !== true) {
+                  fs.unlink(self.pluginSlug + '/.gitmodules', function (error) {
+                    if (error) {
+                      console.log(('Error on removing .gitmodules: ' + error).red);
                     }
-                    cleanFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help', ['readme.txt']);
-                  }
-
-                  //Console.log are cool and bowtie are cool!
-                  console.log(('Inserted index.php files in all the folders').white);
-                  console.log(('All done!').white);
+                  });
+                  deleteFolder(self.pluginSlug + '/.git');
+                  console.log(('Removed git configs generated').white);
                 }
+                //Clean all the folders!!
+                if (self.modules.indexOf('CPT_Core') !== -1) {
+                  cleanFolder(self.pluginSlug + '/includes/CPT_Core');
+                }
+
+                if (self.modules.indexOf('Taxonomy_Core') !== -1) {
+                  cleanFolder(self.pluginSlug + '/includes/Taxonomy_Core');
+                }
+
+                if (self.modules.indexOf('Widget Helper') !== -1) {
+                  cleanFolder(self.pluginSlug + '/includes/Widgets-Helper/');
+                  cleanFolder(self.pluginSlug + '/includes/widgets');
+                }
+
+                if (self.modules.indexOf('Freemius SDK') !== -1) {
+                  cleanFolder(self.pluginSlug + '/includes/freemius');
+                }
+
+                if (self.modules.indexOf('CMB2-Grid') !== -1) {
+                  cleanFolder(self.pluginSlug + '/admin/includes/CMB2-grid');
+                }
+
+                if (self.modules.indexOf('CMB2-Google-Maps') !== -1) {
+                  cleanFolder(self.pluginSlug + '/admin/includes/CMB2-Google-Maps');
+                }
+
+                if (self.modules.indexOf('CMB2') !== -1) {
+                  cleanFolder(self.pluginSlug + '/admin/includes/CMB2', ['readme.txt', 'README.txt']);
+                }
+
+                if (self.modules.indexOf('PointerPlus') !== -1) {
+                  cleanFolder(self.pluginSlug + '/admin/includes/PointerPlus');
+                }
+
+                if (self.modules.indexOf('CronPlus') !== -1) {
+                  cleanFolder(self.pluginSlug + '/admin/includes/CronPlus');
+                }
+
+                if (self.modules.indexOf('WP Background Processing') !== -1) {
+                  cleanFolder(self.pluginSlug + '/wp-background-processing');
+                }
+
+                if (self.modules.indexOf('Template system (like WooCommerce)') !== -1) {
+                  cleanFolder(self.pluginSlug + '/templates');
+                }
+
+                if (self.modules.indexOf('WP-Contextual-Help') !== -1) {
+                  if (cleanfolder !== false) {
+                    deleteFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help/assets/');
+                  }
+                  cleanFolder(self.pluginSlug + '/admin/includes/WP-Contextual-Help', ['readme.txt']);
+                }
+
+                //Console.log are cool and bowtie are cool!
+                console.log(('Inserted index.php files in all the folders').white);
+                console.log(('All done!').white);
               }
             }
     );
@@ -312,9 +306,9 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
       console.log(('Not supported on Windows!').bold.red);
       process.exit(1);
     } else if (os.platform() === 'darwin') {
-        console.log(('Mac OSX have 2 type of sed commands!').bold.red);
-        console.log(('brew install gnu-sed - Is the command to install a GNU version of sed compatible with Linux.').bold.red);
-        console.log(('That generator search first for gsed and after the native sed but sometimes the native version have problems.').bold.red);
+      console.log(('Mac OSX have 2 type of sed commands!').bold.red);
+      console.log(('brew install gnu-sed - Is the command to install a GNU version of sed compatible with Linux.').bold.red);
+      console.log(('That generator search first for gsed and after the native sed but sometimes the native version have problems.').bold.red);
     }
     default_file = path.join(__dirname, '../default-values-example.json');
     console.log('--------------------------');
@@ -549,17 +543,16 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
 
     //Set the path of the files
     this.files = {
+      gitmodules: new Replacer(this.pluginSlug + '/.gitmodules', this),
       primary: new Replacer(this.pluginSlug + '/' + this.pluginSlug + '.php', this),
       publicClass: new Replacer(this.pluginSlug + '/public/class-' + this.pluginSlug + '.php', this),
       adminClass: new Replacer(this.pluginSlug + '/admin/class-' + this.pluginSlug + '-admin.php', this),
       adminCss: new Replacer(this.pluginSlug + '/admin/assets/sass/admin.scss', this),
-      publicView: new Replacer(this.pluginSlug + '/public/views/public.php', this),
       adminView: new Replacer(this.pluginSlug + '/admin/views/admin.php', this),
       uninstall: new Replacer(this.pluginSlug + '/uninstall.php', this),
       readme: new Replacer(this.pluginSlug + '/README.txt', this),
       gruntfile: new Replacer(this.pluginSlug + '/Gruntfile.js', this),
       package: new Replacer(this.pluginSlug + '/package.json', this),
-      gitmodules: new Replacer(this.pluginSlug + '/.gitmodules', this),
       template: new Replacer(this.pluginSlug + '/includes/template.php', this),
       loadtextdomain: new Replacer(this.pluginSlug + '/includes/load_textdomain.php', this),
       publicjs: new Replacer(this.pluginSlug + '/public/assets/js/public.js', this),
@@ -929,35 +922,35 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   if (verbose) {
     console.log(('Cleaning in admin-class*.php').italic);
   }
-  if(this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1 && this.snippet.indexOf('Support Dashboard Activity Widget for CPT') === -1 && this.snippet.indexOf('Transient Example') === -1 && this.snippet.indexOf('Bubble notification on pending CPT') === -1) {
+  if (this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1 && this.snippet.indexOf('Support Dashboard Activity Widget for CPT') === -1 && this.snippet.indexOf('Transient Example') === -1 && this.snippet.indexOf('Bubble notification on pending CPT') === -1) {
     fs.unlink(this.files.extras.file);
     this.files.adminClass.looplines(this.loadLines.admin.extras);
   } else {
-  if (this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1) {
-    this.files.extras.looplines(this.loadLines.extras.glance);
-    this.files.adminCss.looplines(this.loadLines.admincss.glance);
-    if (verbose) {
-      console.log(('Removed code of At Glance Support in Dashboard').italic);
+    if (this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1) {
+      this.files.extras.looplines(this.loadLines.extras.glance);
+      this.files.adminCss.looplines(this.loadLines.admincss.glance);
+      if (verbose) {
+        console.log(('Removed code of At Glance Support in Dashboard').italic);
+      }
     }
-  }
-  if (this.snippet.indexOf('Support Dashboard Activity Widget for CPT') === -1) {
-    this.files.extras.looplines(this.loadLines.extras.activity);
-    if (verbose) {
-      console.log(('Removed code of Activity Support in Dashboard').italic);
+    if (this.snippet.indexOf('Support Dashboard Activity Widget for CPT') === -1) {
+      this.files.extras.looplines(this.loadLines.extras.activity);
+      if (verbose) {
+        console.log(('Removed code of Activity Support in Dashboard').italic);
+      }
     }
-  }
-  if (this.snippet.indexOf('Transient Example') === -1) {
-    this.files.extras.looplines(this.loadLines.extras.transient);
-    if (verbose) {
-      console.log(('Removed code of Transient Example').italic);
+    if (this.snippet.indexOf('Transient Example') === -1) {
+      this.files.extras.looplines(this.loadLines.extras.transient);
+      if (verbose) {
+        console.log(('Removed code of Transient Example').italic);
+      }
     }
-  }
-  if (this.snippet.indexOf('Bubble notification on pending CPT') === -1) {
-    this.files.extras.looplines(this.loadLines.extras.bubble);
-    if (verbose) {
-      console.log(('Removed Bubble Notification').italic);
+    if (this.snippet.indexOf('Bubble notification on pending CPT') === -1) {
+      this.files.extras.looplines(this.loadLines.extras.bubble);
+      if (verbose) {
+        console.log(('Removed Bubble Notification').italic);
+      }
     }
-  }
   }
   if (this.snippet.indexOf('Import/Export settings system') === -1) {
     fs.unlink(this.files.impexp.file);
@@ -1095,5 +1088,5 @@ WpPluginBoilerplateGenerator.prototype.setUnitTest = function setUnitTest() {
     deleteFolder(this.pluginSlug + '/tests');
     fs.unlink(this.pluginSlug + '/.travis.yml');
     fs.unlink(this.pluginSlug + '/phpunit.xml.dist');
-  } 
+  }
 };

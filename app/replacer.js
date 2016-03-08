@@ -173,12 +173,10 @@ var Replacer = module.exports = function Replacer(file, options) {
         } else {
           module.replace();
         }
-      } else {
-        console.log(('File not exist: ' + file).red);
-      }
+      } 
     } catch (err) {
-
     }
+    return true;
   };
 
   return module;
