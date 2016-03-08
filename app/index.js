@@ -187,7 +187,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
       '         git submodule add -f $url $path >> /dev/null',
       '       fi',
       '   done',
-      'rm $0'
+    //  'rm $0'
     ].join('\n');
     fs.writeFile(self.pluginSlug + '/submodules.sh', submodulessh, 'utf8',
             function (err) {
@@ -212,10 +212,11 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
                 console.log(('Download submodules (wait a moment)').white);
                 var submodule = spawn(process.cwd() + '/' + self.pluginSlug + '/submodules.sh', [],
                         {
-                          cwd: process.cwd() + '/' + self.pluginSlug + '/'
+                          cwd: process.cwd() + '/' + self.pluginSlug + '/',
+                          encoding : 'utf8'
                         });
-
-                if (submodule.status !== 0) {
+                console.log((submodule.stdout.toString()).white)
+                if (submodule.stderr.length > 0) {
                   console.log(('Error on submodule: ' + submodule.stderr).blue);
                   process.exit();
                 } else {

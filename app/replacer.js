@@ -36,21 +36,6 @@ var Replacer = module.exports = function Replacer(file, options) {
     searches.push({search: search, replace: ''});
   };
 
-  /*
-   * Workaround count the line of a file
-   * 
-   * @param string file
-   */
-  module.getlines = function (file) {
-    if (countLines === 0) {
-      var wc = execSync("wc -l < " + process.cwd() + '/' + file);
-      if (wc.stderr !== undefined) {
-        console.log((wc.stderr).red);
-      }
-      countLines = parseInt(wc.stdout) - 1;
-    }
-  };
-
   module.file = file;
 
   //Base replacements
@@ -117,7 +102,7 @@ var Replacer = module.exports = function Replacer(file, options) {
           seds.push({start: element[0]});
         }
       } else {
-        console.log((element).red);
+        console.log(module.file + ' ' + (element).red);
       }
     });
   };
