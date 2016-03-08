@@ -381,7 +381,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
         {name: 'Widget Helper', checked: true},
         {name: 'CMB2', checked: true},
         {name: 'CMB2-Grid', checked: true},
-        {name: 'CMB2-Google-Maps', checked: true},
+        {name: 'CMB2-Google-Maps', checked: false},
         {name: 'WP-Contextual-Help', checked: true},
         {name: 'WP-Admin-Notice', checked: true},
         {name: 'PointerPlus', checked: true},
@@ -400,7 +400,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       choices: [
         {name: 'Support Dashboard At Glance Widget for CPT', checked: true},
         {name: 'Support Dashboard Activity Widget for CPT', checked: true},
-        {name: 'Javascript DOM-based Routing', checked: true},
+        {name: 'Javascript DOM-based Routing', checked: false},
         {name: 'Bubble notification on pending CPT', checked: true},
         {name: 'Import/Export settings system', checked: true},
         {name: 'Capability system', checked: true},
@@ -563,14 +563,14 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
       loadtextdomain: new Replacer(this.pluginSlug + '/includes/load_textdomain.php', this),
       publicjs: new Replacer(this.pluginSlug + '/public/assets/js/public.js', this),
       debug: new Replacer(this.pluginSlug + '/admin/includes/debug.php', this),
-      impexp: new Replacer(this.pluginSlug + '/admin/includes/PN_ImpExp.php', this),
-      cmb: new Replacer(this.pluginSlug + '/admin/includes/PN_CMB.php', this),
-      contextualhelp: new Replacer(this.pluginSlug + '/admin/includes/PN_ContextualHelp.php', this),
-      debugpanel: new Replacer(this.pluginSlug + '/admin/includes/PN_Debug_Panel.php', this),
-      extras: new Replacer(this.pluginSlug + '/admin/includes/PN_Extras.php', this),
-      pointers: new Replacer(this.pluginSlug + '/admin/includes/PN_Pointers.php', this),
+      impexp: new Replacer(this.pluginSlug + '/admin/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_ImpExp.php', this),
+      cmb: new Replacer(this.pluginSlug + '/admin/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_CMB.php', this),
+      contextualhelp: new Replacer(this.pluginSlug + '/admin/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_ContextualHelp.php', this),
+      debugpanel: new Replacer(this.pluginSlug + '/admin/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_Debug_Panel.php', this),
+      extras: new Replacer(this.pluginSlug + '/admin/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_Extras.php', this),
+      pointers: new Replacer(this.pluginSlug + '/admin/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_Pointers.php', this),
       requirements: new Replacer(this.pluginSlug + '/public/includes/requirements.php', this),
-      actdeact: new Replacer(this.pluginSlug + '/public/includes/PN_ActDeact.php', this),
+      actdeact: new Replacer(this.pluginSlug + '/public/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_ActDeact.php', this),
       language: new Replacer(this.pluginSlug + '/includes/language.php', this),
       fakepage: new Replacer(this.pluginSlug + '/includes/fake-page.php', this),
       widgetsample: new Replacer(this.pluginSlug + '/includes/widget/sample.php', this)
@@ -692,6 +692,41 @@ WpPluginBoilerplateGenerator.prototype.setFiles = function setFiles() {
   fs.rename(this.pluginSlug + '/languages/plugin-name.pot', this.pluginSlug + '/languages/' + this.pluginSlug + '.pot', function (err) {
     if (err) {
       console.log(('Error on rename plugin-name.pot:' + err).red);
+    }
+  });
+  fs.rename(this.pluginSlug + '/public/includes/PN_ActDeact.php', this.files.actdeact.file, function (err) {
+    if (err) {
+      console.log(('Error on rename PN_ActDeact.php:' + err).red);
+    }
+  });
+  fs.rename(this.pluginSlug + '/admin/includes/PN_CMB.php', this.files.cmb.file, function (err) {
+    if (err) {
+      console.log(('Error on rename PN_ActDeact.php:' + err).red);
+    }
+  });
+  fs.rename(this.pluginSlug + '/admin/includes/PN_Extras.php', this.files.extras.file, function (err) {
+    if (err) {
+      console.log(('Error on rename PN_Extras.php:' + err).red);
+    }
+  });
+  fs.rename(this.pluginSlug + '/admin/includes/PN_ContextualHelp.php', this.files.contextualhelp.file, function (err) {
+    if (err) {
+      console.log(('Error on rename PN_ContextualHelp.php:' + err).red);
+    }
+  });
+  fs.rename(this.pluginSlug + '/admin/includes/PN_Debug_Panel.php', this.files.debugpanel.file, function (err) {
+    if (err) {
+      console.log(('Error on rename PN_Debug_Panel.php:' + err).red);
+    }
+  });
+  fs.rename(this.pluginSlug + '/admin/includes/PN_ImpExp.php', this.files.impexp.file, function (err) {
+    if (err) {
+      console.log(('Error on rename PN_ImpExp.php:' + err).red);
+    }
+  });
+  fs.rename(this.pluginSlug + '/admin/includes/PN_Pointers.php', this.files.pointers.file, function (err) {
+    if (err) {
+      console.log(('Error on rename PN_Pointers.php:' + err).red);
     }
   });
 
@@ -893,6 +928,10 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   if (verbose) {
     console.log(('Cleaning in admin-class*.php').italic);
   }
+  if(this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1 && this.snippet.indexOf('Support Dashboard Activity Widget for CPT') === -1 && this.snippet.indexOf('Transient Example') === -1 && this.snippet.indexOf('Bubble notification on pending CPT') === -1) {
+    fs.unlink(this.files.extras.file);
+    this.files.adminClass.looplines(this.loadLines.admin.extras);
+  } else {
   if (this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1) {
     this.files.extras.looplines(this.loadLines.extras.glance);
     this.files.adminCss.looplines(this.loadLines.admincss.glance);
@@ -918,8 +957,9 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
       console.log(('Removed Bubble Notification').italic);
     }
   }
+  }
   if (this.snippet.indexOf('Import/Export settings system') === -1) {
-    fs.unlink(this.pluginSlug + '/admin/includes/impexp.php');
+    fs.unlink(this.files.impexp.file);
     this.files.adminClass.looplines(this.loadLines.admin.impexp);
     if (this.adminPage === true) {
       this.files.gruntfile.looplines(this.loadLines.adminview.impexp);
@@ -929,8 +969,8 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
     }
   }
   if (this.snippet.indexOf('Debug system (Debug Bar support)') === -1) {
-    fs.unlink(this.pluginSlug + '/admin/includes/debug.php');
-    fs.unlink(this.pluginSlug + '/admin/includes/PN_Debug_Panel.php');
+    fs.unlink(this.files.debug.file);
+    fs.unlink(this.files.debugpanel.file);
     this.files.adminClass.looplines(this.loadLines.admin.debug);
     if (verbose) {
       console.log(('Removed Debug system').italic);

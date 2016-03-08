@@ -37,20 +37,6 @@ var Replacer = module.exports = function Replacer(file, options) {
   };
 
   /*
-   * The rows for sed
-   * 
-   * @param number startok
-   * @param number _end
-   */
-  module.addsed = function (startok, endok) {
-    if (endok) {
-      seds.push({start: startok, end: endok});
-    } else {
-      seds.push({start: startok});
-    }
-  };
-
-  /*
    * Workaround count the line of a file
    * 
    * @param string file
@@ -83,6 +69,7 @@ var Replacer = module.exports = function Replacer(file, options) {
   module.add(new RegExp('http://example.com', 'g'), options.authorURI);
   module.add(/pn_/g, options.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '_');
   module.add(/Pn_/g, options.pluginName.match(/\b(\w)/g).join('') + '_');
+  module.add(/\/PN_/g, '/' + options.pluginName.match(/\b(\w)/g).join('') + '_');
   module.add(/pn-/g, options.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '-');
 
   /*
@@ -91,23 +78,27 @@ var Replacer = module.exports = function Replacer(file, options) {
    */
   module.replace = function () {
     file = module.file;
-    var exists = fs.readFileSync(process.cwd() + '/' + file);
-    if (exists) {
-      var data = exists;
-      data = data.toString();
-      module.add(/\n\n\n/g, "\n");
-      var i, total;
+    try {
+      var exists = fs.readFileSync(process.cwd() + '/' + file);
+      if (exists) {
+        var data = exists;
+        data = data.toString();
+        module.add(/\n\n\n/g, "\n");
+        var i, total;
 
-      total = searches.length;
-      for (i = 0; i < total; i += 1) {
-        data = data.replace(searches[i].search, searches[i].replace);
-      }
+        total = searches.length;
+        for (i = 0; i < total; i += 1) {
+          data = data.replace(searches[i].search, searches[i].replace);
+        }
 
-      fs.writeFileSync(process.cwd() + '/' + file, data);
-      if (verbose) {
-        console.log(('  Replace ' + file).italic);
+        fs.writeFileSync(process.cwd() + '/' + file, data);
+        if (verbose) {
+          console.log(('  Replace ' + file).italic);
+        }
+      } else {
+        console.log(('File not exist: ' + file).red);
       }
-    } else {
+    } catch (e) {
       console.log(('File not exist: ' + file).red);
     }
   };
@@ -119,10 +110,14 @@ var Replacer = module.exports = function Replacer(file, options) {
    */
   module.looplines = function (block) {
     block.forEach(function (element, index, array) {
-      if (1 in element) {
-        module.addsed(element[0], element[1]);
+      if (!isNaN(element[0])) {
+        if (element[1]) {
+          seds.push({start: element[0], end: element[1]});
+        } else {
+          seds.push({start: element[0]});
+        }
       } else {
-        module.addsed(element[0]);
+        console.log((element).red);
       }
     });
   };
@@ -159,15 +154,14 @@ var Replacer = module.exports = function Replacer(file, options) {
           }
           exec(sedcmd, {cwd: process.cwd() + '/'},
                   function (err, stdout, stderr) {
+                    if (verbose) {
+                      console.log(('  Sed ' + file).italic);
+                    }
                     if (stderr.length > 0) {
-                      console.log((sedcmd).red);
-                      return console.log(('stderr: ' + stderr).red);
+                      return console.log(('stderr on removing ' + sedcmd + ': ' + stderr).red);
                     }
                     if (err !== null) {
                       return console.log(('exec error: ' + err).red);
-                    }
-                    if (verbose) {
-                      console.log(('  Sed ' + file).italic);
                     }
                     module.replace();
                     //Remove double empty lines
@@ -184,7 +178,7 @@ var Replacer = module.exports = function Replacer(file, options) {
                             function (err, stdout, stderr) {
                               if (stderr.length > 0) {
                                 console.log((sedcmd).red);
-                                return console.log(('stderr: ' + stderr).red);
+                                return console.log(('stderr on cleaning ' + sedcmd + ': ' + stderr).red);
                               }
                               if (err !== null) {
                                 return console.log(('exec error: ' + err).red);
