@@ -10,7 +10,7 @@ var Admzip = require('adm-zip');
 var rmdir = require('rimraf');
 var s = require('underscore.string');
 var os = require('os');
-var spawn = require('child_process').spawnSync || require('spawn-sync');
+var spawn = require('child_process').spawnSync;
 var Replacer = require('./replacer');
 require('colors');
 
