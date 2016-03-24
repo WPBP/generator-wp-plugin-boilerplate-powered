@@ -149,6 +149,10 @@ var Replacer = module.exports = function Replacer(file, options) {
                       return console.log(('exec error: ' + err).red);
                     }
                     module.replace();
+                    // Avoid cleaning on gitmodules because can be removed by the settings
+                    if( file.indexOf('.gitmodules') >= 0) {
+                      return;
+                    }
                     //Remove double empty lines
                     var sedcmd = "sed -i '/^$/N;/^\\n$/D' " + file;
                     //Detect OSX for a compatible sed command

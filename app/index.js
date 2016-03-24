@@ -104,11 +104,7 @@ function cleanParsing(pathrec, excluded) {
     //Remove the unuseful files
     default_file.forEach(function (element, index, array) {
       if (fs.existsSync('./' + pathrec + '/' + element)) {
-        fs.unlink(pathrec + '/' + element, function (err) {
-          if (err) {
-            console.log(('Remove unuseful file error: ' + err).red);
-          }
-        });
+        fs.unlink(pathrec + '/' + element, function (err) { });
         if (verbose) {
           console.log(('Removed ' + pathrec + '/' + element).italic);
         }
@@ -186,7 +182,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
       '         git submodule add -f $url $path',
       '       fi',
       '   done',
-              //  'rm $0'
+      'rm $0'
     ].join('\n');
     fs.writeFile(self.pluginSlug + '/submodules.sh', submodulessh, 'utf8',
             function (err) {
@@ -314,7 +310,12 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
     console.log('--------------------------');
     is_default = true;
   }
-  this.defaultValues = JSON.parse(require("html-wiring").readFileAsString(default_file));
+  try {
+    this.defaultValues = JSON.parse(fs.readFileSync(default_file));
+  } catch (e) {
+    console.log(('default-values.json is not a valid JSON file!').bold.red);
+    process.exit(1);
+  }
   this.loadLines = JSON.parse(fs.readFileSync(__dirname + '/match.json', "utf8")).list[0];
 };
 
