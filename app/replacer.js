@@ -45,7 +45,6 @@ var Replacer = module.exports = function Replacer(file, options) {
   module.add(/Plugin Name\./g, options.pluginName);
   module.add(/Plugin Name/g, options.pluginName);
   module.add(new RegExp(options.pluginName + ':', 'g'), 'Plugin Name:');
-  module.add(/$plugin_name = 'Plugin Name';/g, '$plugin_name = ' + options.pluginName + '\';');
   module.add(/Plugin Name:( {7})@TODO/g, 'Plugin Name:       ' + options.pluginName);
   module.add(/Your Name <email@example\.com>/g, options.author + ' <' + options.authorEmail + '>');
   module.add(/danielemte90@alice\.it/g, options.authorEmail);
@@ -55,6 +54,7 @@ var Replacer = module.exports = function Replacer(file, options) {
   module.add(/pn_/g, options.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '_');
   module.add(/Pn_/g, options.pluginName.match(/\b(\w)/g).join('') + '_');
   module.add(/\/PN_/g, '/' + options.pluginName.match(/\b(\w)/g).join('') + '_');
+  module.add(/PN_/g, '/' + options.pluginName.match(/\b(\w)/g).join('') + '_');
   module.add(/pn-/g, options.pluginName.match(/\b(\w)/g).join('').toLowerCase() + '-');
 
   /*
