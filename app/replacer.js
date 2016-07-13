@@ -2,7 +2,6 @@
 /*jslint node: true */
 var fs = require('fs');
 var exec = require('child_process').exec;
-var spawn = require('child_process').spawn;
 var execSync = require('sync-exec');
 var args = process.argv.slice(2);
 var os = require('os');

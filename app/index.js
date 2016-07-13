@@ -10,7 +10,7 @@ var Admzip = require('adm-zip');
 var rmdir = require('rimraf');
 var s = require('underscore.string');
 var os = require('os');
-var spawn = require('child_process').spawnSync;
+var execSync = require('sync-exec');
 var Replacer = require('./replacer');
 require('colors');
 
@@ -43,6 +43,9 @@ var isUnixHiddenPath = function (path) {
  * @param string path
  */
 function deleteFolder(path) {
+  if (verbose) {
+	  console.log(('Removed folder ' + path).yellow);
+	}
   rmdir(path, function (error) {
 	if (error) {
 	  console.log((error).red);
@@ -69,6 +72,7 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
 	  }
 	}
 	console.log(('Parsed all the files').white);
+	execSync('composer update');
 
 	//Console.log are cool and bowtie are cool!
 	console.log(('All done!').white);
@@ -323,6 +327,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
 	this.files = {
 	  primary: new Replacer(this.pluginSlug + '/' + this.pluginClassName + '.php', this),
 	  publicClass: new Replacer(this.pluginSlug + '/public/' + this.pluginClassName + '.php', this),
+	  widgets: new Replacer(this.pluginSlug + '/public/widgets/sample.php', this),
 	  adminClass: new Replacer(this.pluginSlug + '/admin/' + this.pluginClassName + '_Admin.php', this),
 	  adminCss: new Replacer(this.pluginSlug + '/admin/assets/sass/admin.scss', this),
 	  adminView: new Replacer(this.pluginSlug + '/admin/views/admin.php', this),
@@ -330,15 +335,16 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
 	  gruntfile: new Replacer(this.pluginSlug + '/Gruntfile.js', this),
 	  package: new Replacer(this.pluginSlug + '/package.json', this),
 	  publicjs: new Replacer(this.pluginSlug + '/public/assets/js/public.js', this),
+	  publiccoffee: new Replacer(this.pluginSlug + '/public/assets/coffee/public.coffee', this),
 	  impexp: new Replacer(this.pluginSlug + '/admin/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_ImpExp.php', this),
 	  cmb: new Replacer(this.pluginSlug + '/admin/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_CMB.php', this),
 	  contextualhelp: new Replacer(this.pluginSlug + '/admin/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_ContextualHelp.php', this),
 	  extras: new Replacer(this.pluginSlug + '/admin/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_Extras.php', this),
 	  pointers: new Replacer(this.pluginSlug + '/admin/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_Pointers.php', this),
-	  actdeact: new Replacer(this.pluginSlug + '/public/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_ActDeact.php', this),
-	  p2p: new Replacer(this.pluginSlug + '/public/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_P2P.php', this),
-	  uninstall: new Replacer(this.pluginSlug + '/public/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_Uninstall.php', this),
-	  fakepage: new Replacer(this.pluginSlug + '/public/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_FakePage.php', this)
+	  actdeact: new Replacer(this.pluginSlug + '/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_ActDeact.php', this),
+	  p2p: new Replacer(this.pluginSlug + '/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_P2P.php', this),
+	  uninstall: new Replacer(this.pluginSlug + '/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_Uninstall.php', this),
+	  fakepage: new Replacer(this.pluginSlug + '/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_FakePage.php', this)
 	};
 
 	if (props.saveSettings === true) {
@@ -448,6 +454,21 @@ WpPluginBoilerplateGenerator.prototype.setFiles = function setFiles() {
 	  console.log(('Error on rename PN_ActDeact.php:' + err).red);
 	}
   });
+  fs.rename(this.pluginSlug + '/includes/PN_P2P.php', this.files.p2p.file, function (err) {
+	if (err) {
+	  console.log(('Error on rename PN_P2P.php:' + err).red);
+	}
+  });
+  fs.rename(this.pluginSlug + '/includes/PN_Uninstall.php', this.files.uninstall.file, function (err) {
+	if (err) {
+	  console.log(('Error on rename PN_Uninstall.php:' + err).red);
+	}
+  });
+  fs.rename(this.pluginSlug + '/includes/PN_FakePage.php', this.files.fakepage.file, function (err) {
+	if (err) {
+	  console.log(('Error on rename PN_FakePage.php:' + err).red);
+	}
+  });
   fs.rename(this.pluginSlug + '/admin/includes/PN_CMB.php', this.files.cmb.file, function (err) {
 	if (err) {
 	  console.log(('Error on rename PN_ActDeact.php:' + err).red);
@@ -471,11 +492,6 @@ WpPluginBoilerplateGenerator.prototype.setFiles = function setFiles() {
   fs.rename(this.pluginSlug + '/admin/includes/PN_Pointers.php', this.files.pointers.file, function (err) {
 	if (err) {
 	  console.log(('Error on rename PN_Pointers.php:' + err).red);
-	}
-  });
-  fs.rename(this.pluginSlug + '/includes/PN_P2P.php', this.files.p2p.file, function (err) {
-	if (err) {
-	  console.log(('Error on rename PN_P2P.php:' + err).red);
 	}
   });
   console.log(('Renamed files').white);
@@ -502,12 +518,8 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
   }
   //Activate/deactivate
   if (this.activateDeactivate.indexOf('Activate/Deactivation Method') === -1) {
-	this.files.actdeact.looplines(this.loadLines.primary.actdeact);
+	this.files.primary.looplines(this.loadLines.primary.actdeact);
 	fs.unlink(this.files.actdeact.file);
-  }
-  if (this.activateDeactivate.indexOf('Uninstall Hook') === -1) {
-	this.files.actdeact.looplines(this.loadLines.primary.actdeact);
-	fs.unlink(this.files.uninstall.file);
   }
   if (this.modules.indexOf('Freemius/wordpress-sdk') === -1) {
 	execSync('composer remove freemius/wordpress-sdk');
@@ -524,19 +536,11 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
 	  console.log(('Removed wpackagist-plugin/posts-to-posts').italic);
 	}
   }
-
-  //Function
   if (this.modules.indexOf('WPBP/FakePage') === -1) {
 	this.files.primary.looplines(this.loadLines.primary.fakepage);
 	fs.unlink(this.files.fakepage.file);
 	if (verbose) {
 	  console.log(('Removed WPBP/FakePage').italic);
-	}
-  }
-  if (this.modules.indexOf('WPBP/Template') === -1) {
-	deleteFolder(this.pluginSlug + '/templates');
-	if (verbose) {
-	  console.log(('Removed WPBP/Template').italic);
 	}
   }
 };
@@ -584,6 +588,20 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
 	  console.log(('Removed nathanielks/wp-admin-notice').italic);
 	}
   }
+  if (this.modules.indexOf('julien731/WP-Review-Me') === -1) {
+	execSync('composer remove julien731/wp-review-me');
+	this.files.adminClass.looplines(this.loadLines.admin.review);
+	if (verbose) {
+	  console.log(('Removed julien731/WP-Review-Me').italic);
+	}
+  }
+  if (this.modules.indexOf('julien731/WP-Dismissible-Notices-Handler') === -1) {
+	execSync('composer remove julien731/wp-dismissible-notices-handler');
+	this.files.adminClass.looplines(this.loadLines.admin.dismissible);
+	if (verbose) {
+	  console.log(('Removed julien731/WP-Dismissible-Notices-Handler').italic);
+	}
+  }
   if (this.modules.indexOf('WPBP/PointerPlus') === -1) {
 	execSync('composer remove wpbp/pointerplus');
 	fs.unlink(this.files.pointers.file);
@@ -617,9 +635,9 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   if (verbose) {
 	console.log(('Cleaning in admin-class*.php').italic);
   }
-  if (this.snippet.indexOf('Backend - Dashboard Activity Widget') === -1 
-		  && this.snippet.indexOf('Backend - Dashboard At Glance Widget') === -1 
-		  && this.snippet.indexOf('System - Transient Example') === -1 
+  if (this.snippet.indexOf('Backend - Dashboard Activity Widget') === -1
+		  && this.snippet.indexOf('Backend - Dashboard At Glance Widget') === -1
+		  && this.snippet.indexOf('System - Transient Example') === -1
 		  && this.snippet.indexOf('Backend - Bubble Notification on pending CPT') === -1) {
 	fs.unlink(this.files.extras.file);
 	this.files.adminClass.looplines(this.loadLines.admin.extras);
@@ -666,8 +684,8 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
 	  console.log(('Removed WPBP/Debug').italic);
 	}
   }
-  if (this.snippet.indexOf('System - Custom action') === -1 
-		  && this.snippet.indexOf('System - Custom filter') === -1 
+  if (this.snippet.indexOf('System - Custom action') === -1
+		  && this.snippet.indexOf('System - Custom filter') === -1
 		  && this.snippet.indexOf('System - Custom shortcode') === -1) {
 	this.files.adminClass.looplines(this.loadLines.admin.custom);
   }
@@ -693,8 +711,6 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
 };
 
 WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass() {
-  this.files.publicClass.looplines(this.loadLines.public.todo);
-
   //Assets - JS/CSS
   if (this.publicResources.length === 0) {
 	this.files.publicClass.looplines(this.loadLines.public.jscss);
@@ -709,8 +725,7 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
 	deleteFolder(this.pluginSlug + '/public/assets/css');
 	deleteFolder(this.pluginSlug + '/public/assets/sass');
   }
-
-  //Repo
+  //Library
   if (this.modules.indexOf('WebDevStudios/CPT_Core') === -1) {
 	execSync('composer remove webdevstudios/cpt-core');
 	this.files.publicClass.looplines(this.loadLines.public.cptcore);
@@ -725,48 +740,59 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
 	  console.log(('Removed WebDevStudios/Taxonomy_Core').italic);
 	}
   }
-
-  //Function
-  if (this.modules.indexOf('Template system (like WooCommerce)') === -1) {
+  if (this.modules.indexOf('WPBP/Widgets-Helper') === -1) {
+	deleteFolder(this.pluginSlug + '/public/widgets');
+	this.files.publicClass.looplines(this.loadLines.public.widget);
+	if (verbose) {
+	  console.log(('Removed WPBP/Widgets-Helper').italic);
+	}
+  }
+  if (this.modules.indexOf('WPBP/Template') === -1) {
 	this.files.publicClass.looplines(this.loadLines.public.template);
 	deleteFolder(this.pluginSlug + '/templates');
+	if (verbose) {
+	  console.log(('Removed WPBP/Template').italic);
+	}
   }
-  if (this.modules.indexOf('Requirements system on activation') === -1) {
+  if (this.modules.indexOf('WPBP/Requirements') === -1) {
 	this.files.actdeact.looplines(this.loadLines.actdeact.requirement);
 	if (verbose) {
-	  console.log(('Removed Requirements Detection System').italic);
+	  console.log(('Removed WPBP/Requirements').italic);
 	}
   }
   //Snippet
-  if (this.snippet.indexOf('CPTs on search box') === -1) {
+  if (this.snippet.indexOf('Frontend - CPTs on search box') === -1) {
 	this.files.publicClass.looplines(this.loadLines.public.cptsearch);
 	if (verbose) {
 	  console.log(('Removed CPTs on search box').italic);
 	}
   }
-  if (this.snippet.indexOf('Custom action') === -1 && this.snippet.indexOf('Custom filter') === -1 && this.snippet.indexOf('Custom shortcode') === -1) {
+  if (this.snippet.indexOf('System - Custom action') === -1
+		  && this.snippet.indexOf('System - Custom filter') === -1
+		  && this.snippet.indexOf('System - Custom shortcode') === -1) {
 	this.files.publicClass.looplines(this.loadLines.public.customfunc);
   }
-  if (this.snippet.indexOf('Custom action') === -1) {
+  if (this.snippet.indexOf('System - Custom action') === -1) {
 	this.files.publicClass.looplines(this.loadLines.public.customact);
   }
-  if (this.snippet.indexOf('Custom filter') === -1) {
+  if (this.snippet.indexOf('System - Custom filter') === -1) {
 	this.files.publicClass.looplines(this.loadLines.public.customflt);
   }
-  if (this.snippet.indexOf('Custom shortcode') === -1) {
+  if (this.snippet.indexOf('System - Custom shortcode') === -1) {
 	this.files.publicClass.looplines(this.loadLines.public.customsc);
   }
-  if (this.snippet.indexOf('Javascript DOM-based Routing') === -1) {
+  if (this.snippet.indexOf('Frontend - Javascript DOM-based Routing') === -1) {
 	this.files.publicjs.looplines(this.loadLines.publicjs.routing);
+	this.files.publiccoffee.looplines(this.loadLines.publiccoffee.routing);
   }
-  if (this.snippet.indexOf('Capability system') === -1) {
+  if (this.snippet.indexOf('Frontend - Capability system') === -1) {
 	this.files.publicClass.looplines(this.loadLines.public.cap);
 	this.files.actdeact.looplines(this.loadLines.actdeact.cap);
   }
-  if (this.snippet.indexOf('Add body class') === -1) {
+  if (this.snippet.indexOf('Frontend - Add body class') === -1) {
 	this.files.publicClass.looplines(this.loadLines.public.body);
   }
-  if (this.snippet.indexOf('wp_localize_script for PHP var to JS') === -1) {
+  if (this.snippet.indexOf('Frontend - wp_localize_script for PHP var to JS') === -1) {
 	this.files.publicClass.looplines(this.loadLines.public.localize);
 	this.files.publicjs.looplines(this.loadLines.publicjs.localize);
   }
@@ -778,8 +804,9 @@ WpPluginBoilerplateGenerator.prototype.setReadme = function setReadme() {
 
 WpPluginBoilerplateGenerator.prototype.setUninstall = function setUninstall() {
   if (this.activateDeactivate.indexOf('Uninstall Hook') === -1) {
+	this.files.primary.looplines(this.loadLines.primary.uninstall);
+	fs.unlink(this.files.uninstall.file);
   } else if (this.snippet.indexOf('Capability system') === -1) {
-	//this.files.uninstall.looplines(this.loadLines.uninstall.cap);
-	//this.files.uninstall.add('global $wpdb, $wp_roles;', 'global $wpdb;');
+	this.files.uninstall.looplines(this.loadLines.uninstall.cap);
   }
 };
