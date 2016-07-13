@@ -12,8 +12,6 @@ var s = require('underscore.string');
 var execSync = require('sync-exec');
 var Replacer = require('./replacer');
 require('colors');
-
-var cleanfolder = false;
 var args = process.argv.slice(2);
 var version = '2.0.0';
 var isDefault = false;
