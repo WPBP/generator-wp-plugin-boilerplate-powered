@@ -44,8 +44,8 @@ var isUnixHiddenPath = function (path) {
  */
 function deleteFolder(path) {
   if (verbose) {
-	  console.log(('Removed folder ' + path).yellow);
-	}
+	console.log(('Removed folder ' + path).yellow);
+  }
   rmdir(path, function (error) {
 	if (error) {
 	  console.log((error).red);
@@ -550,7 +550,6 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   if (verbose) {
 	console.log(('Added info marker in admin').italic);
   }
-  //Repo
   if (this.modules.indexOf('WebDevStudios/CMB2') === -1) {
 	execSync('composer remove webdevstudios/cmb2');
 	this.files.impexp.looplines(this.loadLines.impexp.cmb);
@@ -624,10 +623,9 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
 	  console.log(('Removed WPBP/CPT_Columns').italic);
 	}
   }
-
-  //Snippet
   if (this.adminPage === false) {
 	this.files.adminClass.looplines(this.loadLines.admin.remove);
+	fs.unlink(this.files.adminView.file);
 	if (verbose) {
 	  console.log(('Removed code of Admin page').italic);
 	}
@@ -688,17 +686,18 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
 		  && this.snippet.indexOf('System - Custom filter') === -1
 		  && this.snippet.indexOf('System - Custom shortcode') === -1) {
 	this.files.adminClass.looplines(this.loadLines.admin.custom);
-  }
-  if (this.snippet.indexOf('System - Custom action') === -1) {
-	this.files.adminClass.looplines(this.loadLines.admin.customact);
-	if (verbose) {
-	  console.log(('Removed Custom Action').italic);
+  } else {
+	if (this.snippet.indexOf('System - Custom action') === -1) {
+	  this.files.adminClass.looplines(this.loadLines.admin.customact);
+	  if (verbose) {
+		console.log(('Removed Custom Action').italic);
+	  }
 	}
-  }
-  if (this.snippet.indexOf('System - Custom filter') === -1) {
-	this.files.adminClass.looplines(this.loadLines.admin.customflt);
-	if (verbose) {
-	  console.log(('Removed Custom Filter').italic);
+	if (this.snippet.indexOf('System - Custom filter') === -1) {
+	  this.files.adminClass.looplines(this.loadLines.admin.customflt);
+	  if (verbose) {
+		console.log(('Removed Custom Filter').italic);
+	  }
 	}
   }
   if (this.snippet.indexOf('Backend - Donate link in plugins list') === -1) {
@@ -725,7 +724,6 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
 	deleteFolder(this.pluginSlug + '/public/assets/css');
 	deleteFolder(this.pluginSlug + '/public/assets/sass');
   }
-  //Library
   if (this.modules.indexOf('WebDevStudios/CPT_Core') === -1) {
 	execSync('composer remove webdevstudios/cpt-core');
 	this.files.publicClass.looplines(this.loadLines.public.cptcore);
@@ -771,15 +769,16 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
 		  && this.snippet.indexOf('System - Custom filter') === -1
 		  && this.snippet.indexOf('System - Custom shortcode') === -1) {
 	this.files.publicClass.looplines(this.loadLines.public.customfunc);
-  }
-  if (this.snippet.indexOf('System - Custom action') === -1) {
-	this.files.publicClass.looplines(this.loadLines.public.customact);
-  }
-  if (this.snippet.indexOf('System - Custom filter') === -1) {
-	this.files.publicClass.looplines(this.loadLines.public.customflt);
-  }
-  if (this.snippet.indexOf('System - Custom shortcode') === -1) {
-	this.files.publicClass.looplines(this.loadLines.public.customsc);
+  } else {
+	if (this.snippet.indexOf('System - Custom action') === -1) {
+	  this.files.publicClass.looplines(this.loadLines.public.customact);
+	}
+	if (this.snippet.indexOf('System - Custom filter') === -1) {
+	  this.files.publicClass.looplines(this.loadLines.public.customflt);
+	}
+	if (this.snippet.indexOf('System - Custom shortcode') === -1) {
+	  this.files.publicClass.looplines(this.loadLines.public.customsc);
+	}
   }
   if (this.snippet.indexOf('Frontend - Javascript DOM-based Routing') === -1) {
 	this.files.publicjs.looplines(this.loadLines.publicjs.routing);
