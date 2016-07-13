@@ -336,7 +336,9 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
 	  extras: new Replacer(this.pluginSlug + '/admin/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_Extras.php', this),
 	  pointers: new Replacer(this.pluginSlug + '/admin/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_Pointers.php', this),
 	  actdeact: new Replacer(this.pluginSlug + '/public/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_ActDeact.php', this),
-	  p2p: new Replacer(this.pluginSlug + '/public/includes/' + this.pluginName.match(/\b(\w)/g).join('') + 'P2P.php', this)
+	  p2p: new Replacer(this.pluginSlug + '/public/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_P2P.php', this),
+	  uninstall: new Replacer(this.pluginSlug + '/public/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_Uninstall.php', this),
+	  fakepage: new Replacer(this.pluginSlug + '/public/includes/' + this.pluginName.match(/\b(\w)/g).join('') + '_FakePage.php', this)
 	};
 
 	if (props.saveSettings === true) {
@@ -495,72 +497,46 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
   this.files.primary.add(/Version:( {11})1\.0\.0/g, 'Version:           ' + this.pluginVersion);
   this.files.primary.add(/Author:( {12})@TODO/g, 'Author:            ' + this.author);
   this.files.primary.add(/Author URI:( {8})@TODO/g, 'Author URI:        ' + this.authorURI);
-  this.files.primary.looplines(this.loadLines.primary.todo);
   if (verbose) {
 	console.log(('Added info marker replace on plugin.php').italic);
   }
   //Activate/deactivate
-  if (this.activateDeactivate.indexOf('Activate Method') === -1 && this.activateDeactivate.indexOf('Deactivate Method') === -1) {
+  if (this.activateDeactivate.indexOf('Activate/Deactivation Method') === -1) {
 	this.files.actdeact.looplines(this.loadLines.primary.actdeact);
 	fs.unlink(this.files.actdeact.file);
   }
-  if (this.activateDeactivate.indexOf('Activate Method') === -1) {
-	this.files.actdeact.looplines(this.loadLines.actdeact.act);
+  if (this.activateDeactivate.indexOf('Uninstall Hook') === -1) {
+	this.files.actdeact.looplines(this.loadLines.primary.actdeact);
+	fs.unlink(this.files.uninstall.file);
   }
-  if (this.activateDeactivate.indexOf('Deactivate Method') === -1) {
-	this.files.actdeact.looplines(this.loadLines.actdeact.deact);
-  }
-
-  //Repo
-  if (this.modules.indexOf('CPT_Core') === -1 && this.modules.indexOf('Taxonomy_Core') === -1) {
-	this.files.primary.looplines(this.loadLines.primary.cptcomment);
-  }
-  if (this.modules.indexOf('CPT_Core') === -1) {
-	this.files.primary.looplines(this.loadLines.primary.cptcore);
-	this.files.primary.rm("and Custom Post Type");
-	if (verbose) {
-	  console.log(('Removed CPT_Core').italic);
-	}
-  }
-  if (this.modules.indexOf('Taxonomy_Core') === -1) {
-	this.files.primary.looplines(this.loadLines.primary.taxcore);
-	this.files.primary.rm("Taxonomy and");
-	if (verbose) {
-	  console.log(('Removed Taxonomy_Core ').italic);
-	}
-  }
-  if (this.modules.indexOf('Widget Helper') === -1) {
-	deleteFolder(this.pluginSlug + '/includes/widgets');
-	this.files.primary.looplines(this.loadLines.primary.widget);
-	if (verbose) {
-	  console.log(('Removed Widgets Helper').italic);
-	}
-  }
-  if (this.modules.indexOf('Freemius SDK') === -1) {
+  if (this.modules.indexOf('Freemius/wordpress-sdk') === -1) {
+	execSync('composer remove freemius/wordpress-sdk');
 	this.files.primary.looplines(this.loadLines.primary.freemius);
 	if (verbose) {
-	  console.log(('Removed Freemius SDK').italic);
+	  console.log(('Removed Freemius/wordpress-sdk').italic);
+	}
+  }
+  if (this.modules.indexOf('wpackagist-plugin/posts-to-posts') === -1) {
+	execSync('composer remove wpackagist-plugin/posts-to-posts');
+	this.files.primary.looplines(this.loadLines.primary.p2p);
+	fs.unlink(this.files.p2p.file);
+	if (verbose) {
+	  console.log(('Removed wpackagist-plugin/posts-to-posts').italic);
 	}
   }
 
   //Function
-  if (this.modules.indexOf('Fake Page Class') === -1) {
+  if (this.modules.indexOf('WPBP/FakePage') === -1) {
 	this.files.primary.looplines(this.loadLines.primary.fakepage);
+	fs.unlink(this.files.fakepage.file);
 	if (verbose) {
-	  console.log(('Removed Fake Class').italic);
+	  console.log(('Removed WPBP/FakePage').italic);
 	}
   }
-  if (this.modules.indexOf('Template system (like WooCommerce)') === -1) {
+  if (this.modules.indexOf('WPBP/Template') === -1) {
 	deleteFolder(this.pluginSlug + '/templates');
-	this.files.primary.looplines(this.loadLines.primary.template);
 	if (verbose) {
-	  console.log(('Removed Template System').italic);
-	}
-  }
-  if (this.modules.indexOf('Language function support (WPML/Ceceppa Multilingua/Polylang)') === -1) {
-	this.files.primary.looplines(this.loadLines.primary.language);
-	if (verbose) {
-	  console.log(('Removed Language functions').italic);
+	  console.log(('Removed WPBP/Template').italic);
 	}
   }
 };
@@ -568,10 +544,11 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
 WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() {
   this.files.adminClass.looplines(this.loadLines.admin.todo);
   if (verbose) {
-	console.log(('Added info marker in admin-class*.php').italic);
+	console.log(('Added info marker in admin').italic);
   }
   //Repo
-  if (this.modules.indexOf('CMB2') === -1) {
+  if (this.modules.indexOf('WebDevStudios/CMB2') === -1) {
+	execSync('composer remove webdevstudios/cmb2');
 	this.files.impexp.looplines(this.loadLines.impexp.cmb);
 	this.files.adminClass.looplines(this.loadLines.admin.cmb);
 	fs.unlink(this.files.cmb.file);
@@ -579,48 +556,54 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
 	  this.files.adminView.looplines(this.loadLines.adminview.cmb);
 	}
 	if (verbose) {
-	  console.log(('Removed CMB2').italic);
+	  console.log(('Removed WebDevStudios/CMB2').italic);
 	}
   }
-  if (this.modules.indexOf('CMB2-Grid') === -1) {
+  if (this.modules.indexOf('origgami/CMB2-grid') === -1) {
+	execSync('composer remove origgami/cmb2-grid');
 	this.files.cmb.looplines(this.loadLines.cmb.cmbgrid);
 	this.files.cmb.add('$field1 = ', '');
 	this.files.cmb.add('$field2 = ', '');
 	if (verbose) {
-	  console.log(('Removed CMB2-Grid').italic);
+	  console.log(('Removed origgami/cmb2-grid').italic);
 	}
   }
-  if (this.modules.indexOf('WP-Contextual-Help') === -1) {
+  if (this.modules.indexOf('voceconnect/wp-contextual-help') === -1) {
+	execSync('composer remove voceconnect/wp-contextual-help');
 	deleteFolder(this.pluginSlug + '/admin/includes/help-docs');
 	fs.unlink(this.files.contextualhelp.file);
 	this.files.adminClass.looplines(this.loadLines.admin.contextual);
 	if (verbose) {
-	  console.log(('Removed Wp_Contextual_Help').italic);
+	  console.log(('Removed voceconnect/wp-contextual-help').italic);
 	}
   }
-  if (this.modules.indexOf('WP-Admin-Notice') === -1) {
+  if (this.modules.indexOf('nathanielks/wp-admin-notice') === -1) {
+	execSync('composer remove nathanielks/wp-admin-notice');
 	this.files.adminClass.looplines(this.loadLines.admin.notice);
 	if (verbose) {
-	  console.log(('Removed WP-Admin-Notice').italic);
+	  console.log(('Removed nathanielks/wp-admin-notice').italic);
 	}
   }
-  if (this.modules.indexOf('PointerPlus') === -1) {
+  if (this.modules.indexOf('WPBP/PointerPlus') === -1) {
+	execSync('composer remove wpbp/pointerplus');
 	fs.unlink(this.files.pointers.file);
 	this.files.adminClass.looplines(this.loadLines.admin.pointers);
 	if (verbose) {
-	  console.log(('Removed PointerPlus').italic);
+	  console.log(('Removed WPBP/PointerPlus').italic);
 	}
   }
-  if (this.modules.indexOf('CronPlus') === -1) {
+  if (this.modules.indexOf('WPBP/CronPlus') === -1) {
+	execSync('composer remove wpbp/cronplus');
 	this.files.adminClass.looplines(this.loadLines.admin.cron);
 	if (verbose) {
-	  console.log(('Removed CronPlus').italic);
+	  console.log(('Removed WPBP/CronPlus').italic);
 	}
   }
-  if (this.modules.indexOf('CPT_Columns') === -1) {
+  if (this.modules.indexOf('WPBP/CPT_Columns') === -1) {
+	execSync('composer remove wpbp/cpt_columns');
 	this.files.adminClass.looplines(this.loadLines.admin.columns);
 	if (verbose) {
-	  console.log(('Removed CPT_Columns').italic);
+	  console.log(('Removed WPBP/CPT_Columns').italic);
 	}
   }
 
@@ -634,37 +617,40 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
   if (verbose) {
 	console.log(('Cleaning in admin-class*.php').italic);
   }
-  if (this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1 && this.snippet.indexOf('Support Dashboard Activity Widget for CPT') === -1 && this.snippet.indexOf('Transient Example') === -1 && this.snippet.indexOf('Bubble notification on pending CPT') === -1) {
+  if (this.snippet.indexOf('Backend - Dashboard Activity Widget') === -1 
+		  && this.snippet.indexOf('Backend - Dashboard At Glance Widget') === -1 
+		  && this.snippet.indexOf('System - Transient Example') === -1 
+		  && this.snippet.indexOf('Backend - Bubble Notification on pending CPT') === -1) {
 	fs.unlink(this.files.extras.file);
 	this.files.adminClass.looplines(this.loadLines.admin.extras);
   } else {
-	if (this.snippet.indexOf('Support Dashboard At Glance Widget for CPT') === -1) {
+	if (this.snippet.indexOf('Backend - Dashboard At Glance Widget') === -1) {
 	  this.files.extras.looplines(this.loadLines.extras.glance);
 	  this.files.adminCss.looplines(this.loadLines.admincss.glance);
 	  if (verbose) {
-		console.log(('Removed code of At Glance Support in Dashboard').italic);
+		console.log(('Removed code of Dashboard At Glance Widget').italic);
 	  }
 	}
-	if (this.snippet.indexOf('Support Dashboard Activity Widget for CPT') === -1) {
+	if (this.snippet.indexOf('Backend - Dashboard Activity Widget') === -1) {
 	  this.files.extras.looplines(this.loadLines.extras.activity);
 	  if (verbose) {
-		console.log(('Removed code of Activity Support in Dashboard').italic);
+		console.log(('Removed code of Dashboard Activity Widget').italic);
 	  }
 	}
-	if (this.snippet.indexOf('Transient Example') === -1) {
+	if (this.snippet.indexOf('System - Transient Example') === -1) {
 	  this.files.extras.looplines(this.loadLines.extras.transient);
 	  if (verbose) {
 		console.log(('Removed code of Transient Example').italic);
 	  }
 	}
-	if (this.snippet.indexOf('Bubble notification on pending CPT') === -1) {
+	if (this.snippet.indexOf('Backend - Bubble Notification on pending CPT') === -1) {
 	  this.files.extras.looplines(this.loadLines.extras.bubble);
 	  if (verbose) {
 		console.log(('Removed Bubble Notification').italic);
 	  }
 	}
   }
-  if (this.snippet.indexOf('Import/Export settings system') === -1) {
+  if (this.snippet.indexOf('Backend - Import/Export settings system') === -1) {
 	fs.unlink(this.files.impexp.file);
 	this.files.adminClass.looplines(this.loadLines.admin.impexp);
 	if (this.adminPage === true) {
@@ -674,28 +660,30 @@ WpPluginBoilerplateGenerator.prototype.setAdminClass = function setAdminClass() 
 	  console.log(('Removed Import/Export Settings').italic);
 	}
   }
-  if (this.snippet.indexOf('Debug system (Debug Bar support)') === -1) {
+  if (this.snippet.indexOf('WPBP/Debug') === -1) {
 	this.files.adminClass.looplines(this.loadLines.admin.debug);
 	if (verbose) {
-	  console.log(('Removed Debug system').italic);
+	  console.log(('Removed WPBP/Debug').italic);
 	}
   }
-  if (this.snippet.indexOf('Custom action') === -1 && this.snippet.indexOf('Custom filter') === -1 && this.snippet.indexOf('Custom shortcode') === -1) {
+  if (this.snippet.indexOf('System - Custom action') === -1 
+		  && this.snippet.indexOf('System - Custom filter') === -1 
+		  && this.snippet.indexOf('System - Custom shortcode') === -1) {
 	this.files.adminClass.looplines(this.loadLines.admin.custom);
   }
-  if (this.snippet.indexOf('Custom action') === -1) {
+  if (this.snippet.indexOf('System - Custom action') === -1) {
 	this.files.adminClass.looplines(this.loadLines.admin.customact);
 	if (verbose) {
 	  console.log(('Removed Custom Action').italic);
 	}
   }
-  if (this.snippet.indexOf('Custom filter') === -1) {
+  if (this.snippet.indexOf('System - Custom filter') === -1) {
 	this.files.adminClass.looplines(this.loadLines.admin.customflt);
 	if (verbose) {
 	  console.log(('Removed Custom Filter').italic);
 	}
   }
-  if (this.snippet.indexOf('Donate link in plugins list') === -1) {
+  if (this.snippet.indexOf('Backend - Donate link in plugins list') === -1) {
 	this.files.adminClass.looplines(this.loadLines.admin.donate);
 	if (verbose) {
 	  console.log(('Removed Donate link in plugins list').italic);
@@ -723,11 +711,19 @@ WpPluginBoilerplateGenerator.prototype.setPublicClass = function setPublicClass(
   }
 
   //Repo
-  if (this.modules.indexOf('CPT_Core') === -1) {
+  if (this.modules.indexOf('WebDevStudios/CPT_Core') === -1) {
+	execSync('composer remove webdevstudios/cpt-core');
 	this.files.publicClass.looplines(this.loadLines.public.cptcore);
+	if (verbose) {
+	  console.log(('Removed WebDevStudios/CPT_Core').italic);
+	}
   }
-  if (this.modules.indexOf('Taxonomy_Core') === -1) {
+  if (this.modules.indexOf('WebDevStudios/Taxonomy_Core') === -1) {
+	execSync('composer remove webdevstudios/taxonomy_core');
 	this.files.publicClass.looplines(this.loadLines.public.taxcore);
+	if (verbose) {
+	  console.log(('Removed WebDevStudios/Taxonomy_Core').italic);
+	}
   }
 
   //Function
