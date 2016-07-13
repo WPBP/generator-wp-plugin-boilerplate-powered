@@ -1,6 +1,6 @@
 {
   "name": "generator-wp-plugin-boilerplate-powered",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "description": "A generator for Yeoman to customize the WP Plugin Boilerplate Powered (https://github.com/Mte90/WordPress-Plugin-Boilerplate-Powered).",
   "keywords": [
     "yeoman",
@@ -9,9 +9,9 @@
     "wordpress-plugin",
     "PHP"
   ],
-  "homepage": "https://github.com/Mte90/generator-wp-plugin-boilerplate-powered",
+  "homepage": "https://github.com/WPBP/generator-wp-plugin-boilerplate-powered",
   "bugs": {
-    "url": "https://github.com/Mte90/generator-wp-plugin-boilerplate-powered/issues"
+    "url": "https://github.com/WPBP/generator-wp-plugin-boilerplate-powered/issues"
   },
   "author": {
     "name": "Daniele Scasciafratte",
@@ -21,16 +21,16 @@
   "main": "./app/index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/Mte90/generator-wp-plugin-boilerplate-powered.git"
+    "url": "git://github.com/WPBP/generator-wp-plugin-boilerplate-powered.git"
   },
   "dependencies": {
     "adm-zip": "0.4.7",
     "colors": "1.1.2",
-    "request": "2.69.0",
-    "rimraf": "2.5.2",
+    "request": "2.73.0",
+    "rimraf": "2.5.3",
     "sync-exec": "0.6.2",
     "underscore.string": "3.3.4",
-    "yeoman-generator": "0.22.5",
+    "yeoman-generator": "0.23.4",
     "yosay": "^1.1.0"
   },
   "engines": {

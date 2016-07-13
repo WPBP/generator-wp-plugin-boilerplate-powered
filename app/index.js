@@ -9,7 +9,6 @@ var request = require('request');
 var Admzip = require('adm-zip');
 var rmdir = require('rimraf');
 var s = require('underscore.string');
-var os = require('os');
 var execSync = require('sync-exec');
 var Replacer = require('./replacer');
 require('colors');
@@ -17,9 +16,8 @@ require('colors');
 var cleanfolder = false;
 var args = process.argv.slice(2);
 var version = '2.0.0';
-var is_default = false;
+var isDefault = false;
 var verbose = false;
-var removeGit = false;
 var os = require('os');
 if (args[1] === 'dev') {
   version = 'master';
@@ -27,15 +25,6 @@ if (args[1] === 'dev') {
 if (args[1] === 'verbose' || args[2] === 'verbose') {
   verbose = true;
 }
-
-/**
- * Checks whether a path starts with or contains a hidden file or a folder.
- * @param {string} path - The path of the file that needs to be validated.
- * returns {boolean} - `true` if the source is blacklisted and otherwise `false`.
- */
-var isUnixHiddenPath = function (path) {
-  return (/(^|.\/)\.+[^\/\.]/g).test(path);
-};
 
 /*
  * Delete folders
@@ -55,7 +44,7 @@ function deleteFolder(path) {
 
 var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplateGenerator(args, options, config) {
   var self = this,
-		  default_file;
+		  defaultFile;
 
   yeoman.Base.apply(this, arguments);
 
@@ -81,12 +70,12 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
 
   //Check the default file for the default values, I have already said default?
   if (fs.existsSync(__dirname + '/../default-values.json')) {
-	default_file = path.join(__dirname, '../default-values.json');
+	defaultFile = path.join(__dirname, '../default-values.json');
 	if (verbose) {
 	  console.log(('Config loaded').yellow);
 	}
   } else if (fs.existsSync(process.cwd() + '/default-values.json')) {
-	default_file = process.cwd() + '/default-values.json';
+	defaultFile = process.cwd() + '/default-values.json';
 	if (verbose) {
 	  console.log(('Config loaded').yellow);
 	}
@@ -102,12 +91,12 @@ var WpPluginBoilerplateGenerator = module.exports = function WpPluginBoilerplate
 	  console.log(('brew install gnu-sed - Is the command to install a GNU version of sed compatible with Linux.').bold.red);
 	  console.log(('That generator search first for gsed and after the native sed but sometimes the native version have problems.').bold.red);
 	}
-	default_file = path.join(__dirname, '../default-values-example.json');
+	defaultFile = path.join(__dirname, '../default-values-example.json');
 	console.log('--------------------------');
-	is_default = true;
+	isDefault = true;
   }
   try {
-	this.defaultValues = JSON.parse(fs.readFileSync(default_file));
+	this.defaultValues = JSON.parse(fs.readFileSync(defaultFile));
   } catch (e) {
 	console.log(('default-values.json is not a valid JSON file!').bold.red);
 	process.exit(1);
@@ -220,7 +209,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
 	  message: 'Do you want save the configuration for reuse it?'
 	}];
 
-  if (is_default === false) {
+  if (isDefault === false) {
 	var defaultvalues;
 	if (this.defaultValues.name !== '') {
 	  if (fs.existsSync('./' + s.slugify(this.defaultValues.name)) && this.defaultValues.name !== undefined) {
@@ -332,6 +321,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
 	  adminCss: new Replacer(this.pluginSlug + '/admin/assets/sass/admin.scss', this),
 	  adminView: new Replacer(this.pluginSlug + '/admin/views/admin.php', this),
 	  readme: new Replacer(this.pluginSlug + '/README.txt', this),
+	  json: new Replacer(this.pluginSlug + '/composer.json', this),
 	  gruntfile: new Replacer(this.pluginSlug + '/Gruntfile.js', this),
 	  package: new Replacer(this.pluginSlug + '/package.json', this),
 	  publicjs: new Replacer(this.pluginSlug + '/public/assets/js/public.js', this),

@@ -13,8 +13,7 @@ if (args[1] === 'verbose' || args[2] === 'verbose') {
 var Replacer = module.exports = function Replacer(file, options) {
   var module = {},
           searches = [],
-          seds = [],
-          countLines = 0;
+          seds = [];
   /*
    * Add string for the replace
    * 
