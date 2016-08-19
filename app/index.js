@@ -153,6 +153,7 @@ WpPluginBoilerplateGenerator.prototype.askFor = function askFor() {
 	  name: 'modules',
 	  message: 'Which library your plugin needs?',
 	  choices: [
+		{name: 'athlan/custom-fields-permalink-plugin', checked: false},
 		{name: 'Freemius/wordpress-sdk', checked: false},
 		{name: 'julien731/WP-Dismissible-Notices-Handler', checked: true},
 		{name: 'julien731/WP-Review-Me', checked: false},
@@ -508,6 +509,12 @@ WpPluginBoilerplateGenerator.prototype.setPrimary = function setPrimary() {
   if (this.activateDeactivate.indexOf('Activate/Deactivation Method') === -1) {
 	this.files.primary.looplines(this.loadLines.primary.actdeact);
 	fs.unlink(this.files.actdeact.file);
+  }
+  if (this.modules.indexOf('athlan/custom-fields-permalink-plugin') === -1) {
+	execSync('composer remove athlan/custom-fields-permalink-plugin');
+	if (verbose) {
+	  console.log(('Removed athlan/custom-fields-permalink-plugin').italic);
+	}
   }
   if (this.modules.indexOf('Freemius/wordpress-sdk') === -1) {
 	execSync('composer remove freemius/wordpress-sdk');
